@@ -1,1 +1,3 @@
 welfare-result*.html
+.claude/settings.local.json
+.claude/progress.md
