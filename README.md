@@ -57,6 +57,41 @@ claude --plugin-url https://github.com/Lonck999/welfare-check/releases/latest/do
 
 ---
 
+### 方法三：透過 Codex CLI 安裝與執行
+
+本專案的核心內容是 [`skills/welfare-check/SKILL.md`](skills/welfare-check/SKILL.md)，若沒有 Claude Code、只有 [OpenAI Codex CLI](https://github.com/openai/codex)，也可以直接讓 Codex 讀取此檔案來執行同一套問答流程。Codex 沒有 Claude Code 的 `/plugin` marketplace 機制，因此改用「讓 Codex 讀取專案指令」的方式。
+
+**第一步：安裝 Codex CLI**
+
+```
+npm install -g @openai/codex
+```
+
+**第二步：下載本專案**
+
+```
+git clone https://github.com/Lonck999/welfare-check.git
+cd welfare-check
+```
+
+**第三步：啟動 Codex**
+
+```
+codex
+```
+
+**第四步：讓 Codex 讀取並執行流程**
+
+進入 Codex 對話後，輸入：
+
+```
+請讀取並完全依照 skills/welfare-check/SKILL.md 裡的流程，逐題問我問題，最後幫我列出符合資格的補助清單。
+```
+
+> 若想讓 Codex 每次在此專案資料夾啟動時都自動套用這套流程，可將 `skills/welfare-check/SKILL.md` 的內容複製到專案根目錄的 `AGENTS.md`（Codex CLI 會自動讀取此檔案作為專案指令），之後啟動 `codex` 即會自動依照流程進行。
+
+---
+
 ## 使用方式
 
 安裝完成後，在 Claude Code 中輸入：
