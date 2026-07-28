@@ -20,6 +20,9 @@ export const benefits = pgTable('benefits', {
   categoryNumber: integer('category_number'), // 對應 SKILL.md 舊編號，可為 null（網站新建的項目）
   name: varchar('name', { length: 200 }).notNull(),
   agency: varchar('agency', { length: 200 }).notNull(), // 主管機關
+  // 金額/門檻依縣市而定的類別（如租金補貼、低收入戶認定），每個縣市各存一筆row，此欄位存該縣市名稱；
+  // 全國統一、不分縣市的類別則為 null。
+  county: varchar('county', { length: 20 }),
   description: text('description').notNull(), // 補助內容簡述
   searchGroup: varchar('search_group', { length: 50 }), // 對應「搜尋執行順序」11 組之一
   isTimeSensitive: boolean('is_time_sensitive').notNull().default(false), // 有截止期限/候補制/名額有限

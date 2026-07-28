@@ -26,6 +26,16 @@ export interface EligibilityConditions {
   requiresNoOwnedHome?: boolean
   /** 其他布林旗標式條件，例如 'pregnant'、'disability_card'、'time_sensitive_deadline_confirmed' */
   requiredFlags?: string[]
+  /**
+   * 縣市層級的門檻參考數值（目前只有「低收入戶/中低收入戶認定」這類本身就是門檻定義的項目會填）。
+   * evaluateEligibility() 不會讀取這裡的數字做比對——實際比對邏輯是用 calculations.ts 的
+   * evaluateIncomeThreshold(perCapitaMonthlyIncome, minLivingExpense) 在收集完使用者資料後另外計算。
+   * 這裡純粹是把官方公告數字存進資料庫供查詢/顯示/未來計算引用，避免寫死在程式碼裡。
+   */
+  referenceData?: {
+    minLivingExpense?: number // 每人每月最低生活費
+    realEstateLimit?: number // 家庭不動產限額
+  }
 }
 
 export interface ApplicantProfile {
