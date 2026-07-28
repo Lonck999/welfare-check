@@ -81,4 +81,134 @@ const countyAddonRows: SeedBenefit[] = [
   locations: [{ name: `${addon.county}政府社會局` }],
 }))
 
-export const elderlyOtherBenefitsSeeds: SeedBenefit[] = [nationalBase, ...countyAddonRows]
+/** 假牙補助：衛福部中央補助已退場，改為各縣市自訂方案，因縣市而異 */
+const DENTURE_SOURCE_URL = 'https://health.businessweekly.com.tw/article/ARTL003018345'
+const DENTURE_SOURCE_EXCERPT =
+  '2026假牙補助：衛福部補助退場，全台各縣市最新方案……假牙補助的常見申請資格包括65歲以上長者或55歲以上原住民，且需符合低收入戶、中低收入戶、領有身障證明、領老人生活津貼等條件之一。上下顎全口活動假牙最高可達55,000元（第1、2款對象）或44,000元（其他弱勢對象）；低收入戶65歲以上全口義齒最高40,000元；中低收入戶最高20,000元。申請流程原則為「先申請、後製作」，需攜帶身分證、健保卡及印章至合約牙醫診所進行口腔篩檢。'
+
+const dentureNationalNote: SeedBenefit = {
+  categoryNumber: 18,
+  name: '中低收入老人假牙補助（全國概況）',
+  agency: '各縣市政府衛生局/社會局',
+  county: null,
+  description:
+    '衛福部中央統一補助已退場，改由各縣市政府自訂方案。常見申請資格：65 歲以上長者或 55 歲以上原住民，且符合低收入戶/中低收入戶/領有身障證明/領老人生活津貼其中之一。常見金額級距：全口活動假牙最高 55,000 元（第 1、2 款對象）或 44,000 元（其他弱勢對象）；低收入戶 65 歲以上全口義齒最高 40,000 元、中低收入戶最高 20,000 元，惟各縣市實際金額與資格門檻不同。申請原則為「先申請、後製作」，需攜帶身分證、健保卡及印章至合約牙醫診所口腔篩檢後才能製作假牙。',
+  searchGroup: '現金與生活補助類',
+  isTimeSensitive: false,
+  applicationPeriod: '常態受理，須先申請核准後才能至合約診所製作假牙',
+  eligibilityConditions: { ageMin: 65 },
+  sourceUrl: DENTURE_SOURCE_URL,
+  sourceExcerpt: DENTURE_SOURCE_EXCERPT,
+  lastVerifiedDate: LAST_VERIFIED_DATE,
+  documents: ['身分證', '健保卡', '印章', '低收入戶/中低收入戶/身障證明（依資格別）'],
+  locations: [{ name: '戶籍地政府衛生局/社會局' }, { name: '合約牙醫診所' }],
+}
+
+const DENTURE_UNCONFIRMED_NOTE = '本次搜尋未查得此縣市假牙補助的具體金額與資格門檻，需依居住縣市另行洽詢衛生局/社會局確認。'
+
+const ALL_22_COUNTIES = [
+  '臺北市',
+  '新北市',
+  '桃園市',
+  '臺中市',
+  '臺南市',
+  '高雄市',
+  '基隆市',
+  '新竹市',
+  '嘉義市',
+  '宜蘭縣',
+  '新竹縣',
+  '苗栗縣',
+  '彰化縣',
+  '南投縣',
+  '雲林縣',
+  '嘉義縣',
+  '屏東縣',
+  '臺東縣',
+  '花蓮縣',
+  '澎湖縣',
+  '金門縣',
+  '連江縣',
+]
+
+const dentureCountyRows: SeedBenefit[] = ALL_22_COUNTIES.map((county) => ({
+  categoryNumber: 18,
+  name: '中低收入老人假牙補助（地方明細）',
+  agency: `${county}政府衛生局/社會局`,
+  county,
+  description: `${county}的假牙補助方案：${DENTURE_UNCONFIRMED_NOTE}`,
+  searchGroup: '現金與生活補助類',
+  isTimeSensitive: false,
+  applicationPeriod: '常態受理，須先申請核准後才能至合約診所製作假牙',
+  notes: '⚠️ ' + DENTURE_UNCONFIRMED_NOTE,
+  eligibilityConditions: { ageMin: 65, counties: [county] },
+  sourceUrl: DENTURE_SOURCE_URL,
+  sourceExcerpt: DENTURE_SOURCE_EXCERPT,
+  lastVerifiedDate: LAST_VERIFIED_DATE,
+  locations: [{ name: `${county}政府衛生局/社會局` }],
+}))
+
+/** 身心障礙者愛心卡乘車優惠：因縣市而異，比照敬老卡點數制 */
+const LOVE_CARD_SOURCE_URL = 'https://www.twneed.org/post/28.html'
+const LOVE_CARD_SOURCE_EXCERPT =
+  '多數縣市提供陪同身心障礙者搭乘大眾運輸時，陪伴者可享半價優惠（由陪伴卡扣點或自費儲值）。2026全台各縣市提供不同額度的月點數補助，台東每月1,500點最高、台中1,000點、雙北加碼至600點。'
+
+const loveCardNationalNote: SeedBenefit = {
+  categoryNumber: 18,
+  name: '身心障礙者愛心卡乘車優惠（全國概況）',
+  agency: '各縣市政府社會局',
+  county: null,
+  description:
+    '領有身心障礙手冊/證明者可申請愛心卡，搭乘公車/捷運/台鐵享優惠或免費；陪同者（陪伴卡）搭乘時多可享半價優惠（由點數扣抵或自費儲值）。點數額度依縣市而定，比照敬老卡制度，臺東縣每月最高 1,500 點、臺中市 1,000 點、雙北 600 點。',
+  searchGroup: '現金與生活補助類',
+  isTimeSensitive: false,
+  applicationPeriod: '常態受理',
+  eligibilityConditions: { requiredFlags: ['disability_certificate'] },
+  sourceUrl: LOVE_CARD_SOURCE_URL,
+  sourceExcerpt: LOVE_CARD_SOURCE_EXCERPT,
+  lastVerifiedDate: LAST_VERIFIED_DATE,
+  documents: ['身心障礙手冊或證明'],
+  locations: [{ name: '戶籍地政府社會局' }],
+}
+
+const LOVE_CARD_CONFIRMED: CountyAddon[] = [
+  { county: '臺東縣', addonDescription: '愛心卡每月最高 1,500 點（比照敬老卡制度）。', confirmed: true },
+  { county: '臺中市', addonDescription: '愛心卡每月 1,000 點。', confirmed: true },
+  { county: '臺北市', addonDescription: '愛心卡每月 600 點。', confirmed: true },
+  { county: '新北市', addonDescription: '愛心卡每月 600 點。', confirmed: true },
+]
+
+const LOVE_CARD_UNCONFIRMED_NOTE = '本次搜尋未查得此縣市愛心卡具體點數額度，需依居住縣市另行查證社會局公告。'
+
+const loveCardOtherCounties = ALL_22_COUNTIES.filter(
+  (c) => !LOVE_CARD_CONFIRMED.some((addon) => addon.county === c),
+)
+
+const loveCardCountyRows: SeedBenefit[] = [
+  ...LOVE_CARD_CONFIRMED,
+  ...loveCardOtherCounties.map((county) => ({ county, addonDescription: LOVE_CARD_UNCONFIRMED_NOTE, confirmed: false })),
+].map((addon) => ({
+  categoryNumber: 18,
+  name: '身心障礙者愛心卡乘車優惠（地方明細）',
+  agency: `${addon.county}政府社會局`,
+  county: addon.county,
+  description: `${addon.county}的愛心卡情形：${addon.addonDescription}`,
+  searchGroup: '現金與生活補助類',
+  isTimeSensitive: false,
+  applicationPeriod: '常態受理',
+  notes: addon.confirmed ? undefined : '⚠️ ' + LOVE_CARD_UNCONFIRMED_NOTE,
+  eligibilityConditions: { requiredFlags: ['disability_certificate'], counties: [addon.county] },
+  sourceUrl: LOVE_CARD_SOURCE_URL,
+  sourceExcerpt: LOVE_CARD_SOURCE_EXCERPT,
+  lastVerifiedDate: LAST_VERIFIED_DATE,
+  locations: [{ name: `${addon.county}政府社會局` }],
+}))
+
+export const elderlyOtherBenefitsSeeds: SeedBenefit[] = [
+  nationalBase,
+  ...countyAddonRows,
+  dentureNationalNote,
+  ...dentureCountyRows,
+  loveCardNationalNote,
+  ...loveCardCountyRows,
+]

@@ -23,4 +23,23 @@ export const militaryFamilyBenefitsSeeds: SeedBenefit[] = [
       { name: '國防部福利事業管理處', website: 'https://www.gwsm.gov.tw/' },
     ],
   },
+  {
+    categoryNumber: 56,
+    name: '國軍隨眷就業',
+    agency: '國防部政治作戰局',
+    county: null,
+    description: '現役軍人配偶因隨軍人派駐地點遷徙，可能有隨眷就業輔導/媒合服務。本次搜尋未查得具體申請資格、辦理方式與適用範圍的明確資料。',
+    searchGroup: '特殊身分族群類',
+    isTimeSensitive: false,
+    applicationPeriod: '常態受理（暫未確認）',
+    notes: '⚠️ 本次搜尋未查得「國軍隨眷就業」的具體申請資格與辦理方式，僅確認國防部政治作戰局設有「國軍官兵眷屬服務諮詢」窗口，需洽詢所屬部隊人事單位或國防部政治作戰局確認是否有專屬隨眷就業輔導方案，不可憑空給使用者申請細節。',
+    eligibilityConditions: { requiredIdentities: ['現役軍人'] },
+    sourceUrl: 'https://gpwd.mnd.gov.tw/Publish.aspx?cnid=671',
+    sourceExcerpt: '國防部政治作戰局-首頁-國軍官兵眷屬服務諮詢。',
+    lastVerifiedDate: '2026-07-28',
+    locations: [
+      { name: '所屬部隊人事單位' },
+      { name: '國防部政治作戰局（國軍官兵眷屬服務諮詢）', website: 'https://gpwd.mnd.gov.tw/' },
+    ],
+  },
 ]

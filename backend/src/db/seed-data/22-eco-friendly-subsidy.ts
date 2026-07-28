@@ -95,4 +95,90 @@ const countyAddonRows: SeedBenefit[] = [
   locations: [{ name: `${addon.county}政府環保局` }],
 }))
 
-export const ecoFriendlySubsidySeeds: SeedBenefit[] = [nationalBase, ...countyAddonRows]
+/** 節能家電汰換補助：全國統一（中央常態性補助），不分縣市 */
+const applianceSubsidy: SeedBenefit = {
+  categoryNumber: 22,
+  name: '節能家電汰換補助（冷氣/冰箱/除濕機）',
+  agency: '經濟部能源署',
+  county: null,
+  description:
+    '2026 年常態性中央補助品項僅限冷氣機、冰箱與除濕機：購買指定一級能效冷氣機及電冰箱之消費者可申請補助，每台最高補助 5,000 元。申請需準備身分證明文件、存簿照片、電費單照片、統一發票、產品保證書、廢四機回收聯單等文件，可線上上傳申請或填寫申請表以掛號方式郵寄至指定信箱。原則上從送出申請單到補助入帳約需 2 個月。',
+  searchGroup: '一般性優惠與便民服務',
+  isTimeSensitive: false,
+  applicationPeriod: '常態受理，購買後應於指定期限內申請',
+  eligibilityConditions: {},
+  sourceUrl: 'https://www.businessweekly.com.tw/focus/blog/3020900',
+  sourceExcerpt:
+    '2026年常態性的中央補助品項，僅限冷氣、冰箱與除濕機……購買指定一級能效冷氣機及電冰箱之消費者可申請該補助，並須準備身分證明文件、存簿照片、電費單照片，以及統一發票、產品保證書、廢四機回收聯單等文件……原則上從送出申請單到補助入帳需要2個月。',
+  lastVerifiedDate: LAST_VERIFIED_DATE,
+  documents: ['身分證明文件', '存簿照片', '電費單照片', '統一發票', '產品保證書', '廢四機回收聯單'],
+  locations: [{ name: '經濟部能源署', website: 'https://www.moeaea.gov.tw/' }],
+}
+
+/** 電動自行車購車補助：中央法規統一基準，地方加碼因縣市而異 */
+const eBikeSourceUrl = 'https://uptogo.com.tw/%E6%B1%BD%E6%A9%9F%E8%BB%8A/%E9%9B%BB%E5%8B%95%E8%BB%8A/%E7%8F%BE%E5%9C%A8%E8%B2%B7%E9%9B%BB%E5%8B%95%E6%A9%9F%E8%BB%8A%E6%9C%89%E8%A3%9C%E5%8A%A9%E5%97%8E%EF%BC%9F/'
+const eBikeSourceExcerpt =
+  '新購電動自行車補助辦法……縣市環保局有加碼補助，效期延續至2026年，包含台北、新北等城市。新北市提供額外「雙汰舊加碼」補助每輛9,000元（限量1,000輛）與「早鳥加碼」補助每輛10,000元（限量4,500輛），期限至2026年12月31日止。每縣市汰舊換購補助均有名額限制，建議購買前先確認補助是否還有名額，依先到先得原則發放。'
+
+const eBikeNationalBase: SeedBenefit = {
+  categoryNumber: 22,
+  name: '電動自行車購車補助（中央基準）',
+  agency: '經濟部／環境部',
+  county: null,
+  description:
+    '依「新購電動自行車補助辦法」，購買電動自行車（電輔車/電動輔助自行車）可申請中央補助，各縣市環保局另有加碼方案，多數縣市有名額限制，依先到先得原則發放，購買前應先確認補助名額是否還有剩餘。',
+  searchGroup: '一般性優惠與便民服務',
+  isTimeSensitive: true,
+  applicationPeriod: '常態受理，惟各縣市加碼名額有限，額滿為止',
+  notes: '⚠️ 中央基準的具體補助金額本次搜尋未查得明確數字，僅確認新北市有具體地方加碼金額，其餘縣市需另行查證環保局公告與剩餘名額。',
+  eligibilityConditions: {},
+  sourceUrl: eBikeSourceUrl,
+  sourceExcerpt: eBikeSourceExcerpt,
+  lastVerifiedDate: LAST_VERIFIED_DATE,
+  documents: ['購車發票'],
+  locations: [{ name: '經濟部', website: 'https://www.moea.gov.tw/' }, { name: '環境部', website: 'https://www.moenv.gov.tw/' }],
+}
+
+const EBIKE_CONFIRMED: CountyAddon[] = [
+  {
+    county: '新北市',
+    addonDescription: '「雙汰舊加碼」每輛 9,000 元（限量 1,000 輛）；「早鳥加碼」每輛 10,000 元（限量 4,500 輛），期限至 2026 年 12 月 31 日止。',
+    confirmed: true,
+  },
+]
+
+const EBIKE_UNCONFIRMED_NOTE = '本次搜尋未查得此縣市電動自行車地方加碼的具體金額與名額，需依居住縣市另行查證環保局最新公告。'
+
+const eBikeOtherCounties = [
+  '臺北市',
+  '桃園市',
+  ...OTHER_COUNTIES,
+]
+
+const eBikeCountyRows: SeedBenefit[] = [
+  ...EBIKE_CONFIRMED,
+  ...eBikeOtherCounties.map((county) => ({ county, addonDescription: EBIKE_UNCONFIRMED_NOTE, confirmed: false })),
+].map((addon) => ({
+  categoryNumber: 22,
+  name: '電動自行車購車補助（地方加碼）',
+  agency: `${addon.county}政府環保局`,
+  county: addon.county,
+  description: `在中央基準之上，${addon.county}的地方加碼情形：${addon.addonDescription}`,
+  searchGroup: '一般性優惠與便民服務',
+  isTimeSensitive: true,
+  applicationPeriod: '依各縣市當年度公告期程受理，額滿為止',
+  notes: addon.confirmed ? undefined : '⚠️ ' + EBIKE_UNCONFIRMED_NOTE,
+  eligibilityConditions: { counties: [addon.county] },
+  sourceUrl: eBikeSourceUrl,
+  sourceExcerpt: eBikeSourceExcerpt,
+  lastVerifiedDate: LAST_VERIFIED_DATE,
+  locations: [{ name: `${addon.county}政府環保局` }],
+}))
+
+export const ecoFriendlySubsidySeeds: SeedBenefit[] = [
+  nationalBase,
+  ...countyAddonRows,
+  applianceSubsidy,
+  eBikeNationalBase,
+  ...eBikeCountyRows,
+]

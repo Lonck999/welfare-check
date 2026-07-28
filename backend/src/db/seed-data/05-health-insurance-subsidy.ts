@@ -84,4 +84,25 @@ const countyAddonRows: SeedBenefit[] = countyAddons.map((addon) => ({
   locations: [{ name: `${addon.county}政府衛生局/社會局` }],
 }))
 
-export const healthInsuranceSubsidySeeds: SeedBenefit[] = [nationalBase, ...countyAddonRows]
+/** 健保重大傷病卡：全國統一制度，不分縣市 */
+const catastrophicIllnessCard: SeedBenefit = {
+  categoryNumber: 5,
+  name: '健保重大傷病卡（免部分負擔）',
+  agency: '衛生福利部中央健康保險署',
+  county: null,
+  description:
+    '重大傷病項目共計 30 大類疾病，包括癌症、洗腎、失智、罕見疾病、嚴重精神病、自體免疫疾病等。領有重大傷病證明者，因該證明所載傷病就醫時免門急住診自行負擔費用（僅限與申請疾病類別相關的治療，非重大傷病相關的就醫項目仍需自行負擔部分負擔費用）。證明有效期 3～5 年，依疾病類型而定，到期需重新申請。',
+  searchGroup: '醫療與健康類',
+  isTimeSensitive: false,
+  applicationPeriod: '常態受理，證明到期前應重新申請以免權益中斷',
+  notes: '⚠️ 免部分負擔僅限與重大傷病證明所載疾病相關的治療項目，非該疾病相關的就醫仍需自付部分負擔，並非「持卡全部免費」。',
+  eligibilityConditions: { requiredFlags: ['catastrophic_illness'] },
+  sourceUrl: 'https://www.nhi.gov.tw/ch/cp-6089-0c619-2957-1.html',
+  sourceExcerpt:
+    '重大傷病項目共計30大項，包括癌症、洗腎、失智、罕見疾病、嚴重精神病等……保險對象因重大傷病就醫時，免門急住診自行負擔費用……只有和重大傷病證明所載之傷病相關的治療，該次就醫可免部分負擔……有效期3-5年，具體期限視疾病類型而定。',
+  lastVerifiedDate: LAST_VERIFIED_DATE,
+  documents: ['重大傷病診斷證明文件（依疾病類別而定）'],
+  locations: [{ name: '衛生福利部中央健康保險署（分區業務組）', website: 'https://www.nhi.gov.tw/' }],
+}
+
+export const healthInsuranceSubsidySeeds: SeedBenefit[] = [nationalBase, ...countyAddonRows, catastrophicIllnessCard]
