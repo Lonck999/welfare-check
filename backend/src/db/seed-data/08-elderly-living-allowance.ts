@@ -12,7 +12,8 @@ export const elderlyLivingAllowanceSeeds: SeedBenefit[] = [
     searchGroup: '現金與生活補助類',
     isTimeSensitive: false,
     applicationPeriod: '常態受理',
-    notes: '⚠️ 此為中央統一基準金額，各縣市在不動產評估標準上可能有差異、部分縣市另有加碼措施（如重陽禮金等，屬第 18 類另計），精確金額仍需依居住縣市洽詢當地社會局確認。',
+    notes:
+      '追查後確認：此津貼「發放金額」8,329／4,164 元本身是全國統一的，不需要依 22 縣市分別建列金額不同的資料列——縣市之間真正不同的是「所得門檻」（1.5 倍/2.5 倍最低生活費的實際數字），而這已經在第 1 類（低收入戶/中低收入戶認定）的 22 縣市 referenceData.minLivingExpense 裡建檔，比對時直接引用第 1 類該縣市的數字換算即可，不需在本類重複建立 22 筆。地方另有的「重陽禮金」等現金慰問屬於第 18 類（老人其他福利），非本津貼一部分。',
     eligibilityConditions: { ageMin: 65, incomeThreshold: 'mid_low_income' },
     sourceUrl: 'https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050045',
     sourceExcerpt:
