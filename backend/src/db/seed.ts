@@ -44,6 +44,11 @@ import { childcareSubsidySeeds } from './seed-data/07-childcare-subsidy.js'
 import { rentSubsidySeeds } from './seed-data/10-rent-subsidy.js'
 import { elderlyLivingAllowanceSeeds } from './seed-data/08-elderly-living-allowance.js'
 import { disabilityLivingAllowanceSeeds } from './seed-data/06-disability-living-allowance.js'
+import { emergencyReliefSeeds } from './seed-data/04-emergency-relief.js'
+import { employmentSubsidySeeds } from './seed-data/11-employment-subsidy.js'
+import { specialCircumstanceFamilySeeds } from './seed-data/03-special-circumstance-family.js'
+import { healthInsuranceSubsidySeeds } from './seed-data/05-health-insurance-subsidy.js'
+import { maternityBenefitsSeeds } from './seed-data/02-maternity-benefits.js'
 
 const ALL_SEEDS: SeedBenefit[] = [
   ...lowIncomeThresholdSeeds,
@@ -81,6 +86,11 @@ const ALL_SEEDS: SeedBenefit[] = [
   ...rentSubsidySeeds,
   ...elderlyLivingAllowanceSeeds,
   ...disabilityLivingAllowanceSeeds,
+  ...emergencyReliefSeeds,
+  ...employmentSubsidySeeds,
+  ...specialCircumstanceFamilySeeds,
+  ...healthInsuranceSubsidySeeds,
+  ...maternityBenefitsSeeds,
 ]
 
 async function run() {
