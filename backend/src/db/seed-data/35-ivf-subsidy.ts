@@ -13,7 +13,7 @@ export const ivfSubsidySeeds: SeedBenefit[] = [
     isTimeSensitive: true,
     applicationPeriod: '常態受理',
     notes:
-      '⚠️ 若配偶超過 45 歲且有生育需求，應優先確認此項，時間急迫（超過 45 歲即不符資格）。此為 3.0 新制金額，與舊制（一般 15 萬/中低收入戶 20 萬）不同，SKILL.md 內文字需同步更新。地方加碼部分本次未逐一查證，需依居住縣市另行確認。',
+      '⚠️ 若配偶超過 45 歲且有生育需求，應優先確認此項，時間急迫（超過 45 歲即不符資格）。此為 3.0 新制金額，與舊制（一般 15 萬/中低收入戶 20 萬）不同，SKILL.md 內文字需同步更新。地方加碼部分本次未逐一查證，需依居住縣市另行確認。另外，不孕症「檢查/診斷」費用部分本身即有健保給付（與試管嬰兒治療本身的政府補助是兩件事）；但目前人工協助生殖技術的政府補助範圍僅涵蓋「試管嬰兒（IVF）療程」，體內人工授精（IUI）不在補助範圍內，需向使用者說明清楚這個區別，避免誤以為所有人工生殖技術都有補助。',
     eligibilityConditions: { requiredFlags: ['infertility_treatment_needed'], ageMax: 45 },
     sourceUrl: 'https://www.ivftaiwan.tw/article-detail/195',
     sourceExcerpt:
