@@ -20,6 +20,11 @@ import { veteransAffairsBenefitsSeeds } from './seed-data/44-veterans-affairs-be
 import { tuitionReductionSeeds } from './seed-data/46-tuition-reduction.js'
 import { temporaryWorkAllowanceSeeds } from './seed-data/50-temporary-work-allowance.js'
 import { taxDeductionsSeeds } from './seed-data/15-tax-deductions.js'
+import { indigenousAffairsBenefitsSeeds } from './seed-data/41-indigenous-affairs-benefits.js'
+import { newImmigrantFundSeeds } from './seed-data/42-new-immigrant-fund.js'
+import { hakkaAffairsBenefitsSeeds } from './seed-data/45-hakka-affairs-benefits.js'
+import { overseasCommunityBenefitsSeeds } from './seed-data/51-overseas-community-benefits.js'
+import { militaryFamilyBenefitsSeeds } from './seed-data/56-military-family-benefits.js'
 
 const ALL_SEEDS: SeedBenefit[] = [
   ...lowIncomeThresholdSeeds,
@@ -33,6 +38,11 @@ const ALL_SEEDS: SeedBenefit[] = [
   ...tuitionReductionSeeds,
   ...temporaryWorkAllowanceSeeds,
   ...taxDeductionsSeeds,
+  ...indigenousAffairsBenefitsSeeds,
+  ...newImmigrantFundSeeds,
+  ...hakkaAffairsBenefitsSeeds,
+  ...overseasCommunityBenefitsSeeds,
+  ...militaryFamilyBenefitsSeeds,
 ]
 
 async function run() {
