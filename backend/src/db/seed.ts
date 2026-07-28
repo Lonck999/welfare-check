@@ -35,6 +35,11 @@ import { foreignCaregiverSeeds } from './seed-data/27-foreign-caregiver.js'
 import { culturePointsSeeds } from './seed-data/30-culture-points.js'
 import { solarEnergySubsidySeeds } from './seed-data/40-solar-energy-subsidy.js'
 import { rareDiseaseBenefitsSeeds } from './seed-data/58-rare-disease-benefits.js'
+import { longTermCareSeeds } from './seed-data/09-long-term-care.js'
+import { loanSubsidiesSeeds } from './seed-data/14-loan-subsidies.js'
+import { middleAgedEmploymentSeeds } from './seed-data/34-middle-aged-employment.js'
+import { earlyInterventionSeeds } from './seed-data/47-early-intervention.js'
+import { naturalDisasterReliefSeeds } from './seed-data/55-natural-disaster-relief.js'
 
 const ALL_SEEDS: SeedBenefit[] = [
   ...lowIncomeThresholdSeeds,
@@ -63,6 +68,11 @@ const ALL_SEEDS: SeedBenefit[] = [
   ...culturePointsSeeds,
   ...solarEnergySubsidySeeds,
   ...rareDiseaseBenefitsSeeds,
+  ...longTermCareSeeds,
+  ...loanSubsidiesSeeds,
+  ...middleAgedEmploymentSeeds,
+  ...earlyInterventionSeeds,
+  ...naturalDisasterReliefSeeds,
 ]
 
 async function run() {
