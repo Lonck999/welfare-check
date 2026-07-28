@@ -54,6 +54,11 @@ import { caregiverSupportSeeds } from './seed-data/17-caregiver-support.js'
 import { funeralSubsidySeeds } from './seed-data/31-funeral-subsidy.js'
 import { ivfSubsidySeeds } from './seed-data/35-ivf-subsidy.js'
 import { adultEducationSeeds } from './seed-data/39-adult-education.js'
+import { publicTransitSubsidySeeds } from './seed-data/37-public-transit-subsidy.js'
+import { digitalDevelopmentSubsidySeeds } from './seed-data/52-digital-development-subsidy.js'
+import { sportsAdministrationSubsidySeeds } from './seed-data/53-sports-administration-subsidy.js'
+import { earthquakeInsuranceSubsidySeeds } from './seed-data/38-earthquake-insurance-subsidy.js'
+import { ecoFriendlySubsidySeeds } from './seed-data/22-eco-friendly-subsidy.js'
 
 const ALL_SEEDS: SeedBenefit[] = [
   ...lowIncomeThresholdSeeds,
@@ -101,6 +106,11 @@ const ALL_SEEDS: SeedBenefit[] = [
   ...funeralSubsidySeeds,
   ...ivfSubsidySeeds,
   ...adultEducationSeeds,
+  ...publicTransitSubsidySeeds,
+  ...digitalDevelopmentSubsidySeeds,
+  ...sportsAdministrationSubsidySeeds,
+  ...earthquakeInsuranceSubsidySeeds,
+  ...ecoFriendlySubsidySeeds,
 ]
 
 async function run() {
