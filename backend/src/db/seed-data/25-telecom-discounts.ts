@@ -12,7 +12,7 @@ export const telecomDiscountsSeeds: SeedBenefit[] = [
     searchGroup: '一般性優惠與便民服務',
     isTimeSensitive: false,
     applicationPeriod: '常態受理，優惠期 2 年，期滿可憑有效證明續辦',
-    notes: '優惠內容依電信業者（中華電信/台灣大哥大/遠傳等）方案略有差異，此為中華電信「暖心方案」查證結果，其餘業者需另行查證各自資費內容。',
+    notes: '優惠內容依電信業者（中華電信/台灣大哥大/遠傳等）方案略有差異，此為中華電信「暖心方案」查證結果，其餘業者需另行查證各自資費內容。SKILL.md 另列「中低收入戶 電話費補助 減免」為獨立搜尋語句，本次多次搜尋皆指向同一個 NCC 電信業者優惠方案，未查得縣市政府另外提供的獨立現金電話費補助，判斷這是同一件事的不同措辭，非兩個不同的福利項目；若之後確認真有獨立的縣市電話費現金補助，需另外建檔。',
     eligibilityConditions: { incomeThreshold: 'mid_low_income' },
     sourceUrl: 'https://accessibility.cht.com.tw/home/accessibility/package.html',
     sourceExcerpt:
