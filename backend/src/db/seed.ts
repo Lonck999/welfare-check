@@ -59,6 +59,12 @@ import { digitalDevelopmentSubsidySeeds } from './seed-data/52-digital-developme
 import { sportsAdministrationSubsidySeeds } from './seed-data/53-sports-administration-subsidy.js'
 import { earthquakeInsuranceSubsidySeeds } from './seed-data/38-earthquake-insurance-subsidy.js'
 import { ecoFriendlySubsidySeeds } from './seed-data/22-eco-friendly-subsidy.js'
+import { mentalHealthCounselingSeeds } from './seed-data/24-mental-health-counseling.js'
+import { homeRenovationSubsidySeeds } from './seed-data/26-home-renovation-subsidy.js'
+import { outlyingIslandsTransportSeeds } from './seed-data/54-outlying-islands-transport.js'
+import { elderlyOtherBenefitsSeeds } from './seed-data/18-elderly-other-benefits.js'
+import { foodBankSeeds } from './seed-data/29-food-bank.js'
+import { emergencyComfortPaymentSeeds } from './seed-data/33-emergency-comfort-payment.js'
 
 const ALL_SEEDS: SeedBenefit[] = [
   ...lowIncomeThresholdSeeds,
@@ -111,6 +117,12 @@ const ALL_SEEDS: SeedBenefit[] = [
   ...sportsAdministrationSubsidySeeds,
   ...earthquakeInsuranceSubsidySeeds,
   ...ecoFriendlySubsidySeeds,
+  ...mentalHealthCounselingSeeds,
+  ...homeRenovationSubsidySeeds,
+  ...outlyingIslandsTransportSeeds,
+  ...elderlyOtherBenefitsSeeds,
+  ...foodBankSeeds,
+  ...emergencyComfortPaymentSeeds,
 ]
 
 async function run() {
