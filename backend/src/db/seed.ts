@@ -25,6 +25,11 @@ import { newImmigrantFundSeeds } from './seed-data/42-new-immigrant-fund.js'
 import { hakkaAffairsBenefitsSeeds } from './seed-data/45-hakka-affairs-benefits.js'
 import { overseasCommunityBenefitsSeeds } from './seed-data/51-overseas-community-benefits.js'
 import { militaryFamilyBenefitsSeeds } from './seed-data/56-military-family-benefits.js'
+import { preventiveHealthScreeningSeeds } from './seed-data/19-preventive-health-screening.js'
+import { childVaccinationSeeds } from './seed-data/48-child-vaccination.js'
+import { legalAidSeeds } from './seed-data/23-legal-aid.js'
+import { smokingCessationSeeds } from './seed-data/36-smoking-cessation.js'
+import { telecomDiscountsSeeds } from './seed-data/25-telecom-discounts.js'
 
 const ALL_SEEDS: SeedBenefit[] = [
   ...lowIncomeThresholdSeeds,
@@ -43,6 +48,11 @@ const ALL_SEEDS: SeedBenefit[] = [
   ...hakkaAffairsBenefitsSeeds,
   ...overseasCommunityBenefitsSeeds,
   ...militaryFamilyBenefitsSeeds,
+  ...preventiveHealthScreeningSeeds,
+  ...childVaccinationSeeds,
+  ...legalAidSeeds,
+  ...smokingCessationSeeds,
+  ...telecomDiscountsSeeds,
 ]
 
 async function run() {
