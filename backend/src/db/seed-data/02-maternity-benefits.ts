@@ -93,4 +93,55 @@ const countyAddonRows: SeedBenefit[] = [
   locations: [{ name: `${addon.county}政府戶政事務所/社會局` }],
 }))
 
-export const maternityBenefitsSeeds: SeedBenefit[] = [nationalBase, ...countyAddonRows]
+/** 流產假：全國統一（性別工作平等法），依懷孕週數分級，不分縣市 */
+const miscarriageLeave: SeedBenefit = {
+  categoryNumber: 2,
+  name: '流產假（性別工作平等法）',
+  agency: '勞動部（性別工作平等法第 15 條）',
+  county: null,
+  description:
+    '依懷孕天數不同，流產假天數與薪資保障不同：懷孕 3 個月以上流產者可請流產假 4 週，年資半年以上者全薪、未滿半年者半薪；懷孕 2 個月以上未滿 3 個月流產者可請假 1 週（不支薪）；懷孕未滿 2 個月流產者可請假 5 天（不支薪）。20 週以下流產無勞保生育給付；20 週以上之引產、死產則可申請生育給付（見本類中央基準）。',
+  searchGroup: '時效性最高項目',
+  isTimeSensitive: true,
+  applicationPeriod: '流產發生後應儘速向雇主申請流產假',
+  notes: '⚠️ 各縣市流產後心理諮商補助本次搜尋未查得具體縣市清單，可優先參考第 24 類「15-45 歲青壯世代心理健康支持方案」（全國統一，3 次免費諮商，無戶籍限制），或另行洽詢居住縣市衛生局是否有專屬方案。',
+  eligibilityConditions: { requiredFlags: ['miscarriage'] },
+  sourceUrl: 'https://www.yourator.co/articles/616',
+  sourceExcerpt:
+    '根據懷孕天數不同，流產假天數也不同：懷孕3個月以上流產：4週；懷孕2個月以上未滿3個月流產：1週；懷孕未滿2個月流產：5天。薪資補助標準為：懷孕3個月以上流產：全薪（年資半年以上）、半薪（年資未滿半年）；懷孕2個月以上未滿3個月流產：不支薪；懷孕未滿2個月流產：不支薪。若是20週以下的流產，沒有勞保給付。20週以上的引產、死產，可以申請生育補助。',
+  lastVerifiedDate: LAST_VERIFIED_DATE,
+  documents: ['醫療診斷證明'],
+  locations: [{ name: '任職公司人資單位' }, { name: '勞動部', website: 'https://www.mol.gov.tw/' }],
+}
+
+/** 孕產婦補助/坐月子（產後護理/坐月子中心費用補助）：與生育獎勵金是不同的縣市方案，需分開建檔 */
+const POSTPARTUM_UNCONFIRMED_NOTE =
+  '本次搜尋未查得此縣市孕產婦補助/坐月子相關方案的具體金額，各縣市申請資格常見規定：家庭身分（低收入戶/中低收入戶/特殊境遇家庭等）、戶籍條件（設籍地區/年限或新生兒出生登記限制）、申請時間（懷孕期間/產前或產後指定期限內），需依居住縣市另行洽詢社會局/民政處確認，此為與「生育獎勵金」不同的獨立方案，不可混為一談。'
+
+const postpartumCareRows: SeedBenefit[] = [
+  ...CONFIRMED_ADDONS.map((a) => a.county),
+  ...OTHER_COUNTIES,
+].map((county) => ({
+  categoryNumber: 2,
+  name: '孕產婦補助/坐月子補助（地方方案）',
+  agency: `${county}政府社會局/民政處`,
+  county,
+  description: `${county}的孕產婦補助/坐月子相關方案：${POSTPARTUM_UNCONFIRMED_NOTE}`,
+  searchGroup: '時效性最高項目',
+  isTimeSensitive: true,
+  applicationPeriod: '多依懷孕期間/產前或產後指定期限內申請，逾期可能不予受理',
+  notes: '⚠️ ' + POSTPARTUM_UNCONFIRMED_NOTE,
+  eligibilityConditions: { requiredFlags: ['pregnant_or_recent_birth'], counties: [county] },
+  sourceUrl: 'https://www.yannigo.com/zt/yannigo/blog-detail/pregnancy/maternity-benefits/postpartum/',
+  sourceExcerpt:
+    '坐月子補助申請資格與方式依各縣市規定不同，主要包括家庭身分（低收入戶、中低收入戶、特殊境遇家庭等）、戶籍條件（部分補助設有設籍地區、設籍年限或新生兒出生登記限制）、申請時間（依規定於懷孕期間、產前或產後指定期限內提出申請）、準備文件（常見文件包含身分證明、戶籍資料、孕婦健康手冊、出生證明及存摺影本）等要點。',
+  lastVerifiedDate: LAST_VERIFIED_DATE,
+  locations: [{ name: `${county}政府社會局/民政處` }],
+}))
+
+export const maternityBenefitsSeeds: SeedBenefit[] = [
+  nationalBase,
+  ...countyAddonRows,
+  miscarriageLeave,
+  ...postpartumCareRows,
+]
