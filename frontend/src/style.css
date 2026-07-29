@@ -403,3 +403,115 @@ button {
     break-inside: avoid;
   }
 }
+
+.questionnaire {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.progress {
+  font-size: 13px;
+  opacity: 0.7;
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.step {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  border: none;
+  padding: 0;
+}
+.radio-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.radio-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: none;
+  padding: 0;
+}
+.radio-col label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.member-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.step-actions .submit-btn {
+  margin-left: auto;
+}
+
+.priority-dot {
+  font-size: 14px;
+}
+
+.obtain-location {
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.family-section {
+  border-top: 2px solid var(--border);
+  padding-top: 20px;
+}
+
+.overview-table {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  overflow-x: auto;
+}
+.overview-table table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+.overview-table th,
+.overview-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.overview-table ul {
+  margin: 0;
+  padding-left: 18px;
+}

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import WelfareForm from './components/WelfareForm.vue'
+import Questionnaire from './components/Questionnaire.vue'
 import ResultsView from './components/ResultsView.vue'
 import LegalNotice from './components/LegalNotice.vue'
 import { fetchFormOptions, submitCheck } from './api'
-import type { CheckRequestBody, CheckResponse, FormOptions } from './types'
+import type { CheckResponse, FormOptions, QuestionnaireAnswers } from './types'
 
 const step = ref<'loading-options' | 'form' | 'submitting' | 'results' | 'error'>('loading-options')
 const options = ref<FormOptions | null>(null)
@@ -22,7 +22,7 @@ async function loadOptions() {
   }
 }
 
-async function handleSubmit(body: CheckRequestBody) {
+async function handleSubmit(body: QuestionnaireAnswers) {
   step.value = 'submitting'
   try {
     result.value = await submitCheck(body)
@@ -50,7 +50,7 @@ onMounted(loadOptions)
 
     <p v-if="step === 'loading-options'" class="status-msg">載入表單中…</p>
 
-    <WelfareForm v-if="step === 'form' && options" :options="options" @submit="handleSubmit" />
+    <Questionnaire v-if="step === 'form' && options" :options="options" @submit="handleSubmit" />
 
     <p v-if="step === 'submitting'" class="status-msg">查詢比對中，請稍候…</p>
 

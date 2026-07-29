@@ -1,4 +1,4 @@
-import type { CheckRequestBody, CheckResponse, FormOptions } from './types'
+import type { CheckResponse, FormOptions, QuestionnaireAnswers } from './types'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
 
@@ -8,7 +8,7 @@ export async function fetchFormOptions(): Promise<FormOptions> {
   return res.json()
 }
 
-export async function submitCheck(body: CheckRequestBody): Promise<CheckResponse> {
+export async function submitCheck(body: QuestionnaireAnswers): Promise<CheckResponse> {
   const res = await fetch(`${API_BASE_URL}/api/check`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

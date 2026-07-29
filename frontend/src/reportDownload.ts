@@ -1,4 +1,4 @@
-import type { BenefitResult, CheckResponse } from './types'
+import type { BenefitGroup, BenefitResult, CheckResponse } from './types'
 
 const INCOME_LABEL: Record<CheckResponse['computed']['incomeThresholdResult'], string> = {
   low_income: '低收入戶門檻內',
@@ -23,7 +23,9 @@ function renderBenefitCard(b: BenefitResult, kind: 'confirmed' | 'possible'): st
       : ''
   const documents =
     b.documents.length > 0
-      ? `<ul>${b.documents.map((d) => `<li>${escapeHtml(d)}</li>`).join('')}</ul>`
+      ? `<ul>${b.documents
+          .map((d) => `<li>${escapeHtml(d.name)}${d.obtainLocation ? `（${escapeHtml(d.obtainLocation)}）` : ''}</li>`)
+          .join('')}</ul>`
       : ''
   const locations =
     b.locations.length > 0
@@ -46,6 +48,15 @@ function renderBenefitCard(b: BenefitResult, kind: 'confirmed' | 'possible'): st
       ${missing}
       <p class="source">資料來源：<a href="${escapeHtml(b.sourceUrl)}">${escapeHtml(b.sourceUrl)}</a>（查證日期：${b.lastVerifiedDate}）</p>
     </article>`
+}
+
+function renderBenefitGroup(label: string, group: BenefitGroup): string {
+  return `
+  <h2>${escapeHtml(label)}：✅ 確定符合（${group.confirmed.length} 項）</h2>
+  ${group.confirmed.map((b) => renderBenefitCard(b, 'confirmed')).join('') || '<p>目前沒有確定符合的項目。</p>'}
+
+  <h2>${escapeHtml(label)}：⚠️ 可能符合（${group.possible.length} 項，需補充資料確認）</h2>
+  ${group.possible.map((b) => renderBenefitCard(b, 'possible')).join('') || '<p>沒有需要補充資料確認的項目。</p>'}`
 }
 
 /** 產生對應 SKILL.md 第六步規格的獨立 HTML 報告字串，供瀏覽器下載，不含任何伺服器往返 */
@@ -86,11 +97,8 @@ export function buildReportHtml(result: CheckResponse): string {
     <li>所得門檻比對：${INCOME_LABEL[result.computed.incomeThresholdResult]}</li>
   </ul>
 
-  <h2>✅ 確定符合（${result.confirmed.length} 項）</h2>
-  ${result.confirmed.map((b) => renderBenefitCard(b, 'confirmed')).join('') || '<p>目前沒有確定符合的項目。</p>'}
-
-  <h2>⚠️ 可能符合（${result.possible.length} 項，需補充資料確認）</h2>
-  ${result.possible.map((b) => renderBenefitCard(b, 'possible')).join('') || '<p>沒有需要補充資料確認的項目。</p>'}
+  ${renderBenefitGroup('本人', result.self)}
+  ${result.familyMembers.map((m) => renderBenefitGroup(`${m.relationship}（${m.age} 歲，設籍${m.county}）`, m)).join('')}
 
   <div class="disclaimer">
     <p>本查詢結果僅供參考，實際資格請以各單位最新公告為準。本站資料庫每週更新一次，個別項目可能已有異動。</p>

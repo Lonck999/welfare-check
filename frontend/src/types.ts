@@ -1,8 +1,3 @@
-export interface FlagOption {
-  value: string
-  label: string
-}
-
 export interface IdentityOption {
   value: string
   label: string
@@ -10,26 +5,79 @@ export interface IdentityOption {
 
 export interface FormOptions {
   counties: string[]
-  flags: FlagOption[]
   identities: IdentityOption[]
 }
 
-export interface HouseholdMemberInput {
-  annualIncome: number
-  assets: number
+export interface HouseholdMember {
+  relationship: string
+  birthDate: string
+  registeredCounty?: string
+  sameHukou: boolean
+  annualIncome?: number
+  assets?: number
+  disabilityCard?: boolean
+  catastrophicIllnessCard?: boolean
+  rareDisease?: boolean
+  chronicDisability?: string[]
 }
 
-export interface CheckRequestBody {
+export type EmploymentStatus =
+  | 'employed_insured'
+  | 'employed_reduced_hours'
+  | 'self_employed'
+  | 'unemployed_seeking'
+  | 'unemployed_not_seeking'
+  | 'retired'
+  | 'homemaker'
+
+export interface NonCohabitingFamilyMember {
+  relationship: string
   birthDate: string
   county: string
-  workCounty?: string
-  ownsHome: boolean
-  householdMembers: HouseholdMemberInput[]
-  youngestChildAge?: number
-  oldestElderAge?: number
-  identities: string[]
-  flags: string[]
+  annualIncome: number
+  assets: number
+  isSinglePersonHousehold: boolean
 }
+
+export interface QuestionnaireAnswers {
+  birthDate: string
+  county: string
+  district?: string
+  gender?: 'male' | 'female' | 'other'
+  maritalStatus: 'single' | 'married' | 'divorced' | 'widowed'
+  pregnantOrPostpartumSelf: boolean
+  pregnantOrPostpartumSpouse: boolean
+  miscarriageRecently: boolean
+  familySpecialCircumstances: string[]
+  householdMembers: HouseholdMember[]
+  housingStatus: 'own' | 'rent' | 'borrow' | 'other'
+  selfAnnualIncome: number
+  selfAssets: number
+  employmentStatus: EmploymentStatus
+  workCounty?: string
+  selfDisabilityCard: boolean
+  selfCatastrophicIllnessCard: boolean
+  selfRareDisease: boolean
+  selfRecentMajorSurgery: boolean
+  hasForeignCaregiver: boolean
+  hadOccupationalInjury: boolean
+  nonCohabitingFamily: NonCohabitingFamilyMember[]
+  specialIdentities: string[]
+  involuntaryUnemployment6mo: boolean
+  majorMedicalExpense: boolean
+  naturalDisasterDamage: boolean
+  domesticViolenceOrTrafficking: boolean
+  otherAcuteHardship: boolean
+  hasStartupIntent: boolean
+  infertilityTreatmentNeeded: boolean
+  wantsToQuitSmoking: boolean
+  legalDisputeNeedsConsultation: boolean
+  wantsAdultEducation: boolean
+  isStudent: boolean
+  developmentalDelayChild: boolean
+}
+
+export type Priority = 'urgent' | 'normal' | 'review'
 
 export interface BenefitResult {
   id: number
@@ -42,11 +90,23 @@ export interface BenefitResult {
   applicationPeriod: string | null
   notes: string | null
   sourceUrl: string
-  missingConditions: string[]
-  documents: string[]
-  locations: Array<{ name: string; address: string | null; phone: string | null; website: string | null }>
-  lastVerifiedDate: string
   sourceExcerpt: string
+  lastVerifiedDate: string
+  missingConditions: string[]
+  documents: Array<{ name: string; obtainLocation: string | null }>
+  locations: Array<{ name: string; address: string | null; phone: string | null; website: string | null }>
+  priority: Priority
+}
+
+export interface BenefitGroup {
+  confirmed: BenefitResult[]
+  possible: BenefitResult[]
+}
+
+export interface FamilyMemberResult extends BenefitGroup {
+  relationship: string
+  county: string
+  age: number
 }
 
 export interface CheckResponse {
@@ -59,8 +119,8 @@ export interface CheckResponse {
   }
   generatedAt: string
   oldestVerifiedDate: string | null
-  confirmed: BenefitResult[]
-  possible: BenefitResult[]
+  self: BenefitGroup
+  familyMembers: FamilyMemberResult[]
 }
 
 export interface ApiError {

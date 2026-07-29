@@ -46,6 +46,7 @@ export const FLAG_OPTIONS: FlagOption[] = [
   },
   { value: 'recent_natural_disaster_damage', label: '近期遭遇風災／震災／水災導致房屋或財產受損' },
   { value: 'rare_disease_certificate', label: '本人或同戶家人領有罕見疾病證明' },
+  { value: 'legal_dispute_or_consultation_needed', label: '目前有法律糾紛或需要法律諮詢（租屋、勞資、婚姻等）' },
 ]
 
 export interface IdentityOption {
