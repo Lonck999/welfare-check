@@ -10,6 +10,9 @@
  */
 
 import type { IncomeThresholdResult } from './calculations.js'
+import { FLAG_OPTIONS } from './profile-mapping.js'
+
+const FLAG_LABELS = new Map(FLAG_OPTIONS.map((f) => [f.value, f.label]))
 
 export interface EligibilityConditions {
   ageMin?: number
@@ -127,11 +130,23 @@ function checkNoOwnedHome(conditions: EligibilityConditions, applicant: Applican
   return applicant.ownsHome === false ? 'satisfied' : 'failed'
 }
 
-function checkRequiredFlags(conditions: EligibilityConditions, applicant: ApplicantProfile): ConditionCheck {
-  if (!conditions.requiredFlags || conditions.requiredFlags.length === 0) return 'satisfied'
-  if (!applicant.flags) return 'missing_data'
-  const allPresent = conditions.requiredFlags.every((flag) => applicant.flags!.includes(flag))
-  return allPresent ? 'satisfied' : 'failed'
+/**
+ * 旗標條件刻意不會回傳 'failed'，只會是 'satisfied' 或 missing（缺哪幾個旗標）。
+ *
+ * 跟身分別（checkIdentities，使用者通常很清楚自己是不是原住民/退伍軍人）不同，
+ * 這裡的旗標大多是使用者不見得會主動想到要勾的細節狀況（例如「有戒菸意願」
+ * 「有不孕症/人工生殖需求」）。如果沒勾就直接判定不符合、從結果消失，
+ * 使用者永遠不會知道有這個補助存在——這樣就違背了「幫使用者發現他不知道
+ * 自己能申請的補助」這個核心價值。所以沒勾一律視為「不確定」，讓這類項目
+ * 進「⚠️ 可能符合」列出還缺哪個旗標，由使用者自己判斷是否符合，而不是被系統
+ * 直接篩掉。
+ */
+function missingRequiredFlagLabels(conditions: EligibilityConditions, applicant: ApplicantProfile): string[] {
+  if (!conditions.requiredFlags || conditions.requiredFlags.length === 0) return []
+  const presentFlags = applicant.flags ?? []
+  return conditions.requiredFlags
+    .filter((flag) => !presentFlags.includes(flag))
+    .map((flag) => FLAG_LABELS.get(flag) ?? flag)
 }
 
 const CHECKS: Array<{
@@ -146,7 +161,6 @@ const CHECKS: Array<{
   { label: '長者年齡', check: checkElderOver },
   { label: '居住/工作縣市', check: checkCounties },
   { label: '無自有住宅', check: checkNoOwnedHome },
-  { label: '其他條件旗標', check: checkRequiredFlags },
 ]
 
 /** 依 SKILL.md 第四步的三級邏輯評估單一福利項目 */
@@ -162,6 +176,7 @@ export function evaluateEligibility(
     if (result === 'failed') failedConditions.push(label)
     if (result === 'missing_data') missingConditions.push(label)
   }
+  missingConditions.push(...missingRequiredFlagLabels(conditions, applicant))
 
   if (failedConditions.length > 0) {
     return { verdict: 'not_eligible', missingConditions: [], failedConditions }

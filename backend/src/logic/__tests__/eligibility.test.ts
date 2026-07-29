@@ -70,4 +70,24 @@ describe('evaluateEligibility', () => {
     const result = evaluateEligibility({}, {})
     expect(result.verdict).toBe('confirmed')
   })
+
+  it('⚠️ 旗標條件沒勾 → possible（不確定，讓使用者自己確認），而非直接濾掉', () => {
+    const conditions: EligibilityConditions = { requiredFlags: ['wants_to_quit_smoking'] }
+    const applicant: ApplicantProfile = { flags: [] }
+    const result = evaluateEligibility(conditions, applicant)
+    expect(result.verdict).toBe('possible')
+    expect(result.missingConditions).toContain('有戒菸意願')
+  })
+
+  it('✅ 旗標條件有勾 → confirmed', () => {
+    const conditions: EligibilityConditions = { requiredFlags: ['wants_to_quit_smoking'] }
+    const applicant: ApplicantProfile = { flags: ['wants_to_quit_smoking'] }
+    expect(evaluateEligibility(conditions, applicant).verdict).toBe('confirmed')
+  })
+
+  it('旗標沒勾但其他條件確定不符合 → 仍是 not_eligible（❌ 優先於 ⚠️）', () => {
+    const conditions: EligibilityConditions = { ageMax: 40, requiredFlags: ['wants_to_quit_smoking'] }
+    const applicant: ApplicantProfile = { age: 45, flags: [] }
+    expect(evaluateEligibility(conditions, applicant).verdict).toBe('not_eligible')
+  })
 })
