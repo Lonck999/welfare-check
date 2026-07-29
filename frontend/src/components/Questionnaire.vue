@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import type { FormOptions, HouseholdMember, QuestionnaireAnswers } from '../types'
 
 const props = defineProps<{ options: FormOptions }>()
@@ -130,6 +130,29 @@ function addMember() {
 function removeMember(index: number) {
   answers.householdMembers.splice(index, 1)
 }
+
+/** 第 6 題已勾選「不同戶號」的家人，本質上就是第 13 題要問的非同戶籍家人，直接帶入避免使用者重填一次關係/出生年月日/戶籍縣市 */
+function syncNonCohabitingFromHousehold() {
+  const existingKeys = new Set(answers.nonCohabitingFamily.map((m) => `${m.relationship}|${m.birthDate}`))
+  for (const member of answers.householdMembers) {
+    if (member.sameHukou) continue
+    if (!member.relationship || !member.birthDate) continue
+    const key = `${member.relationship}|${member.birthDate}`
+    if (existingKeys.has(key)) continue
+    answers.nonCohabitingFamily.push({
+      relationship: member.relationship,
+      birthDate: member.birthDate,
+      county: member.registeredCounty || '',
+      annualIncome: 0,
+      assets: 0,
+      isSinglePersonHousehold: false,
+    })
+    existingKeys.add(key)
+  }
+}
+watch(currentStep, (step) => {
+  if (step === 'nonCohabiting') syncNonCohabitingFromHousehold()
+})
 
 function addNonCohabitingMember() {
   answers.nonCohabitingFamily.push({
@@ -506,7 +529,7 @@ const noneStudentAndChild = computed({
 
     <section v-if="currentStep === 'nonCohabiting'" class="step">
       <h2>第 13 題：非同戶籍家人補助資料（選填）</h2>
-      <p class="hint">即使非同戶籍，您的家人（如父母）可能有自己可以申請的補助。</p>
+      <p class="hint">即使非同戶籍，您的家人（如父母）可能有自己可以申請的補助。已自動帶入第 6 題勾選「不同戶號」的家人，請補上收入／財產等資料；不需要一併查詢的可按「移除」，也可自行新增其他非同戶籍家人。</p>
       <div v-for="(member, i) in answers.nonCohabitingFamily" :key="i" class="member-card">
         <label class="field inline">
           <span>關係</span>
