@@ -149,13 +149,15 @@ a {
 .field input[type='text'],
 .field input[type='date'],
 .field input[type='number'],
-.field select {
+.field select,
+.step > input[type='date'] {
   font: inherit;
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--bg);
   color: var(--text-h);
+  min-height: 48px;
 }
 
 .field.inline {
