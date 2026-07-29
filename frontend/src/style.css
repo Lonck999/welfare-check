@@ -524,19 +524,29 @@ button {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 20px;
-  overflow-x: auto;
 }
-.overview-table table {
-  border-collapse: collapse;
-  width: 100%;
+.overview-section {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
   font-size: 14px;
 }
-.overview-table th,
-.overview-table td {
-  text-align: left;
-  vertical-align: top;
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
+.overview-section:first-of-type {
+  padding-top: 8px;
+}
+.overview-section:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.overview-section h3 {
+  margin-bottom: 8px;
+}
+.overview-block {
+  margin-top: 10px;
+}
+.overview-block h4 {
+  font-size: 14px;
+  margin: 0 0 6px;
+  color: var(--text-h);
 }
 .overview-table ul {
   margin: 0;

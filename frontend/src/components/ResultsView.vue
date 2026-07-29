@@ -99,76 +99,67 @@ function pageCount(list: BenefitResult[]) {
       <p class="hint">
         🔴 有時限優先確認　🟠 確定可申請　🟡 建議確認。同一項目若同時有「中央基準」與「地方加碼」版本，這裡只列一筆代表，完整明細請看下方卡片。
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>對象</th>
-            <th>✅ 確定可申請</th>
-            <th>⚠️ 建議確認</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="section in overviewSections" :key="section.key">
-            <td>{{ section.label }}</td>
-            <td>
-              <template v-if="dedupeByCategory(section.group.confirmed).length > 0">
-                <ul>
-                  <li v-for="b in paginate(dedupeByCategory(section.group.confirmed), section.key, 'confirmed')" :key="b.id">
-                    {{ b.isTimeSensitive ? '🔴 ' : '' }}{{ b.name }}
-                  </li>
-                </ul>
-                <div v-if="pageCount(dedupeByCategory(section.group.confirmed)) > 1" class="pager">
-                  <button
-                    type="button"
-                    class="pager-btn"
-                    :disabled="currentPage(section.key, 'confirmed') === 0"
-                    @click="setPage(section.key, 'confirmed', currentPage(section.key, 'confirmed') - 1)"
-                  >
-                    ‹
-                  </button>
-                  <span>{{ currentPage(section.key, 'confirmed') + 1 }} / {{ pageCount(dedupeByCategory(section.group.confirmed)) }}</span>
-                  <button
-                    type="button"
-                    class="pager-btn"
-                    :disabled="currentPage(section.key, 'confirmed') >= pageCount(dedupeByCategory(section.group.confirmed)) - 1"
-                    @click="setPage(section.key, 'confirmed', currentPage(section.key, 'confirmed') + 1)"
-                  >
-                    ›
-                  </button>
-                </div>
-              </template>
-              <span v-else class="empty">無</span>
-            </td>
-            <td>
-              <template v-if="dedupeByCategory(section.group.possible).length > 0">
-                <ul>
-                  <li v-for="b in paginate(dedupeByCategory(section.group.possible), section.key, 'possible')" :key="b.id">{{ b.name }}</li>
-                </ul>
-                <div v-if="pageCount(dedupeByCategory(section.group.possible)) > 1" class="pager">
-                  <button
-                    type="button"
-                    class="pager-btn"
-                    :disabled="currentPage(section.key, 'possible') === 0"
-                    @click="setPage(section.key, 'possible', currentPage(section.key, 'possible') - 1)"
-                  >
-                    ‹
-                  </button>
-                  <span>{{ currentPage(section.key, 'possible') + 1 }} / {{ pageCount(dedupeByCategory(section.group.possible)) }}</span>
-                  <button
-                    type="button"
-                    class="pager-btn"
-                    :disabled="currentPage(section.key, 'possible') >= pageCount(dedupeByCategory(section.group.possible)) - 1"
-                    @click="setPage(section.key, 'possible', currentPage(section.key, 'possible') + 1)"
-                  >
-                    ›
-                  </button>
-                </div>
-              </template>
-              <span v-else class="empty">無</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div v-for="section in overviewSections" :key="section.key" class="overview-section">
+        <h3>{{ section.label }}</h3>
+        <div class="overview-block">
+          <h4>✅ 確定可申請</h4>
+          <template v-if="dedupeByCategory(section.group.confirmed).length > 0">
+            <ul>
+              <li v-for="b in paginate(dedupeByCategory(section.group.confirmed), section.key, 'confirmed')" :key="b.id">
+                {{ b.isTimeSensitive ? '🔴 ' : '' }}{{ b.name }}
+              </li>
+            </ul>
+            <div v-if="pageCount(dedupeByCategory(section.group.confirmed)) > 1" class="pager">
+              <button
+                type="button"
+                class="pager-btn"
+                :disabled="currentPage(section.key, 'confirmed') === 0"
+                @click="setPage(section.key, 'confirmed', currentPage(section.key, 'confirmed') - 1)"
+              >
+                ‹
+              </button>
+              <span>{{ currentPage(section.key, 'confirmed') + 1 }} / {{ pageCount(dedupeByCategory(section.group.confirmed)) }}</span>
+              <button
+                type="button"
+                class="pager-btn"
+                :disabled="currentPage(section.key, 'confirmed') >= pageCount(dedupeByCategory(section.group.confirmed)) - 1"
+                @click="setPage(section.key, 'confirmed', currentPage(section.key, 'confirmed') + 1)"
+              >
+                ›
+              </button>
+            </div>
+          </template>
+          <p v-else class="empty">無</p>
+        </div>
+        <div class="overview-block">
+          <h4>⚠️ 建議確認</h4>
+          <template v-if="dedupeByCategory(section.group.possible).length > 0">
+            <ul>
+              <li v-for="b in paginate(dedupeByCategory(section.group.possible), section.key, 'possible')" :key="b.id">{{ b.name }}</li>
+            </ul>
+            <div v-if="pageCount(dedupeByCategory(section.group.possible)) > 1" class="pager">
+              <button
+                type="button"
+                class="pager-btn"
+                :disabled="currentPage(section.key, 'possible') === 0"
+                @click="setPage(section.key, 'possible', currentPage(section.key, 'possible') - 1)"
+              >
+                ‹
+              </button>
+              <span>{{ currentPage(section.key, 'possible') + 1 }} / {{ pageCount(dedupeByCategory(section.group.possible)) }}</span>
+              <button
+                type="button"
+                class="pager-btn"
+                :disabled="currentPage(section.key, 'possible') >= pageCount(dedupeByCategory(section.group.possible)) - 1"
+                @click="setPage(section.key, 'possible', currentPage(section.key, 'possible') + 1)"
+              >
+                ›
+              </button>
+            </div>
+          </template>
+          <p v-else class="empty">無</p>
+        </div>
+      </div>
     </section>
 
     <section class="benefit-list">
