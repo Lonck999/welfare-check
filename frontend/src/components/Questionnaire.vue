@@ -150,6 +150,36 @@ const CHRONIC_DISABILITY_OPTIONS = [
   { value: 'self_care', label: '生活自理困難（無法自行洗澡、穿衣、如廁、進食）' },
   { value: 'chronic_disease', label: '慢性病功能退化（中風後遺症、帕金森、嚴重糖尿病截肢等）' },
 ]
+
+const RELATIONSHIP_OPTIONS = ['配偶', '子女', '父親', '母親', '兄弟姊妹', '祖父', '祖母', '岳父', '岳母', '公公', '婆婆', '孫子女', '其他']
+
+type EditableMember = { relationship: string; relationshipIsOther?: boolean }
+
+function isOtherRelationship(relationship: string): boolean {
+  return relationship !== '' && !RELATIONSHIP_OPTIONS.slice(0, -1).includes(relationship)
+}
+
+/** 下拉選單目前該顯示哪個選項：一旦切到「其他」就維持在「其他」，即使自訂文字還是空的（避免文字框剛切換就消失） */
+function relationshipSelectValue(member: EditableMember): string {
+  if (member.relationshipIsOther) return '其他'
+  if (member.relationship === '') return ''
+  return isOtherRelationship(member.relationship) ? '其他' : member.relationship
+}
+function showOtherRelationshipInput(member: EditableMember): boolean {
+  return Boolean(member.relationshipIsOther) || isOtherRelationship(member.relationship)
+}
+function onRelationshipSelect(member: EditableMember, value: string) {
+  if (value === '其他') {
+    if (!member.relationshipIsOther) member.relationship = ''
+    member.relationshipIsOther = true
+  } else {
+    member.relationshipIsOther = false
+    member.relationship = value
+  }
+}
+function onOtherRelationshipInput(member: EditableMember, value: string) {
+  member.relationship = value
+}
 </script>
 
 <template>
@@ -237,7 +267,22 @@ const CHRONIC_DISABILITY_OPTIONS = [
       <div v-for="(member, i) in answers.householdMembers" :key="i" class="member-card">
         <label class="field inline">
           <span>關係</span>
-          <input v-model="member.relationship" type="text" placeholder="例：配偶、子女、母親" />
+          <select
+            :value="relationshipSelectValue(member)"
+            @change="onRelationshipSelect(member, ($event.target as HTMLSelectElement).value)"
+          >
+            <option value="" disabled>請選擇</option>
+            <option v-for="opt in RELATIONSHIP_OPTIONS" :key="opt" :value="opt">{{ opt }}</option>
+          </select>
+        </label>
+        <label v-if="showOtherRelationshipInput(member)" class="field inline">
+          <span>請說明關係</span>
+          <input
+            :value="member.relationship === '其他' ? '' : member.relationship"
+            type="text"
+            placeholder="例：伯父、外甥"
+            @input="onOtherRelationshipInput(member, ($event.target as HTMLInputElement).value)"
+          />
         </label>
         <label class="field inline">
           <span>出生年月日</span>
@@ -361,7 +406,22 @@ const CHRONIC_DISABILITY_OPTIONS = [
       <div v-for="(member, i) in answers.nonCohabitingFamily" :key="i" class="member-card">
         <label class="field inline">
           <span>關係</span>
-          <input v-model="member.relationship" type="text" placeholder="例：父親" />
+          <select
+            :value="relationshipSelectValue(member)"
+            @change="onRelationshipSelect(member, ($event.target as HTMLSelectElement).value)"
+          >
+            <option value="" disabled>請選擇</option>
+            <option v-for="opt in RELATIONSHIP_OPTIONS" :key="opt" :value="opt">{{ opt }}</option>
+          </select>
+        </label>
+        <label v-if="showOtherRelationshipInput(member)" class="field inline">
+          <span>請說明關係</span>
+          <input
+            :value="member.relationship === '其他' ? '' : member.relationship"
+            type="text"
+            placeholder="例：伯父、外甥"
+            @input="onOtherRelationshipInput(member, ($event.target as HTMLInputElement).value)"
+          />
         </label>
         <label class="field inline">
           <span>出生年月日</span>
