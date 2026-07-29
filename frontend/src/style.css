@@ -162,7 +162,7 @@ a {
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  flex: 1 1 220px;
+  flex: 0 0 auto;
 }
 .field.inline > span {
   min-width: 110px;
@@ -459,6 +459,13 @@ button {
   font-size: 15px;
 }
 
+.checkbox-row.none-option {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  opacity: 0.85;
+}
+
 .member-card {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -514,4 +521,25 @@ button {
 .overview-table ul {
   margin: 0;
   padding-left: 18px;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+  opacity: 0.85;
+}
+.pager-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 13px;
+  color: var(--text-h);
+}
+.pager-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

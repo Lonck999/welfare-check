@@ -92,10 +92,18 @@ function validateCurrentStep(): boolean {
   return errors.value.length === 0
 }
 
+/** 使用者可能點了「+ 新增」卻沒填完就直接下一步，送出前濾掉這些空白列，避免後端因缺必填欄位而擋掉整份問卷 */
+function buildSubmission(): QuestionnaireAnswers {
+  const cloned = JSON.parse(JSON.stringify(answers)) as QuestionnaireAnswers
+  cloned.householdMembers = cloned.householdMembers.filter((m) => m.relationship && m.birthDate)
+  cloned.nonCohabitingFamily = cloned.nonCohabitingFamily.filter((m) => m.relationship && m.birthDate && m.county)
+  return cloned
+}
+
 function next() {
   if (!validateCurrentStep()) return
   if (isLastStep.value) {
-    emit('submit', JSON.parse(JSON.stringify(answers)))
+    emit('submit', buildSubmission())
     return
   }
   stepIndex.value += 1
@@ -180,6 +188,88 @@ function onRelationshipSelect(member: EditableMember, value: string) {
 function onOtherRelationshipInput(member: EditableMember, value: string) {
   member.relationship = value
 }
+
+/** 勾選「與本人同一戶號」時，預設帶入與本人相同的設籍縣市（同戶號通常也同地址），使用者仍可自行改掉 */
+function onSameHukouChange(member: HouseholdMember, checked: boolean) {
+  member.sameHukou = checked
+  if (checked && answers.county) member.registeredCounty = answers.county
+}
+
+const noneSelfHealth = computed({
+  get: () =>
+    !answers.selfDisabilityCard &&
+    !answers.selfCatastrophicIllnessCard &&
+    !answers.selfRareDisease &&
+    !answers.selfRecentMajorSurgery,
+  set: (val: boolean) => {
+    if (!val) return
+    answers.selfDisabilityCard = false
+    answers.selfCatastrophicIllnessCard = false
+    answers.selfRareDisease = false
+    answers.selfRecentMajorSurgery = false
+  },
+})
+
+function isMemberHealthNone(member: HouseholdMember): boolean {
+  return (
+    !member.disabilityCard &&
+    !member.catastrophicIllnessCard &&
+    !member.rareDisease &&
+    !(member.chronicDisability && member.chronicDisability.length > 0)
+  )
+}
+function setMemberHealthNone(member: HouseholdMember, val: boolean) {
+  if (!val) return
+  member.disabilityCard = false
+  member.catastrophicIllnessCard = false
+  member.rareDisease = false
+  member.chronicDisability = []
+}
+
+const noneIdentityAndUrgency = computed({
+  get: () =>
+    answers.specialIdentities.length === 0 &&
+    !answers.involuntaryUnemployment6mo &&
+    !answers.majorMedicalExpense &&
+    !answers.naturalDisasterDamage &&
+    !answers.domesticViolenceOrTrafficking &&
+    !answers.otherAcuteHardship,
+  set: (val: boolean) => {
+    if (!val) return
+    answers.specialIdentities = []
+    answers.involuntaryUnemployment6mo = false
+    answers.majorMedicalExpense = false
+    answers.naturalDisasterDamage = false
+    answers.domesticViolenceOrTrafficking = false
+    answers.otherAcuteHardship = false
+  },
+})
+
+const noneLifePlans = computed({
+  get: () =>
+    !answers.hasStartupIntent &&
+    !answers.infertilityTreatmentNeeded &&
+    !answers.wantsToQuitSmoking &&
+    !answers.legalDisputeNeedsConsultation &&
+    !answers.wantsAdultEducation,
+  set: (val: boolean) => {
+    if (!val) return
+    answers.hasStartupIntent = false
+    answers.infertilityTreatmentNeeded = false
+    answers.wantsToQuitSmoking = false
+    answers.legalDisputeNeedsConsultation = false
+    answers.wantsAdultEducation = false
+  },
+})
+
+const noneStudentAndChild = computed({
+  get: () => !answers.isStudent && !answers.developmentalDelayChild,
+  set: (val: boolean) => {
+    if (!val) return
+    answers.isStudent = false
+    answers.developmentalDelayChild = false
+  },
+})
 </script>
 
 <template>
@@ -305,7 +395,10 @@ function onOtherRelationshipInput(member: EditableMember, value: string) {
             <option v-for="c in props.options.counties" :key="c" :value="c">{{ c }}</option>
           </select>
         </label>
-        <label class="checkbox-row"><input v-model="member.sameHukou" type="checkbox" /> 與本人同一戶號</label>
+        <label class="checkbox-row">
+          <input type="checkbox" :checked="member.sameHukou" @change="onSameHukouChange(member, ($event.target as HTMLInputElement).checked)" />
+          與本人同一戶號
+        </label>
       </div>
     </section>
 
@@ -377,6 +470,7 @@ function onOtherRelationshipInput(member: EditableMember, value: string) {
       <label class="checkbox-row"><input v-model="answers.selfCatastrophicIllnessCard" type="checkbox" /> 持有健保重大傷病卡</label>
       <label class="checkbox-row"><input v-model="answers.selfRareDisease" type="checkbox" /> 罕見疾病（領有罕病證明）</label>
       <label class="checkbox-row"><input v-model="answers.selfRecentMajorSurgery" type="checkbox" /> 近期（6 個月內）有重大手術或住院</label>
+      <label class="checkbox-row none-option"><input v-model="noneSelfHealth" type="checkbox" /> 以上皆無</label>
     </section>
 
     <section v-if="currentStep === 'memberHealth'" class="step">
@@ -397,6 +491,10 @@ function onOtherRelationshipInput(member: EditableMember, value: string) {
             <span>{{ opt.label }}</span>
           </label>
         </div>
+        <label class="checkbox-row none-option">
+          <input type="checkbox" :checked="isMemberHealthNone(member)" @change="setMemberHealthNone(member, ($event.target as HTMLInputElement).checked)" />
+          以上皆無
+        </label>
       </div>
     </section>
 
@@ -467,6 +565,7 @@ function onOtherRelationshipInput(member: EditableMember, value: string) {
       <label class="checkbox-row"><input v-model="answers.naturalDisasterDamage" type="checkbox" /> 近期遭遇風災／震災／水災，房屋或財產受損</label>
       <label class="checkbox-row"><input v-model="answers.domesticViolenceOrTrafficking" type="checkbox" /> 受家暴、性侵或人口販賣</label>
       <label class="checkbox-row"><input v-model="answers.otherAcuteHardship" type="checkbox" /> 其他急難情形</label>
+      <label class="checkbox-row none-option"><input v-model="noneIdentityAndUrgency" type="checkbox" /> 以上皆無</label>
     </section>
 
     <section v-if="currentStep === 'lifePlans'" class="step">
@@ -476,6 +575,7 @@ function onOtherRelationshipInput(member: EditableMember, value: string) {
       <label class="checkbox-row"><input v-model="answers.wantsToQuitSmoking" type="checkbox" /> 本人或家中成員有吸菸習慣，且有戒菸意願</label>
       <label class="checkbox-row"><input v-model="answers.legalDisputeNeedsConsultation" type="checkbox" /> 目前有法律糾紛或需要法律諮詢</label>
       <label class="checkbox-row"><input v-model="answers.wantsAdultEducation" type="checkbox" /> 想重返學校進修（回流教育／成人進修）</label>
+      <label class="checkbox-row none-option"><input v-model="noneLifePlans" type="checkbox" /> 以上皆無</label>
     </section>
 
     <section v-if="currentStep === 'studentAndChild'" class="step">
@@ -485,6 +585,7 @@ function onOtherRelationshipInput(member: EditableMember, value: string) {
         <input v-model="answers.developmentalDelayChild" type="checkbox" />
         家中有未滿 6 歲子女，有發展遲緩疑似情形或已診斷
       </label>
+      <label class="checkbox-row none-option"><input v-model="noneStudentAndChild" type="checkbox" /> 以上皆無</label>
     </section>
 
     <p v-if="errors.length > 0" class="error-box">

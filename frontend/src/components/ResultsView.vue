@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { BenefitGroup, CheckResponse } from '../types'
+import { computed, reactive } from 'vue'
+import type { BenefitGroup, BenefitResult, CheckResponse } from '../types'
 import { downloadReport } from '../reportDownload'
 import BenefitCard from './BenefitCard.vue'
 
@@ -22,14 +22,53 @@ function handleDownload() {
 }
 
 interface OverviewSection {
+  key: string
   label: string
   group: BenefitGroup
 }
 
 const overviewSections = computed<OverviewSection[]>(() => [
-  { label: '本人', group: props.result.self },
-  ...props.result.familyMembers.map((m) => ({ label: `${m.relationship}（${m.age} 歲）`, group: m })),
+  { key: 'self', label: '本人', group: props.result.self },
+  ...props.result.familyMembers.map((m) => ({ key: `${m.relationship}-${m.county}`, label: `${m.relationship}（${m.age} 歲）`, group: m })),
 ])
+
+/**
+ * 總覽表刻意跟下方詳細卡片分開處理：很多類別本身就會有「中央基準」+「地方加碼」兩筆資料
+ * （例如身心障礙補助分「生活補助費，中央基準」與「地方加碼」兩列），這是資料庫設計本身如此、
+ * 不是重複建檔，但在總覽表這種一行一項目的快速掃視表格裡，同一個 categoryNumber 出現兩次
+ * 看起來會像是重複列出。總覽表只挑每個 categoryNumber 的第一筆代表顯示，完整明細仍看下方卡片。
+ */
+function dedupeByCategory(list: BenefitResult[]): BenefitResult[] {
+  const seen = new Set<number | string>()
+  const result: BenefitResult[] = []
+  for (const b of list) {
+    const key = b.categoryNumber ?? `id-${b.id}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    result.push(b)
+  }
+  return result
+}
+
+const PAGE_SIZE = 10
+const pageIndex = reactive<Record<string, number>>({})
+
+function pageKey(sectionKey: string, kind: 'confirmed' | 'possible') {
+  return `${sectionKey}-${kind}`
+}
+function currentPage(sectionKey: string, kind: 'confirmed' | 'possible') {
+  return pageIndex[pageKey(sectionKey, kind)] ?? 0
+}
+function setPage(sectionKey: string, kind: 'confirmed' | 'possible', page: number) {
+  pageIndex[pageKey(sectionKey, kind)] = page
+}
+function paginate(list: BenefitResult[], sectionKey: string, kind: 'confirmed' | 'possible') {
+  const page = currentPage(sectionKey, kind)
+  return list.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
+}
+function pageCount(list: BenefitResult[]) {
+  return Math.max(1, Math.ceil(list.length / PAGE_SIZE))
+}
 </script>
 
 <template>
@@ -57,7 +96,9 @@ const overviewSections = computed<OverviewSection[]>(() => [
 
     <section class="overview-table">
       <h2>補助總覽表</h2>
-      <p class="hint">🔴 有時限優先確認　🟠 確定可申請　🟡 建議確認</p>
+      <p class="hint">
+        🔴 有時限優先確認　🟠 確定可申請　🟡 建議確認。同一項目若同時有「中央基準」與「地方加碼」版本，這裡只列一筆代表，完整明細請看下方卡片。
+      </p>
       <table>
         <thead>
           <tr>
@@ -67,18 +108,62 @@ const overviewSections = computed<OverviewSection[]>(() => [
           </tr>
         </thead>
         <tbody>
-          <tr v-for="section in overviewSections" :key="section.label">
+          <tr v-for="section in overviewSections" :key="section.key">
             <td>{{ section.label }}</td>
             <td>
-              <ul v-if="section.group.confirmed.length > 0">
-                <li v-for="b in section.group.confirmed" :key="b.id">{{ b.isTimeSensitive ? '🔴 ' : '' }}{{ b.name }}</li>
-              </ul>
+              <template v-if="dedupeByCategory(section.group.confirmed).length > 0">
+                <ul>
+                  <li v-for="b in paginate(dedupeByCategory(section.group.confirmed), section.key, 'confirmed')" :key="b.id">
+                    {{ b.isTimeSensitive ? '🔴 ' : '' }}{{ b.name }}
+                  </li>
+                </ul>
+                <div v-if="pageCount(dedupeByCategory(section.group.confirmed)) > 1" class="pager">
+                  <button
+                    type="button"
+                    class="pager-btn"
+                    :disabled="currentPage(section.key, 'confirmed') === 0"
+                    @click="setPage(section.key, 'confirmed', currentPage(section.key, 'confirmed') - 1)"
+                  >
+                    ‹
+                  </button>
+                  <span>{{ currentPage(section.key, 'confirmed') + 1 }} / {{ pageCount(dedupeByCategory(section.group.confirmed)) }}</span>
+                  <button
+                    type="button"
+                    class="pager-btn"
+                    :disabled="currentPage(section.key, 'confirmed') >= pageCount(dedupeByCategory(section.group.confirmed)) - 1"
+                    @click="setPage(section.key, 'confirmed', currentPage(section.key, 'confirmed') + 1)"
+                  >
+                    ›
+                  </button>
+                </div>
+              </template>
               <span v-else class="empty">無</span>
             </td>
             <td>
-              <ul v-if="section.group.possible.length > 0">
-                <li v-for="b in section.group.possible" :key="b.id">{{ b.name }}</li>
-              </ul>
+              <template v-if="dedupeByCategory(section.group.possible).length > 0">
+                <ul>
+                  <li v-for="b in paginate(dedupeByCategory(section.group.possible), section.key, 'possible')" :key="b.id">{{ b.name }}</li>
+                </ul>
+                <div v-if="pageCount(dedupeByCategory(section.group.possible)) > 1" class="pager">
+                  <button
+                    type="button"
+                    class="pager-btn"
+                    :disabled="currentPage(section.key, 'possible') === 0"
+                    @click="setPage(section.key, 'possible', currentPage(section.key, 'possible') - 1)"
+                  >
+                    ‹
+                  </button>
+                  <span>{{ currentPage(section.key, 'possible') + 1 }} / {{ pageCount(dedupeByCategory(section.group.possible)) }}</span>
+                  <button
+                    type="button"
+                    class="pager-btn"
+                    :disabled="currentPage(section.key, 'possible') >= pageCount(dedupeByCategory(section.group.possible)) - 1"
+                    @click="setPage(section.key, 'possible', currentPage(section.key, 'possible') + 1)"
+                  >
+                    ›
+                  </button>
+                </div>
+              </template>
               <span v-else class="empty">無</span>
             </td>
           </tr>
