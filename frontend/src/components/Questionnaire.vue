@@ -114,6 +114,12 @@ function back() {
   if (stepIndex.value > 0) stepIndex.value -= 1
 }
 
+/** Chrome 等瀏覽器點日期欄位文字區塊不會跳出選擇器，只有點小圖示才會，這裡讓點欄位任何地方都能開啟 */
+function openDatePicker(event: Event) {
+  const el = event.target as HTMLInputElement
+  el.showPicker?.()
+}
+
 function addMember() {
   answers.householdMembers.push({
     relationship: '',
@@ -279,7 +285,7 @@ const noneStudentAndChild = computed({
     <section v-if="currentStep === 'birthDate'" class="step">
       <h2>第 1 題：出生年月日</h2>
       <p class="hint">系統將自動計算實際年齡，用於比對各補助的精確年齡門檻。</p>
-      <input v-model="answers.birthDate" type="date" required />
+      <input v-model="answers.birthDate" type="date" required @click="openDatePicker" />
     </section>
 
     <section v-if="currentStep === 'location'" class="step">
@@ -376,7 +382,7 @@ const noneStudentAndChild = computed({
         </label>
         <label class="field inline">
           <span>出生年月日</span>
-          <input v-model="member.birthDate" type="date" />
+          <input v-model="member.birthDate" type="date" @click="openDatePicker" />
         </label>
         <button type="button" class="remove-btn" @click="removeMember(i)">移除</button>
       </div>
@@ -523,7 +529,7 @@ const noneStudentAndChild = computed({
         </label>
         <label class="field inline">
           <span>出生年月日</span>
-          <input v-model="member.birthDate" type="date" />
+          <input v-model="member.birthDate" type="date" @click="openDatePicker" />
         </label>
         <label class="field">
           <span>戶籍縣市</span>
