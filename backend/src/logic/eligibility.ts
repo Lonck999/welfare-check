@@ -27,6 +27,8 @@ export interface EligibilityConditions {
   /** 居住或工作縣市須為其中之一；不填代表不限地區 */
   counties?: string[]
   requiresNoOwnedHome?: boolean
+  /** 需要本人（或申請人）名下有自有住宅，例如老屋修繕/太陽能屋頂型補助——申請人須為房屋所有權人 */
+  requiresOwnedHome?: boolean
   /** 其他布林旗標式條件，例如 'pregnant'、'disability_card'、'time_sensitive_deadline_confirmed' */
   requiredFlags?: string[]
   /**
@@ -130,6 +132,12 @@ function checkNoOwnedHome(conditions: EligibilityConditions, applicant: Applican
   return applicant.ownsHome === false ? 'satisfied' : 'failed'
 }
 
+function checkOwnedHome(conditions: EligibilityConditions, applicant: ApplicantProfile): ConditionCheck {
+  if (!conditions.requiresOwnedHome) return 'satisfied'
+  if (applicant.ownsHome === undefined) return 'missing_data'
+  return applicant.ownsHome === true ? 'satisfied' : 'failed'
+}
+
 /**
  * 旗標條件刻意不會回傳 'failed'，只會是 'satisfied' 或 missing（缺哪幾個旗標）。
  *
@@ -161,6 +169,7 @@ const CHECKS: Array<{
   { label: '長者年齡', check: checkElderOver },
   { label: '居住/工作縣市', check: checkCounties },
   { label: '無自有住宅', check: checkNoOwnedHome },
+  { label: '需自有住宅', check: checkOwnedHome },
 ]
 
 /** 依 SKILL.md 第四步的三級邏輯評估單一福利項目 */

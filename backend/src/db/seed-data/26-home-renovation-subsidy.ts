@@ -13,6 +13,7 @@ export const homeRenovationSubsidySeeds: SeedBenefit[] = [
     isTimeSensitive: false,
     applicationPeriod: '2026 年 5 月起正式受理申請',
     notes: '長照失能成員的居家無障礙環境改善另有第 9 類長照 3.0 補助（每 3 年最高 4 萬元），兩者可視情況分別或合併申請，需洽詢承辦單位確認是否可疊加。',
+    eligibilityConditions: { requiresOwnedHome: true },
     sourceUrl: 'https://www.gvm.com.tw/article/126533',
     sourceExcerpt:
       '行政院於2026年3月正式核定「老宅延壽計畫」，三年編列50億元，針對全台屋齡30年以上老舊住宅，提供結構安全到室內設計的修繕補助，預計2026年5月起正式受理申請……政府將提供最高實支實付65%、最高可領960萬元的老屋修繕補助……室內修繕最高每戶可補助20萬元，如有高齡弱勢者，可加碼至每戶30萬元。',

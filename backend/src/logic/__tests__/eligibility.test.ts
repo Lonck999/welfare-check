@@ -90,4 +90,18 @@ describe('evaluateEligibility', () => {
     const applicant: ApplicantProfile = { age: 45, flags: [] }
     expect(evaluateEligibility(conditions, applicant).verdict).toBe('not_eligible')
   })
+
+  it('需自有住宅：租屋者（ownsHome=false）→ not_eligible，不會誤判成確定符合', () => {
+    const conditions: EligibilityConditions = { requiresOwnedHome: true }
+    const applicant: ApplicantProfile = { ownsHome: false }
+    const result = evaluateEligibility(conditions, applicant)
+    expect(result.verdict).toBe('not_eligible')
+    expect(result.failedConditions).toContain('需自有住宅')
+  })
+
+  it('需自有住宅：有自有住宅 → confirmed', () => {
+    const conditions: EligibilityConditions = { requiresOwnedHome: true }
+    const applicant: ApplicantProfile = { ownsHome: true }
+    expect(evaluateEligibility(conditions, applicant).verdict).toBe('confirmed')
+  })
 })
