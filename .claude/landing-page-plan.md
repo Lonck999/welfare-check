@@ -1,7 +1,7 @@
 # 新首頁（Landing Page）規劃
 
 記錄時間：2026-07-31
-狀態：**文案已定案，圖片與動畫實作細節尚未定案，尚未寫程式碼**
+狀態：**已實作並部署上線**（`10d4218`，經 dev→staging 驗證→main→production 完整流程）。像素 hero 目前是 CSS 簡化版佔位，等使用者提供 sprite sheet 圖檔（見附錄 prompt）後再替換；4 個〔圖片待補〕位置仍是占位框，內容待另外討論
 視覺語言參考：`.claude/style-example.md`（cofounder.co 設計語言分析）
 
 ## 背景與目的
