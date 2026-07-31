@@ -109,11 +109,21 @@ SKILL.md 搜索清單裡的 `{年份}`、`{縣市}`、`{鄉鎮市區}`、`{工�
 使用者已明確表示不需要每次調整都詢問是否要 commit/push/部署，往後前後端程式碼調整完成、且已本機驗證（`npm run build`／必要時用 Playwright 實測）通過後：
 
 1. 直接 `git add` 該次調整涉及的檔案（不要用 `git add -A`，避免誤加無關檔案）並 commit
-2. `git push` 到 `main`
-3. 用 `railway up --ci -s <service>` 部署到正式站（`welfare-check` 為 backend、`welfare-check-frontend` 為 frontend；純前端調整只需部署 frontend service，純後端調整只需部署 backend service）
-4. 部署完建議（非必要）用 Playwright 對正式站網址快速驗證一次
+2. `git push` 到 `dev`（**不是 main**，見下方 staging/production 流程）
+3. 用 `railway up --ci -s <service> --environment staging` 部署到 staging 站（`welfare-check` 為 backend、`welfare-check-frontend` 為 frontend；純前端調整只需部署 frontend service，純後端調整只需部署 backend service）
+4. 用 Playwright 對 staging 網址（`welfare-check-frontend-staging.up.railway.app`／`welfare-check-staging.up.railway.app`）快速驗證一次，確認調整生效且無 console error
+5. staging 驗證沒問題後，把 `dev` fast-forward 或 merge 進 `main`（`git push origin dev:main`，若有分岔則正常 merge）並 push
+6. 用 `railway up --ci -s <service>` 部署到正式站（不加 `--environment`，預設走 production）
 
 不需要再用 `AskUserQuestion` 詢問是否要 commit/push/部署。若調整內容有風險（例如會動到 Neon 正式資料庫、刪除既有資料、需要跑 `npm run seed`），仍要先告知使用者再執行，比照規則 7 對 seed-data 的處理方式（AI 只改原始檔，實際寫入資料庫需人工執行）。
+
+**staging／production 架構說明**（2026-07-31 建立）：Railway 專案 `reasonable-comfort` 下有 `staging`／`production` 兩個 environment，`welfare-check`／`welfare-check-frontend` 兩個 service 在各自 environment 下各有一份部署：
+
+- staging 綁 `dev` 分支，網址 `welfare-check-staging.up.railway.app`（backend）／`welfare-check-frontend-staging.up.railway.app`（frontend）
+- production 綁 `main` 分支，網址同原本的 `welfare-check-production.up.railway.app`／`welfare-check-frontend-production.up.railway.app`
+- 兩邊**共用同一個 Neon 資料庫**（使用者選擇，理由：這個網站沒有寫入使用者資料的功能，填表即查即丟不落地，staging 查詢正式資料庫沒有汙染風險，不需要為此多付費建第二個資料庫）
+- staging frontend 的 `VITE_API_BASE_URL` 已指向 staging backend（不是 production backend），兩邊互不干擾
+- 這個 repo 的 GitHub webhook 目前是壞的（見規則 7 相關記錄），push 到 `dev`／`main` 都不會自動觸發部署，仍需手動 `railway up --ci`
 
 ### 為什麼會漏掉子項目：根本原因與具體對策
 
