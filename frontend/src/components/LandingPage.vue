@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import Hero3D from './Hero3D.vue'
+
+const HERO_BADGE_CHIPS = [
+  { glyph: '🏠', label: '租屋補貼' },
+  { glyph: '👶', label: '育兒津貼' },
+  { glyph: '🩺', label: '長照給付' },
+  { glyph: '♿', label: '身心障礙補助' },
+  { glyph: '👴', label: '老人生活津貼' },
+  { glyph: '🎓', label: '助學金' },
+]
 
 defineEmits<{ start: [] }>()
 
@@ -40,12 +48,30 @@ onUnmounted(() => {
 <template>
   <div class="landing">
     <section class="landing-hero">
-      <Hero3D />
-      <div class="landing-hero-content">
-        <h1>你知道自己有什麼權益嗎？</h1>
-        <p>逐題問答，幾分鐘內幫你找出所有可能符合資格的政府福利、補助與優惠。</p>
-        <button type="button" class="submit-btn landing-cta" @click="$emit('start')">開始查詢我的權益 →</button>
-        <p class="landing-microcopy">完全免費・不用註冊・填完即查即丟</p>
+      <div class="landing-hero-topbar">
+        <span class="landing-hero-tag">01 #租屋補貼</span>
+        <span class="landing-hero-tag">02 #育兒津貼</span>
+        <span class="landing-hero-tag">03 #長照給付</span>
+      </div>
+      <div class="landing-hero-main">
+        <div class="landing-hero-content">
+          <p class="landing-hero-arrow">▶▶▶</p>
+          <h1>你知道自己<br />有什麼權益嗎？</h1>
+          <p>逐題問答，幾分鐘內幫你找出所有可能符合資格的政府福利、補助與優惠。</p>
+          <button type="button" class="submit-btn landing-cta" @click="$emit('start')">開始查詢我的權益 →</button>
+          <p class="landing-microcopy">完全免費・不用註冊・填完即查即丟</p>
+        </div>
+        <div class="landing-hero-badge" aria-hidden="true">
+          <div
+            v-for="(chip, i) in HERO_BADGE_CHIPS"
+            :key="chip.label"
+            class="badge-chip"
+            :class="`badge-chip--${i + 1}`"
+          >
+            {{ chip.glyph }}
+            <span>{{ chip.label }}</span>
+          </div>
+        </div>
       </div>
     </section>
 

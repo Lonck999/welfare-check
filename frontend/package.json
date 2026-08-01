@@ -11,13 +11,10 @@
   },
   "dependencies": {
     "@sentry/vue": "^10.68.0",
-    "gsap": "^3.15.0",
-    "three": "^0.185.1",
     "vue": "^3.5.39"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",
-    "@types/three": "^0.185.3",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/tsconfig": "^0.9.1",
     "typescript": "~6.0.2",
