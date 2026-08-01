@@ -649,13 +649,26 @@ button {
 .landing-hero {
   position: relative;
   overflow: hidden;
-  margin: -32px -20px 0;
+  /* Break out of `.app`'s `max-width: 720px` so the hero (and the Three.js canvas
+     inside it) spans the full viewport width, not just the readable-width column
+     the rest of the (form-heavy) app intentionally uses. `100vw` is viewport-relative
+     (unlike `100%`, which — since this is a flex container — resolves to a
+     fit-content size around its children, not the 720px containing block, so it
+     never stretches); paired with `calc(50% - 50vw)` margins this re-centers that
+     full-viewport-wide box under the narrow parent. */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-top: -32px;
   min-height: 62vh;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  padding: 90px 20px 110px;
+  /* Left inset matches where text sits in the centered 720px column used by
+     `.app`/`.landing-section` below, so the headline lines up with the body
+     copy instead of hugging the raw screen edge on wide viewports. */
+  padding: 90px 20px 110px max(20px, calc(50vw - 340px));
   background: var(--hero-gradient);
 }
 @media (max-width: 640px) {
