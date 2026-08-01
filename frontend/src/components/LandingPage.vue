@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import Hero3D from './Hero3D.vue'
 
 defineEmits<{ start: [] }>()
 
@@ -39,12 +40,7 @@ onUnmounted(() => {
 <template>
   <div class="landing">
     <section class="landing-hero">
-      <div class="landing-pixel-bg" aria-hidden="true">
-        <div class="pixel-horizon"></div>
-        <div class="pixel-cloud pixel-cloud--a"><span></span><span></span><span></span></div>
-        <div class="pixel-cloud pixel-cloud--b"><span></span><span></span><span></span></div>
-        <div class="pixel-cloud pixel-cloud--c"><span></span><span></span><span></span></div>
-      </div>
+      <Hero3D />
       <div class="landing-hero-content">
         <h1>你知道自己有什麼權益嗎？</h1>
         <p>逐題問答，幾分鐘內幫你找出所有可能符合資格的政府福利、補助與優惠。</p>
