@@ -44,7 +44,7 @@
     rgba(0, 0, 0, 0.2) 0 4px 6px 0;
   --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --hero-gradient: linear-gradient(160deg, #eef1ff 0%, #f3ecfc 45%, #fdf0f6 100%);
+  --hero-gradient: linear-gradient(160deg, #eef1ff 0%, #f3ecfc 45%, #f5f5f2 100%);
   --hero-card-bg: rgba(255, 255, 255, 0.62);
   --hero-card-fg: #08060d;
   --hero-glow: #c9a6ff;
@@ -80,7 +80,7 @@
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 
-    --hero-gradient: linear-gradient(160deg, #1a1b23 0%, #201f2c 50%, #241c2e 100%);
+    --hero-gradient: linear-gradient(160deg, #1a1b23 0%, #201f2c 50%, #16171d 100%);
     --hero-card-bg: rgba(255, 255, 255, 0.08);
     --hero-card-fg: #f3f4f6;
     --hero-glow: #c084fc;
@@ -660,7 +660,7 @@ button {
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   margin-top: -32px;
-  min-height: 62vh;
+  min-height: 92vh;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -673,7 +673,7 @@ button {
 }
 @media (max-width: 640px) {
   .landing-hero {
-    min-height: 70vh;
+    min-height: 94vh;
     padding: 80px 20px 100px;
   }
 }
