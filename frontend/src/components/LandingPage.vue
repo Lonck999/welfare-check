@@ -6,7 +6,7 @@ const HERO_BADGE_CHIPS: { icon: BadgeIconName; label: string }[] = [
   { icon: 'house', label: '租屋補貼' },
   { icon: 'bottle', label: '育兒津貼' },
   { icon: 'care', label: '長照給付' },
-  { icon: 'access', label: '身心障礙補助' },
+  { icon: 'support', label: '身心障礙補助' },
   { icon: 'elder', label: '老人生活津貼' },
   { icon: 'grad', label: '助學金' },
 ]

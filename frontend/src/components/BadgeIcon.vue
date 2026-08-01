@@ -1,5 +1,5 @@
 <script setup lang="ts">
-export type BadgeIconName = 'house' | 'bottle' | 'care' | 'access' | 'elder' | 'grad'
+export type BadgeIconName = 'house' | 'bottle' | 'care' | 'support' | 'elder' | 'grad'
 
 defineProps<{ name: BadgeIconName }>()
 </script>
@@ -29,18 +29,16 @@ defineProps<{ name: BadgeIconName }>()
       <rect x="15" y="25" width="18" height="6" fill="var(--hero-chip-bg)" />
     </template>
 
-    <template v-else-if="name === 'access'">
-      <circle cx="30" cy="10" r="4" fill="var(--hero-ink)" />
+    <template v-else-if="name === 'support'">
+      <path d="M9 33 Q9 44 24 44 Q39 44 39 33 L39 29 L9 29 Z" fill="var(--hero-ink)" />
+      <circle cx="13" cy="29" r="3" fill="var(--hero-ink)" />
+      <circle cx="19.5" cy="27" r="3.3" fill="var(--hero-ink)" />
+      <circle cx="28.5" cy="27" r="3.3" fill="var(--hero-ink)" />
+      <circle cx="35" cy="29" r="3" fill="var(--hero-ink)" />
       <path
-        d="M28 16 L28 24 L34 24 M20 24 L28 24 M28 20 L20 28"
-        stroke="var(--hero-ink)"
-        stroke-width="4"
-        fill="none"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        d="M24 26 C17 21 14 16 18 12.5 C20.5 10.3 24 12 24 15.5 C24 12 27.5 10.3 30 12.5 C34 16 31 21 24 26 Z"
+        fill="var(--hero-solid)"
       />
-      <circle cx="20" cy="32" r="10" fill="none" stroke="var(--hero-solid)" stroke-width="4" />
-      <circle cx="36" cy="38" r="3" fill="var(--hero-ink)" />
     </template>
 
     <template v-else-if="name === 'elder'">
