@@ -784,8 +784,10 @@ button {
   border-radius: 16px;
   padding: 10px 12px 8px;
   box-shadow: 0 6px 16px rgba(23, 17, 12, 0.18);
-  font-size: 28px;
-  line-height: 1;
+}
+.badge-chip svg {
+  width: 28px;
+  height: 28px;
 }
 .badge-chip span {
   font-family: var(--pixel-mono);
@@ -796,8 +798,11 @@ button {
 }
 @media (max-width: 480px) {
   .badge-chip {
-    font-size: 20px;
     padding: 7px 8px 6px;
+  }
+  .badge-chip svg {
+    width: 20px;
+    height: 20px;
   }
   .badge-chip span {
     font-size: 8px;

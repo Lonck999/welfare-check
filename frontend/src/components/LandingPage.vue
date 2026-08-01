@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import BadgeIcon, { type BadgeIconName } from './BadgeIcon.vue'
 
-const HERO_BADGE_CHIPS = [
-  { glyph: '🏠', label: '租屋補貼' },
-  { glyph: '👶', label: '育兒津貼' },
-  { glyph: '🩺', label: '長照給付' },
-  { glyph: '♿', label: '身心障礙補助' },
-  { glyph: '👴', label: '老人生活津貼' },
-  { glyph: '🎓', label: '助學金' },
+const HERO_BADGE_CHIPS: { icon: BadgeIconName; label: string }[] = [
+  { icon: 'house', label: '租屋補貼' },
+  { icon: 'bottle', label: '育兒津貼' },
+  { icon: 'care', label: '長照給付' },
+  { icon: 'access', label: '身心障礙補助' },
+  { icon: 'elder', label: '老人生活津貼' },
+  { icon: 'grad', label: '助學金' },
 ]
 
 defineEmits<{ start: [] }>()
@@ -68,7 +69,7 @@ onUnmounted(() => {
             class="badge-chip"
             :class="`badge-chip--${i + 1}`"
           >
-            {{ chip.glyph }}
+            <BadgeIcon :name="chip.icon" />
             <span>{{ chip.label }}</span>
           </div>
         </div>
