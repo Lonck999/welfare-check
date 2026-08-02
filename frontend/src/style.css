@@ -58,7 +58,7 @@
   --mono: ui-monospace, Consolas, monospace;
   --pixel-mono: 'IBM Plex Mono', var(--mono);
 
-  font: 17px/150% var(--sans);
+  font: 17px/1.5 var(--sans);
   color-scheme: light;
   color: var(--text);
   background: var(--bg);
@@ -666,10 +666,15 @@ button {
 /* Hero: the illustration runs full width and the headline is absolutely
    positioned over the empty cream sky in its upper-left. The overlay is only
    safe while the copy stays narrower than the illustration's blank area, so
-   below 780px it is swapped for a stacked version instead of shrinking. */
+   below 780px it is swapped for a stacked version instead of shrinking.
+   The negative margin must equal .landing-nav's actual rendered height
+   (18px padding top/bottom + the submit-btn's 39px content box, itself
+   9px padding + 21px line-height at font-size 14px) = 75px, not the logo's
+   36px — the button, not the logo, is the tallest nav child. If nav padding
+   or the button's font-size/padding ever change, recompute this to match. */
 .landing-hero {
   position: relative;
-  margin-top: -68px;
+  margin-top: -75px;
 }
 .landing-hero-img {
   display: block;
