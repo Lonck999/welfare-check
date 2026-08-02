@@ -14,50 +14,52 @@
 }
 
 :root {
-  --text: #6b5d4f;
-  --text-h: #1f160e;
-  --bg: #faf5eb;
-  --border: #e8ddc9;
-  --code-bg: #f5ecdb;
-  --accent: #8a4321;
-  --accent-bg: rgba(138, 67, 33, 0.08);
-  --accent-border: rgba(138, 67, 33, 0.35);
-  --confirmed: #1a7f37;
-  --confirmed-bg: rgba(26, 127, 55, 0.1);
-  --possible: #b3690a;
-  --possible-bg: rgba(179, 105, 10, 0.1);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Cream is deliberately pinned to #f9f5e9 — the exact sampled value of the
+     hero illustration's top-left sky. The full-bleed hero sits directly against
+     the page background, so any drift here shows up as a visible seam. */
+  --bg: #f9f5e9;
+  --surface: #ffffff;
+  --cream-deep: #f2ead9;
+
+  --sage-100: #dfe9d4;
+  --sage-200: #c8dbb8;
+  --sage-500: #7d9b6a;
+  --sage-700: #4f6a41;
+
+  --text: #665b4d;
+  --text-h: #2a2019;
+  --border: #e2dac7;
+  --code-bg: #f2ead9;
+
+  --accent: #4f6a41;
+  --accent-bg: rgba(79, 106, 65, 0.08);
+  --accent-border: rgba(79, 106, 65, 0.4);
+
+  --confirmed: #3b6438;
+  --confirmed-bg: #e2f0e4;
+  --possible: #8a6414;
+  --possible-bg: #faf0d2;
+  --urgent: #97441f;
+  --urgent-bg: #fbe6d8;
+
   --shadow-card:
-    rgba(0, 0, 0, 0.04) 0 1px 2px 0, rgba(0, 0, 0, 0.06) 0 4px 12px -2px;
-  --shadow-btn:
-    rgba(64, 64, 64, 0.12) 0 0 0 1px,
-    rgba(255, 255, 255, 0.24) 0 1px 0 0 inset,
-    rgba(0, 0, 0, 0.25) 0 -0.5px 2px 0 inset,
-    rgba(0, 0, 0, 0.04) 0 2px 8px 0,
-    rgba(0, 0, 0, 0.16) 0 3px 4px 0;
-  --shadow-btn-hover:
-    rgba(64, 64, 64, 0.12) 0 0 0 1px,
-    rgba(255, 255, 255, 0.24) 0 1px 0 0 inset,
-    rgba(0, 0, 0, 0.25) 0 -0.5px 2px 0 inset,
-    rgba(0, 0, 0, 0.06) 0 4px 12px 0,
-    rgba(0, 0, 0, 0.2) 0 4px 6px 0;
+    rgba(42, 32, 25, 0.04) 0 1px 2px 0, rgba(42, 32, 25, 0.06) 0 4px 12px -2px;
+  --shadow-btn: rgba(42, 32, 25, 0.12) 0 2px 6px 0;
+  --shadow-btn-hover: rgba(42, 32, 25, 0.2) 0 5px 14px 0;
   --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* Hero is a deliberately bold, flat, always-warm brand statement — it does not
-     follow the site's light/dark theme switch, so these aren't re-declared below. */
-  --hero-solid: #ee461c;
-  --hero-ink: #17110c;
-  --hero-ink-soft: rgba(23, 17, 12, 0.72);
-  --hero-chip-bg: #fff8ef;
-  --hero-badge-bg: #f3e4c8;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: system-ui, 'PingFang TC', 'Microsoft JhengHei', 'Segoe UI', Roboto, sans-serif;
+  /* Display serif for landing headings. Deliberately NOT loaded from Google
+     Fonts — the privacy policy in LegalNotice.vue promises no third-party
+     tracking, and a webfont request leaks visitor IPs to a third party. Falls
+     back to each OS's bundled CJK serif, so the exact face differs per platform
+     (Songti on macOS, MingLiU on Windows). Self-host a subset if that matters. */
+  --serif: 'Noto Serif TC', 'Source Han Serif TC', 'Songti TC', 'PMingLiU', Georgia, serif;
   --mono: ui-monospace, Consolas, monospace;
   --pixel-mono: 'IBM Plex Mono', var(--mono);
 
   font: 17px/150% var(--sans);
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -66,32 +68,13 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #c9b8a3;
-    --text-h: #f5ebe0;
-    --bg: #1c1712;
-    --border: #3a2f26;
-    --code-bg: #241d16;
-    --accent: #f0ac6b;
-    --accent-bg: rgba(240, 172, 107, 0.15);
-    --accent-border: rgba(240, 172, 107, 0.5);
-    --confirmed: #4ade80;
-    --confirmed-bg: rgba(74, 222, 128, 0.1);
-    --possible: #fbbf24;
-    --possible-bg: rgba(251, 191, 36, 0.12);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-}
-
 * {
   box-sizing: border-box;
 }
 
-
 body {
   margin: 0;
+  background: var(--bg);
 }
 
 h1,
@@ -133,6 +116,13 @@ a {
   padding: 32px 20px 64px;
 }
 
+/* The landing page runs full-bleed (hero image, wave dividers, tinted bands),
+   so it opts out of the reading-width column the form-heavy app uses. */
+.app--landing {
+  max-width: none;
+  padding: 0;
+}
+
 .app-header {
   margin-bottom: 24px;
   text-align: center;
@@ -143,7 +133,7 @@ a {
   padding-top: 16px;
   border-top: 1px solid var(--border);
   font-size: 14px;
-  opacity: 0.8;
+  color: var(--text);
 }
 
 .status-msg {
@@ -153,7 +143,7 @@ a {
 
 .hint {
   font-size: 14px;
-  opacity: 0.8;
+  color: var(--text);
   margin-bottom: 12px;
 }
 
@@ -182,7 +172,7 @@ a {
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text-h);
   min-height: 48px;
   transition: border-color 0.15s var(--ease-standard), box-shadow 0.15s var(--ease-standard);
@@ -205,13 +195,7 @@ a {
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 20px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-}
-
-@media (prefers-color-scheme: dark) {
-  .field select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23bbb' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  }
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f6a41' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
 
 .field.inline {
@@ -284,13 +268,13 @@ button {
 
 .submit-btn {
   align-self: center;
-  background: var(--accent);
-  color: white;
+  background: var(--sage-700);
+  color: #fbfdf8;
   border: none;
-  padding: 12px 32px;
-  border-radius: 10px;
+  padding: 13px 30px;
+  border-radius: 999px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   box-shadow: var(--shadow-btn);
   transition: box-shadow 0.2s var(--ease-standard), transform 0.2s var(--ease-standard);
 }
@@ -307,10 +291,10 @@ button {
 }
 
 .secondary-btn {
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 8px 20px;
+  border-radius: 999px;
   color: var(--text-h);
   min-height: 48px;
   box-shadow: var(--shadow-card);
@@ -318,10 +302,11 @@ button {
 }
 .secondary-btn:hover {
   transform: translateY(-1px);
+  box-shadow: var(--shadow-btn-hover);
 }
 
 .remove-btn {
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 6px 10px;
@@ -334,8 +319,8 @@ button {
 }
 
 .error-box {
-  border: 1px solid var(--possible);
-  background: var(--possible-bg);
+  border: 1px solid var(--urgent);
+  background: var(--urgent-bg);
   color: var(--text-h);
   border-radius: 10px;
   padding: 12px 16px;
@@ -351,6 +336,7 @@ button {
 }
 
 .computed-summary {
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px;
@@ -366,11 +352,13 @@ button {
 }
 
 .benefit-card {
+  background: var(--surface);
   border-radius: 12px;
   padding: 16px 20px;
   margin-bottom: 12px;
   border: 1px solid var(--border);
   border-left-width: 4px;
+  border-radius: 0 12px 12px 0;
   text-align: left;
   box-shadow: var(--shadow-card);
 }
@@ -388,13 +376,13 @@ button {
   font-weight: 500;
 }
 .badge.urgent {
-  background: var(--possible-bg);
-  color: var(--possible);
+  background: var(--urgent-bg);
+  color: var(--urgent);
 }
 
 .agency {
   font-size: 14px;
-  opacity: 0.8;
+  color: var(--text);
 }
 
 .period,
@@ -420,7 +408,7 @@ button {
 }
 
 .empty {
-  opacity: 0.7;
+  color: var(--text);
   font-style: italic;
 }
 
@@ -442,7 +430,7 @@ button {
 
 .data-freshness {
   font-size: 13px;
-  opacity: 0.85;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 14px;
@@ -450,7 +438,7 @@ button {
 }
 
 .verified-date {
-  opacity: 0.7;
+  color: var(--text);
 }
 
 .legal-section {
@@ -490,12 +478,13 @@ button {
 
 .progress {
   font-size: 13px;
-  opacity: 0.7;
+  color: var(--text);
   text-align: center;
   margin-bottom: 0;
 }
 
 .step {
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 24px;
@@ -542,7 +531,6 @@ button {
   margin-top: 8px;
   padding-top: 10px;
   border-top: 1px dashed var(--border);
-  opacity: 0.85;
 }
 
 .member-card {
@@ -571,7 +559,7 @@ button {
 }
 
 .obtain-location {
-  opacity: 0.7;
+  color: var(--text);
   font-size: 13px;
 }
 
@@ -581,6 +569,7 @@ button {
 }
 
 .overview-table {
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px;
@@ -620,7 +609,6 @@ button {
   gap: 8px;
   margin-top: 8px;
   font-size: 13px;
-  opacity: 0.85;
 }
 .pager-btn {
   background: transparent;
@@ -635,199 +623,151 @@ button {
   cursor: not-allowed;
 }
 
-/* ===== 新首頁（LandingPage.vue） ===== */
+/* ===== 首頁（LandingPage.vue） ===== */
 
-/* Deliberately not display:flex — a flex parent silently breaks GSAP ScrollTrigger's
-   pin-spacer padding technique on the pinned .landing-hero child below (Hero3D.vue),
-   since block-level children already stack vertically without needing flex here. */
 .landing {
   display: block;
 }
 
+.landing-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.landing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 18px 28px;
+  position: relative;
+  z-index: 3;
+}
+.landing-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.landing-logo span {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--text-h);
+}
+.landing-nav .submit-btn {
+  padding: 9px 20px;
+  font-size: 14px;
+  align-self: auto;
+}
+
+/* Hero: the illustration runs full width and the headline is absolutely
+   positioned over the empty cream sky in its upper-left. The overlay is only
+   safe while the copy stays narrower than the illustration's blank area, so
+   below 780px it is swapped for a stacked version instead of shrinking. */
 .landing-hero {
   position: relative;
-  overflow: hidden;
-  /* Break out of `.app`'s `max-width: 720px` so the hero spans the full viewport
-     width, not just the readable-width column the rest of the (form-heavy) app
-     intentionally uses. `100vw` is viewport-relative (unlike `100%`, which — since
-     this is a flex container — resolves to a fit-content size around its children,
-     not the 720px containing block, so it never stretches); paired with
-     `calc(50% - 50vw)` margins this re-centers that full-viewport-wide box under
-     the narrow parent. */
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  margin-top: -32px;
-  display: flex;
-  flex-direction: column;
-  /* Left inset matches where text sits in the centered 720px column used by
-     `.app`/`.landing-section` below, so the headline lines up with the body
-     copy instead of hugging the raw screen edge on wide viewports. */
-  padding: 28px 24px 56px max(24px, calc(50vw - 340px));
-  background: var(--hero-solid);
-  color: var(--hero-ink);
+  margin-top: -68px;
 }
-
-.landing-hero-topbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
+.landing-hero-img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
-.landing-hero-tag {
-  background: var(--hero-chip-bg);
-  color: var(--hero-ink);
-  font-family: var(--pixel-mono);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  padding: 6px 14px;
-  border-radius: 999px;
-  white-space: nowrap;
+.landing-hero-copy {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 11% 28px 0;
 }
-
-.landing-hero-main {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 56px;
-  padding-top: 36px;
+.landing-hero-copy-inner {
+  max-width: 42%;
 }
-@media (max-width: 860px) {
-  .landing-hero-main {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 32px;
-    padding-top: 28px;
-  }
+.landing-hero-copy h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(24px, 3.4vw, 50px);
+  line-height: 1.24;
+  margin-bottom: 14px;
 }
-
-.landing-hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 560px;
+.landing-hero-copy .landing-lede {
+  font-size: clamp(11px, 1.15vw, 16px);
+  margin: 0 0 20px;
+  color: var(--text-h);
 }
-.landing-hero-arrow {
-  font-size: 14px;
-  letter-spacing: 0.3em;
-  color: var(--hero-ink-soft);
-  margin: 0 0 12px;
-}
-.landing-hero-content h1 {
-  font-size: 56px;
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: var(--hero-ink);
-  margin: 0 0 16px;
-}
-@media (max-width: 640px) {
-  .landing-hero-content h1 {
-    font-size: 38px;
-  }
-}
-.landing-hero-content p {
-  font-size: 17px;
-  color: var(--hero-ink-soft);
-  margin: 0 0 24px;
-}
-.landing-hero-content .submit-btn {
-  background: var(--hero-ink);
-  color: var(--hero-chip-bg);
-  box-shadow: none;
-}
-.landing-hero-content .submit-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(23, 17, 12, 0.25);
-}
-.landing-cta {
-  font-size: 17px;
+.landing-hero-copy .submit-btn {
+  align-self: auto;
+  padding: clamp(7px, 0.9vw, 13px) clamp(14px, 2vw, 30px);
+  font-size: clamp(11px, 1.15vw, 16px);
 }
 .landing-microcopy {
-  margin-top: 14px;
-  font-size: 13px;
+  margin-top: 12px;
   font-family: var(--pixel-mono);
-  color: var(--hero-ink-soft);
-  letter-spacing: 0.02em;
+  font-size: clamp(9px, 0.85vw, 12px);
+  color: var(--text);
 }
 
-.landing-hero-badge {
-  position: relative;
-  flex-shrink: 0;
-  width: 340px;
-  height: 340px;
-  border-radius: 50%;
-  background: var(--hero-badge-bg);
+.landing-hero-stacked {
+  display: none;
+  padding: 10px 28px 30px;
+  max-width: 1040px;
+  margin: 0 auto;
 }
-@media (max-width: 860px) {
-  .landing-hero-badge {
-    width: 260px;
-    height: 260px;
-    align-self: center;
-    margin-top: 8px;
-  }
+.landing-hero-stacked h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 1.26;
+  margin-bottom: 12px;
 }
-@media (max-width: 480px) {
-  .landing-hero-badge {
-    width: 200px;
-    height: 200px;
-  }
+.landing-hero-stacked .submit-btn {
+  align-self: auto;
 }
 
-.badge-chip {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  background: var(--hero-chip-bg);
-  border-radius: 16px;
-  padding: 10px 12px 8px;
-  box-shadow: 0 6px 16px rgba(23, 17, 12, 0.18);
-}
-.badge-chip svg {
-  width: 28px;
-  height: 28px;
-}
-.badge-chip span {
-  font-family: var(--pixel-mono);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--hero-ink);
-  white-space: nowrap;
-}
-@media (max-width: 480px) {
-  .badge-chip {
-    padding: 7px 8px 6px;
+@media (max-width: 780px) {
+  .landing-hero {
+    margin-top: 0;
   }
-  .badge-chip svg {
-    width: 20px;
-    height: 20px;
+  .landing-hero-copy {
+    display: none;
   }
-  .badge-chip span {
-    font-size: 8px;
+  .landing-hero-stacked {
+    display: block;
   }
 }
 
-.badge-chip--1 { top: 8%; left: 40%; transform: translate(-50%, -50%) rotate(-6deg); }
-.badge-chip--2 { top: 4%; left: 76%; transform: translate(-50%, -50%) rotate(5deg); }
-.badge-chip--3 { top: 42%; left: 4%; transform: translate(-50%, -50%) rotate(-4deg); }
-.badge-chip--4 { top: 46%; left: 74%; transform: translate(-50%, -50%) rotate(7deg); }
-.badge-chip--5 { top: 82%; left: 24%; transform: translate(-50%, -50%) rotate(-8deg); }
-.badge-chip--6 { top: 80%; left: 62%; transform: translate(-50%, -50%) rotate(4deg); }
+.landing-band-sage {
+  background: var(--sage-100);
+}
+.landing-band-deep {
+  background: var(--sage-500);
+  color: #f4f8f0;
+}
+.landing-band-deep h2,
+.landing-band-deep h3 {
+  color: #fbfdf8;
+}
+
+.landing-wave {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: -1px;
+  margin-bottom: -1px;
+}
 
 .landing-section {
-  max-width: 720px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 56px 0;
-  border-bottom: 1px solid var(--border);
-}
-.landing-section:last-of-type {
-  border-bottom: none;
+  padding: 46px 0 54px;
 }
 .landing-section h2 {
-  font-size: 24px;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 36px;
   margin-bottom: 14px;
 }
 .landing-section .landing-eyebrow {
@@ -835,28 +775,150 @@ button {
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  opacity: 0.6;
+  color: var(--sage-700);
   margin-bottom: 8px;
 }
 .landing-section p {
   font-size: 16px;
-  line-height: 1.7;
+  line-height: 1.8;
+  max-width: 480px;
 }
 .landing-section ol,
 .landing-section ul {
   padding-left: 22px;
-  line-height: 1.8;
+  line-height: 1.9;
+  max-width: 560px;
 }
 
-.image-placeholder {
-  margin-top: 20px;
-  border: 1px dashed var(--border);
-  border-radius: 12px;
-  padding: 32px;
+.landing-about {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+.landing-about svg {
+  width: 100%;
+  height: auto;
+}
+
+.landing-cats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  margin-top: 30px;
+}
+.landing-cat {
   text-align: center;
+}
+.landing-cat-disc {
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.landing-cat-disc svg {
+  width: 60px;
+  height: 60px;
+}
+.landing-cat-label {
+  font-size: 15px;
+  color: var(--text-h);
+  font-weight: 500;
+}
+.landing-cat-sub {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.landing-preview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 24px;
+}
+.landing-pcard {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+.landing-pcard h3 {
+  font-size: 15px;
+  margin-bottom: 8px;
+  color: var(--text-h);
+  display: block;
+}
+.landing-pcard p {
   font-size: 13px;
-  opacity: 0.55;
-  background: var(--code-bg);
+  margin: 0;
+  color: var(--text);
+  line-height: 1.7;
+}
+.landing-tagline {
+  display: inline-block;
+  font-size: 11px;
+  font-family: var(--pixel-mono);
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+.landing-tagline.confirmed {
+  background: var(--confirmed-bg);
+  color: var(--confirmed);
+}
+.landing-tagline.possible {
+  background: var(--possible-bg);
+  color: var(--possible);
+}
+.landing-tagline.urgent {
+  background: var(--urgent-bg);
+  color: var(--urgent);
+}
+
+.landing-footer {
+  background: var(--cream-deep);
+  padding: 38px 0 28px;
+  font-size: 13px;
+}
+.landing-footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 24px;
+}
+.landing-footer-grid h4 {
+  font-size: 13px;
+  color: var(--text-h);
+  margin: 0 0 10px;
+}
+.landing-footer-grid p {
+  margin: 0 0 6px;
+}
+
+@media (max-width: 780px) {
+  .landing-about,
+  .landing-footer-grid {
+    grid-template-columns: 1fr;
+  }
+  .landing-cats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .landing-preview {
+    grid-template-columns: 1fr;
+  }
+  .landing-section h2 {
+    font-size: 28px;
+  }
+  .landing-nav .nav-links {
+    display: none;
+  }
+}
+
+.landing-nav .nav-links {
+  display: flex;
+  gap: 24px;
+  font-size: 14px;
 }
 
 .reveal {
@@ -875,6 +937,14 @@ button {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    animation: none;
   }
 }
 

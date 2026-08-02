@@ -1,58 +1,47 @@
 <script setup lang="ts">
-export type BadgeIconName = 'house' | 'bottle' | 'care' | 'support' | 'elder' | 'grad'
+/**
+ * 首頁「涵蓋哪些面向」的分類圖示。
+ * 刻意畫成無描邊的實心色塊，與主視覺插畫（扁平、無外框）同一套語彙；
+ * 先前的細線描邊版本跟新主圖放在同一頁會互相打架。
+ */
+export type BadgeIconName = 'housing' | 'care' | 'family' | 'study'
 
 defineProps<{ name: BadgeIconName }>()
 </script>
 
 <template>
-  <svg viewBox="0 0 48 48" class="badge-icon" aria-hidden="true">
-    <template v-if="name === 'house'">
-      <path d="M24 6 L42 22 L6 22 Z" fill="var(--hero-ink)" />
-      <rect x="10" y="22" width="28" height="18" rx="2" fill="var(--hero-solid)" />
-      <rect x="21" y="30" width="6" height="10" fill="var(--hero-ink)" />
-      <circle cx="31" cy="29" r="3" fill="var(--hero-chip-bg)" />
-    </template>
-
-    <template v-else-if="name === 'bottle'">
-      <path d="M22 6 Q24 4 26 6 L26 12 L22 12 Z" fill="var(--hero-ink)" />
-      <rect x="18" y="12" width="12" height="5" rx="2" fill="var(--hero-ink)" />
-      <rect x="17" y="17" width="14" height="25" rx="4" fill="var(--hero-solid)" />
-      <rect x="17" y="27" width="14" height="10" fill="var(--hero-chip-bg)" opacity="0.5" />
+  <svg viewBox="0 0 64 64" class="badge-icon" aria-hidden="true">
+    <template v-if="name === 'housing'">
+      <path d="M32 11 L56 32 h-7 v21 H15 V32 H8 Z" fill="var(--sage-500)" />
+      <rect x="26" y="37" width="12" height="16" rx="2" fill="var(--bg)" />
     </template>
 
     <template v-else-if="name === 'care'">
       <path
-        d="M24 40 C10 30 6 20 12 14 C16 10 22 12 24 18 C26 12 32 10 36 14 C42 20 38 30 24 40 Z"
-        fill="var(--hero-solid)"
+        d="M32 52C19 43 10 36 10 25a11 11 0 0 1 22-6 11 11 0 0 1 22 6c0 11-9 18-22 27z"
+        fill="var(--sage-500)"
       />
-      <rect x="21" y="19" width="6" height="16" fill="var(--hero-chip-bg)" />
-      <rect x="15" y="25" width="18" height="6" fill="var(--hero-chip-bg)" />
-    </template>
-
-    <template v-else-if="name === 'support'">
-      <path d="M9 33 Q9 44 24 44 Q39 44 39 33 L39 29 L9 29 Z" fill="var(--hero-ink)" />
-      <circle cx="13" cy="29" r="3" fill="var(--hero-ink)" />
-      <circle cx="19.5" cy="27" r="3.3" fill="var(--hero-ink)" />
-      <circle cx="28.5" cy="27" r="3.3" fill="var(--hero-ink)" />
-      <circle cx="35" cy="29" r="3" fill="var(--hero-ink)" />
       <path
-        d="M24 26 C17 21 14 16 18 12.5 C20.5 10.3 24 12 24 15.5 C24 12 27.5 10.3 30 12.5 C34 16 31 21 24 26 Z"
-        fill="var(--hero-solid)"
+        d="M17 27h9l4-8 5 15 4-7h8"
+        fill="none"
+        stroke="var(--bg)"
+        stroke-width="3.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       />
     </template>
 
-    <template v-else-if="name === 'elder'">
-      <circle cx="22" cy="12" r="7" fill="var(--hero-ink)" />
-      <path d="M22 19 Q14 22 14 34 L14 42 L30 42 L30 34 Q30 22 22 19 Z" fill="var(--hero-solid)" />
-      <line x1="32" y1="24" x2="38" y2="42" stroke="var(--hero-ink)" stroke-width="3" stroke-linecap="round" />
-      <circle cx="32" cy="22" r="3" fill="var(--hero-ink)" />
+    <template v-else-if="name === 'family'">
+      <circle cx="24" cy="21" r="10" fill="var(--sage-500)" />
+      <circle cx="45" cy="26" r="7.5" fill="var(--sage-200)" />
+      <path d="M8 53c0-10 7-16 16-16s16 6 16 16z" fill="var(--sage-500)" />
+      <path d="M42 53c0-8 4-13 11-13 4 0 7 2 7 6v7z" fill="var(--sage-200)" />
     </template>
 
-    <template v-else-if="name === 'grad'">
-      <path d="M24 8 L44 18 L24 28 L4 18 Z" fill="var(--hero-ink)" />
-      <path d="M14 22 L14 30 Q24 36 34 30 L34 22 L24 27 Z" fill="var(--hero-solid)" />
-      <line x1="40" y1="19" x2="40" y2="30" stroke="var(--hero-ink)" stroke-width="2" />
-      <circle cx="40" cy="32" r="2.5" fill="var(--hero-ink)" />
+    <template v-else-if="name === 'study'">
+      <path d="M6 25 L32 13 L58 25 L32 37 Z" fill="var(--sage-500)" />
+      <path d="M18 31v13c0 4 6 7 14 7s14-3 14-7V31l-14 6z" fill="var(--sage-200)" />
+      <path d="M57 26v15" stroke="var(--sage-500)" stroke-width="3.6" stroke-linecap="round" />
     </template>
   </svg>
 </template>

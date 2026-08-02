@@ -68,20 +68,22 @@ export function buildReportHtml(result: CheckResponse): string {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台灣社會福利補助查詢結果</title>
 <style>
-  body { font-family: system-ui, 'Segoe UI', Roboto, sans-serif; max-width: 720px; margin: 0 auto; padding: 32px 20px; color: #222; }
+  body { font-family: system-ui, 'PingFang TC', 'Microsoft JhengHei', 'Segoe UI', Roboto, sans-serif; max-width: 720px; margin: 0 auto; padding: 32px 20px; color: #665b4d; background: #f9f5e9; }
+  h1, h2, h3 { color: #2a2019; }
   h1 { font-size: 24px; }
   h2 { font-size: 19px; margin-top: 32px; }
   h3 { font-size: 16px; display: flex; align-items: center; gap: 8px; }
-  .card { border: 1px solid #ddd; border-left-width: 4px; border-radius: 8px; padding: 14px 18px; margin-bottom: 12px; }
-  .card.confirmed { border-left-color: #1a7f37; }
-  .card.possible { border-left-color: #b3690a; }
+  a { color: #4f6a41; overflow-wrap: anywhere; }
+  .card { background: #fff; border: 1px solid #e2dac7; border-left-width: 4px; border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 12px; }
+  .card.confirmed { border-left-color: #3b6438; }
+  .card.possible { border-left-color: #8a6414; }
   .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; }
-  .badge.confirmed { background: rgba(26,127,55,0.12); color: #1a7f37; }
-  .badge.possible { background: rgba(179,105,10,0.12); color: #b3690a; }
-  .badge.urgent { background: rgba(179,105,10,0.12); color: #b3690a; }
-  .missing { color: #b3690a; }
-  .source, .notes, .agency { font-size: 13px; opacity: 0.85; }
-  .disclaimer { font-size: 13px; opacity: 0.8; border-top: 1px solid #ddd; margin-top: 32px; padding-top: 16px; }
+  .badge.confirmed { background: #e2f0e4; color: #3b6438; }
+  .badge.possible { background: #faf0d2; color: #8a6414; }
+  .badge.urgent { background: #fbe6d8; color: #97441f; }
+  .missing { color: #8a6414; }
+  .source, .notes, .agency { font-size: 13px; color: #7a7062; }
+  .disclaimer { font-size: 13px; color: #7a7062; border-top: 1px solid #e2dac7; margin-top: 32px; padding-top: 16px; }
 </style>
 </head>
 <body>
