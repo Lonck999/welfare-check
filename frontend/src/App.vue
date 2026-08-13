@@ -55,7 +55,7 @@ onMounted(loadOptions)
 </script>
 
 <template>
-  <main class="app">
+  <main class="app" :class="{ 'app--landing': step === 'landing' }">
     <LandingPage v-if="step === 'landing'" @start="handleStart" />
 
     <template v-else>
