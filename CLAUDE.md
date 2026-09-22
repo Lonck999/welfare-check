@@ -2,6 +2,52 @@
 
 本文件是給 Claude Code 在維護 `welfare-check` 這個 Skill 專案時遵守的規則，非使用者問卷內容。
 
+## 🔴 先讓它跑起來（2026-09-22 新增）
+
+這個專案停過 40 天，重新啟動時**花掉的時間幾乎全在摸索環境**，不是寫功能。
+所以環境建置已經腳本化，**不要再手動摸索一次**：
+
+```bash
+bash scripts/dev-setup.sh          # 從零：裝 Postgres → 建庫 → 推 schema → 灌資料 → 裝依賴
+```
+
+然後開兩個終端機：
+
+```bash
+cd backend  && set -a && . ./.env && set +a && npm run dev   # :3000
+cd frontend && npm run dev                                   # :5173
+```
+
+🔴 **驗證「真的可以用」不是看首頁長得對**：
+
+```bash
+node scripts/verify-flow.mjs       # 自動走完 16 題問卷，斷言結果頁真的出得來
+```
+
+⚠️ 首頁截圖漂亮、第一題出得來、`curl /api/check` 打得通 ——
+這三件事全部成立的情況下，中間某一題卡住仍然完全可能，
+而那個症狀在前面三個檢查裡**都看不到**。
+
+### ⚠️ `.env.example` 會誤導
+
+它寫的是 Neon（雲端 Postgres），讓人以為要先去開帳號。
+但 `src/db/client.ts` 用的是 `drizzle-orm/node-postgres` + `pg` 這個**標準驅動**，
+不是 Neon 專用驅動 —— **本機 Postgres 完全可以**。
+
+### 🔴 驗證腳本自己的兩個坑（都是實測踩到的）
+
+1. **「不在問卷畫面」不可以當成「進到結果頁」**
+   把 backend 停掉之後前端跳到空的錯誤畫面，`stillForm === false` 照樣成立 ——
+   那條斷言在後端全掛時仍然是綠的。
+   判準要問「結果頁該有的東西在不在」（`預審計算結果`），不是「舊畫面走掉了沒」。
+
+2. **`process.exitCode = 1` 寫在 `finally` 前面會被吃掉**
+   `finally` 裡的 `chrome.kill` 與 `rm` 會覆蓋它，
+   症狀是「印了一堆 ❌ FAIL 但 rc=0」，接進 CI 等於沒驗。
+   → 用旗標，在 `finally` **之後**才 `process.exit(1)`。
+
+✅ 雙向驗證過：正常 7/7 rc=0；backend 停掉 6/7 失敗 rc=1。
+
 ## 核心檔案
 
 - `skills/welfare-check/SKILL.md`：本體，問卷題目（第一步）＋搜索清單（第三步）都在這裡
