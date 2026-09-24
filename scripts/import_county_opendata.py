@@ -31,6 +31,12 @@ import psycopg2
 # 🔴 來源清單：每個縣市的「社會福利/救助項目」開放資料下載網址。
 #    ⚠️ 必須是**資料下載網址**，不是 data.gov.tw 的頁面網址
 #    （那頁是 JS 渲染的，urllib 抓不到連結）。
+#
+# 🔴 實測 2026-09-25：各縣市格式分三種，不可假設統一
+#    ① 政府標準中文欄位（臺南47/嘉義22/臺中10/新竹市6/南投6）
+#    ② 英文欄位（新北150、桃園26）—— 🔴 **資料量與品質反而最好**，
+#       而且**跨局處**（桃園那筆是勞動局的），正好補社會救助以外的缺口
+#    ③ 不可用（高雄是服務館地點、彰化是 big5 亂碼統計表）
 SOURCES: dict[str, dict[str, str]] = {
     "臺南市": {
         "url": "https://soa.tainan.gov.tw/Api/Service/Get/"
@@ -52,23 +58,85 @@ SOURCES: dict[str, dict[str, str]] = {
         "dataset": "https://data.gov.tw/dataset/129839",
         "agency": "臺北市政府社會局",
     },
+    "新北市": {
+        "url": "https://data.ntpc.gov.tw/api/datasets/73c24d1c-e1f0-44ce-8a31-cf835ef37e74/csv/file",
+        "dataset": "https://data.gov.tw/dataset/122990",
+        "agency": "新北市政府",
+        "county": "新北市",
+    },
+    "桃園市": {
+        "url": "https://opendata.tycg.gov.tw/api/dataset/b20a8017-2736-448e-86e4-4032211073d7/resource/80eecbec-9112-4f3b-9b7d-20ace73eb7b3/download",
+        "dataset": "https://data.gov.tw/dataset/26032",
+        "agency": "桃園市政府",
+        "county": "桃園市",
+    },
+    "臺中市-112084": {
+        "url": "https://newdatacenter.taichung.gov.tw/api/v1/no-auth/resource.download?rid=fc6751a9-a3d2-4e74-972a-2c263c6a888f",
+        "dataset": "https://data.gov.tw/dataset/112084",
+        "agency": "臺中市政府社會局",
+        "county": "臺中市",
+    },
+    "臺中市-138591": {
+        "url": "https://newdatacenter.taichung.gov.tw/api/v1/no-auth/resource.download?rid=e6585130-4cd7-48e2-9e1d-f93943e70adf",
+        "dataset": "https://data.gov.tw/dataset/138591",
+        "agency": "臺中市政府社會局",
+        "county": "臺中市",
+    },
+    "臺中市-138588": {
+        "url": "https://newdatacenter.taichung.gov.tw/api/v1/no-auth/resource.download?rid=f92a8b89-b81e-4c29-9714-57c4009d3d82",
+        "dataset": "https://data.gov.tw/dataset/138588",
+        "agency": "臺中市政府社會局",
+        "county": "臺中市",
+    },
+    "臺中市-112090": {
+        "url": "https://newdatacenter.taichung.gov.tw/api/v1/no-auth/resource.download?rid=cff9fe99-541f-49d8-b265-575e3ae07a51",
+        "dataset": "https://data.gov.tw/dataset/112090",
+        "agency": "臺中市政府社會局",
+        "county": "臺中市",
+    },
+    "臺中市-138589": {
+        "url": "https://newdatacenter.taichung.gov.tw/api/v1/no-auth/resource.download?rid=d3cbca31-6663-431d-9314-6b79c0c10a90",
+        "dataset": "https://data.gov.tw/dataset/138589",
+        "agency": "臺中市政府社會局",
+        "county": "臺中市",
+    },
+    "新竹市": {
+        "url": "https://odws.hccg.gov.tw/001/Upload/25/opendataback/9059/420/eda63d81-54b3-4ad9-940e-81a973cc3f66.csv",
+        "dataset": "https://data.gov.tw/dataset/109908",
+        "agency": "新竹市政府社會處",
+        "county": "新竹市",
+    },
+    "南投縣": {
+        "url": "https://data.nantou.gov.tw/dataset/ad7db6e6-5483-4fd9-80d6-4db1d21ba696/resource/6a8a9e0a-4942-4fa6-a87a-f0c1945a05d0/download/20250523115545.csv",
+        "dataset": "https://data.gov.tw/dataset/112567",
+        "agency": "南投縣政府社會及勞動局",
+        "county": "南投縣",
+    },
 }
 
 # 欄位別名：各縣市欄位名有小差異（臺北 14 欄、嘉義/臺南 17 欄）
+# 🔴 新北/桃園用英文欄位，而且**內容比中文那批更完整**（新北 150 筆、
+#    桃園 26 筆且跨局處）—— 不支援它們等於丟掉最好的資料。
 ALIAS: dict[str, tuple[str, ...]] = {
-    "name": ("補助名稱",),
+    "name": ("補助名稱", "name", "policyName", "\ufeff補助名稱", "\ufeff編號"),
     "age_min": ("補助對象年齡下限",),
     "age_max": ("補助對象年齡上限",),
     "county_cond": ("設籍條件",),
     "income_max": ("收入條件每人每月上限", "收入條件每人每月上限金額"),
     "movable_max": ("動產條件每人上限",),
     "realty_max": ("不動產條件每戶上限",),
-    "other": ("其他條件",),
-    "docs": ("應備文件",),
-    "office": ("收件洽辦單位",),
+    "other": ("其他條件", "審核條件", "eligibilityCriteria", "cont3"),
+    "docs": ("應備文件", "cont2"),
+    "office": ("收件洽辦單位", "agencyName", "cont1"),
     "phone": ("聯絡電話", "聯繫方式"),
     "ext": ("分機",),
-    "link": ("詳細資訊[連結]", "詳細資訊網址", "詳細資訊"),
+    "link": ("詳細資訊[連結]", "詳細資訊網址", "詳細資訊", "sourcePolicyUrl",
+             "competentAuthorityUrl"),
+    # 🔴 英文格式才有的欄位 —— 內容比中文那批豐富，不可丟掉
+    "desc": ("service_desc", "policyDescription", "補助內容"),
+    "period": ("cont5", "applicationPeriod"),
+    "category": ("policyCategory", "welfareIdentity"),
+    "method": ("applicationMethod", "cont4"),
 }
 IDENTITY_KEYS = ("身份1", "身份2", "身份3", "身份")
 
@@ -132,8 +200,11 @@ def main() -> int:
     args = ap.parse_args()
 
     src = SOURCES[args.county]
+    # 🔴 key 可能是「臺中市-112084」（同縣市多個資料集），
+    #    真正的縣市名要從 src["county"] 取，取不到才退回 key。
+    county = src.get("county", args.county)
     rows = fetch(src["url"])
-    print(f"{args.county}：抓到 {len(rows)} 筆")
+    print(f"{args.county}（縣市={county}）：抓到 {len(rows)} 筆")
 
     # 🔴 來源自己就有重複（實測臺南「兒童與少年未來教育及發展帳戶」
     #    出現兩次）—— 不去重會在資料庫裡留下兩筆一模一樣的補助。
@@ -156,7 +227,7 @@ def main() -> int:
     cur = conn.cursor()
 
     # 🔴 與現有資料比對：同縣市同名視為已存在
-    cur.execute("SELECT name FROM benefits WHERE county = %s", (args.county,))
+    cur.execute("SELECT name FROM benefits WHERE county = %s", (county,))
     existing = {re.sub(r"\s+", "", n) for (n,) in cur.fetchall()}
 
     new, collide = [], []
@@ -173,7 +244,7 @@ def main() -> int:
 
     print("\n  新增樣本（前 3 筆）：")
     for r in new[:3]:
-        e = build_eligibility(r, args.county)
+        e = build_eligibility(r, county)
         print(f"    · {pick(r, 'name')[:32]}")
         print(f"      資格 {json.dumps(e, ensure_ascii=False)[:96]}")
         print(f"      洽辦 {pick(r, 'office')[:28]}　"
@@ -186,7 +257,7 @@ def main() -> int:
     ins = 0
     for r in new:
         nm = pick(r, "name")
-        elig = build_eligibility(r, args.county)
+        elig = build_eligibility(r, county)
         link = pick(r, "link") or src["dataset"]
         phone = pick(r, "phone")
         if ext := pick(r, "ext"):
@@ -205,11 +276,14 @@ def main() -> int:
                     CURRENT_DATE, true, 'unknown')
             RETURNING id""",
             (nm, src["agency"], args.county,
-             f"{args.county}{nm}。"
-             + (f"其他條件：{pick(r, 'other')[:300]}"
+             # 🔴 優先用來源自己的描述（新北/桃園有完整說明），
+             #    沒有才退回「縣市+名稱」這種只有骨架的字串
+             (pick(r, "desc")[:1500] if pick(r, "desc")
+              else f"{county}{nm}。")
+             + (f" 其他條件：{pick(r, 'other')[:400]}"
                 if pick(r, "other") else ""),
-             "現金與生活補助類",
-             "",                       # 🔴 來源沒有期限欄位 → 留空，不猜
+             pick(r, "category")[:80] or "現金與生活補助類",
+             pick(r, "period")[:200],   # 🔴 沒有就留空，不猜
              json.dumps(elig, ensure_ascii=False), link, excerpt))
         bid = cur.fetchone()[0]
         ins += 1
