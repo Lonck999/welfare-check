@@ -6,6 +6,8 @@ const props = defineProps<{ options: FormOptions }>()
 const emit = defineEmits<{ submit: [answers: QuestionnaireAnswers] }>()
 
 const answers = reactive<QuestionnaireAnswers>({
+  // ⚠️ 空陣列＝「只找自己」，不是「還沒回答」
+  applyForRoles: [],
   birthDate: '',
   county: '',
   district: '',
@@ -46,11 +48,17 @@ const answers = reactive<QuestionnaireAnswers>({
 const STEP_SKIP_NO_MEMBERS = new Set(['membersRegistration', 'memberHealth'])
 const NON_ACTIVE_EMPLOYMENT = new Set(['unemployed_seeking', 'unemployed_not_seeking', 'retired', 'homemaker'])
 
+// 🔴 「要不要幫家人申請」的答案（Lonck 2026-09-24 定的問法）
+//    先問有沒有，答「有」才出現對象選擇 —— 答「沒有」就只找自身的。
+const wantsFamilyBenefits = ref(false)
+
 const ALL_STEPS = [
   'birthDate',
   'location',
   'gender',
   'marital',
+  'applyFor',
+  'applyForWho',
   'pregnancy',
   'members',
   'membersRegistration',
@@ -70,8 +78,17 @@ const ALL_STEPS = [
 function isStepVisible(step: (typeof ALL_STEPS)[number]): boolean {
   if (STEP_SKIP_NO_MEMBERS.has(step) && answers.householdMembers.length === 0) return false
   if (step === 'workCounty' && NON_ACTIVE_EMPLOYMENT.has(answers.employmentStatus)) return false
+  // 🔴 答「只找自己」就不追問對象（Lonck 2026-09-24：
+  //    「沒有只想找自身就只給自身」）
+  if (step === 'applyForWho' && !wantsFamilyBenefits.value) return false
   return true
 }
+
+// 🔴 從「也想幫家人找」改回「只找我自己的」時必須清空已選對象 ——
+//    否則舊值留著，使用者以為改掉了，系統卻還在找家人的福利（靜默錯誤）。
+watch(wantsFamilyBenefits, (want) => {
+  if (!want) answers.applyForRoles = []
+})
 
 const visibleSteps = computed(() => ALL_STEPS.filter(isStepVisible))
 const stepIndex = ref(0)
@@ -343,6 +360,40 @@ const noneStudentAndChild = computed({
         <label><input v-model="answers.maritalStatus" type="radio" value="divorced" /> 離婚</label>
         <label><input v-model="answers.maritalStatus" type="radio" value="widowed" /> 喪偶</label>
       </fieldset>
+    </section>
+
+    <section v-if="currentStep === 'applyFor'" class="step">
+      <h2>這次想幫誰找福利？</h2>
+      <p class="hint">
+        很多補助除了本人，配偶或家人也能申請。先確認範圍，後面才知道要不要多問幾題。
+      </p>
+      <div class="radio-row">
+        <label>
+          <input v-model="wantsFamilyBenefits" type="radio" :value="false" />
+          只找我自己的
+        </label>
+        <label>
+          <input v-model="wantsFamilyBenefits" type="radio" :value="true" />
+          也想幫家人找
+        </label>
+      </div>
+    </section>
+
+    <section v-if="currentStep === 'applyForWho'" class="step">
+      <h2>想幫誰申請？</h2>
+      <p class="hint">可複選。你自己的福利一定會找，這裡只問「額外」要幫誰。</p>
+      <label class="checkbox-row">
+        <input v-model="answers.applyForRoles" type="checkbox" value="spouse" />
+        配偶
+      </label>
+      <label class="checkbox-row">
+        <input v-model="answers.applyForRoles" type="checkbox" value="household" />
+        同住家人（同一戶籍或同住）
+      </label>
+      <label class="checkbox-row">
+        <input v-model="answers.applyForRoles" type="checkbox" value="family" />
+        未同住的家人（父母、子女等）
+      </label>
     </section>
 
     <section v-if="currentStep === 'pregnancy'" class="step">

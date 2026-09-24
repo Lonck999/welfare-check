@@ -42,8 +42,19 @@ export interface NonCohabitingFamilyMember {
   isSinglePersonHousehold: boolean
 }
 
+/**
+ * 🔴 申請對象（P4 排序：self > household > spouse > family）
+ *
+ * ⚠️ 必須與前端 `types.ts` 的 `ApplyForRole`、以及資料庫
+ *    `benefit_applicants.role` 三邊一致 —— 任何一邊改字串，
+ *    比對就會靜默查不到（不會報錯，只會少給補助）。
+ */
+export type ApplyForRole = 'spouse' | 'household' | 'family'
+
 /** 完整問卷答案，對應 SKILL.md 第 1～14b 題 */
 export interface QuestionnaireAnswers {
+  /** 這次額外想幫誰找。⚠️ 空陣列＝只找本人，不是未回答。 */
+  applyForRoles?: ApplyForRole[]
   // Q1
   birthDate: string
   // Q2

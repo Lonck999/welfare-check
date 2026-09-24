@@ -28,6 +28,21 @@ function validateAnswers(body: unknown): QuestionnaireAnswers {
   if (b.workCounty !== undefined && b.workCounty !== '' && !ALL_22_COUNTIES.includes(b.workCounty as string)) {
     throw new Error('工作地點縣市（第 10a 題）不在 22 縣市清單內')
   }
+  // 🔴 applyForRoles（P4）：只收三種合法值。
+  //    ⚠️ 不可放行未知字串 —— 比對時查不到對應的 benefit_applicants.role，
+  //    使用者會以為系統幫他找了家人的福利，實際上一筆都沒比對到（靜默）。
+  if (b.applyForRoles !== undefined) {
+    if (!Array.isArray(b.applyForRoles)) {
+      throw new Error('申請對象（applyForRoles）必須是陣列')
+    }
+    const VALID_ROLES = ['spouse', 'household', 'family']
+    for (const r of b.applyForRoles) {
+      if (!VALID_ROLES.includes(r as string)) {
+        throw new Error(`申請對象不合法：${String(r)}（僅接受 ${VALID_ROLES.join('／')}）`)
+      }
+    }
+  }
+
   if (!['own', 'rent', 'borrow', 'other'].includes(b.housingStatus as string)) {
     throw new Error('住宅狀況（第 7 題）必填')
   }

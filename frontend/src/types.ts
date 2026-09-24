@@ -39,7 +39,26 @@ export interface NonCohabitingFamilyMember {
   isSinglePersonHousehold: boolean
 }
 
+/**
+ * 🔴 申請對象（P4 排序：self > household > spouse > family）
+ *
+ * ⚠️ 與 `benefit_applicants.role` 的值一一對應，**兩邊不可分岔**：
+ *    問卷選了 'spouse'，比對時才找得到 role='spouse' 的補助。
+ */
+export type ApplyForRole = 'spouse' | 'household' | 'family'
+
 export interface QuestionnaireAnswers {
+  /**
+   * 🔴 這次想幫誰找福利（P4：自身 > 配偶 > 家人）
+   *
+   * Lonck 2026-09-24 定的問法：
+   *   先問「有沒有要幫家人申請」——
+   *   · 答「沒有」→ 只找自身的，不再追問
+   *   · 答「有」  → 才出現對象選擇（配偶／同住家人／未同住家人）
+   *
+   * ⚠️ 空陣列代表「只找自己」，不是「還沒回答」。
+   */
+  applyForRoles: ApplyForRole[]
   birthDate: string
   county: string
   district?: string
