@@ -1,0 +1,190 @@
+{
+  "ngo_from_mohw_pdf": [
+    {
+      "idx": 1,
+      "org": "財團法人中華民國佛教慈濟慈善事業基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html",
+      "manual_fix": "PDF 版面導致解析失敗，人工核對原文補上"
+    },
+    {
+      "idx": 2,
+      "org": "財團法人法鼓山社會福利慈善事業基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 3,
+      "org": "財團法人佛光山慈悲社會福利基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 4,
+      "org": "財團法人全聯慶祥慈善事業基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 5,
+      "org": "財團法人台北行天宮",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 6,
+      "org": "富邦慈善基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 7,
+      "org": "財團法人兆豐慈善基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 8,
+      "org": "財團法人萬海航運社會福利慈善事業基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html",
+      "manual_fix": "PDF 版面導致解析失敗，人工核對原文補上"
+    },
+    {
+      "idx": 9,
+      "org": "社團法人中華基督教救助協會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 10,
+      "org": "財團法人張榮發慈善基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 11,
+      "org": "社團法人台灣公益服務協會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 12,
+      "org": "財團法人臺北市永慶社會福利慈善事業基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 13,
+      "org": "信義公益基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 14,
+      "org": "財團法人台灣省私立統一企業社會福利慈善事業基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 15,
+      "org": "中華民國紅十字會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 16,
+      "org": "財團法人台北市李連來公益基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 17,
+      "org": "財團法人永瑞慈善事業基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 18,
+      "org": "財團法人臺北市傳德慈善基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 19,
+      "org": "財團法人寶佳公益慈善基金會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 20,
+      "org": "社團法人中華佛教善緣慈善會",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    },
+    {
+      "idx": 21,
+      "org": "社團法人台灣公益聯盟",
+      "kind": "民間單位",
+      "source": "衛福部民間單位急難救助資源一覽表",
+      "source_url": "https://www.mohw.gov.tw/dl-99548-d4d74313-ea53-4aa1-98cb-6820ea1a63b8.html"
+    }
+  ],
+  "utilities_and_others": [
+    {
+      "org": "台灣電力公司",
+      "kind": "公營事業",
+      "service": "低收入戶每月用電 110 度以下免收電費；中低收入戶部分優惠",
+      "source": "https://www.mohw.gov.tw/cp-190-226-1.html（洽 1957）",
+      "note": "⚠️ 度數與條件待向台電官方查證，此處為概述"
+    },
+    {
+      "org": "台灣自來水公司",
+      "kind": "公營事業",
+      "service": "低收入戶減免基本水費",
+      "source": "同上",
+      "note": "⚠️ 同上，待查證細節"
+    },
+    {
+      "org": "中華電信",
+      "kind": "公營事業（民營化）",
+      "service": "暖心方案：低收入戶／中低收入戶／身心障礙者寬頻與 MOD 優惠",
+      "source": "https://broadband.hinet.net/Broadband/charge/charge/charge_04.do",
+      "note": "低收/中低收優惠 2 年，期滿憑證可續辦"
+    },
+    {
+      "org": "財團法人法律扶助基金會",
+      "kind": "財團法人",
+      "service": "免費法律諮詢、訴訟代理、文件撰寫",
+      "source": "https://www.laf.org.tw/",
+      "note": "資料庫已收錄"
+    },
+    {
+      "org": "財團法人住宅地震保險基金",
+      "kind": "財團法人",
+      "service": "住宅地震基本保險保費補助",
+      "source": "https://www.treif.org.tw/",
+      "note": "資料庫已收錄"
+    }
+  ]
+}

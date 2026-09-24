@@ -212,7 +212,7 @@ export function buildReportHtml(result: CheckResponse): string {
   ${result.familyMembers.map((m) => renderBenefitGroup(`${m.relationship}（${m.age} 歲，設籍${m.county}）`, m)).join('')}
 
   <div class="disclaimer">
-    <p>本查詢結果僅供參考，實際資格請以各單位最新公告為準。本站資料庫每週更新一次，個別項目可能已有異動。</p>
+    <p>本查詢結果僅供參考，實際資格請以各單位最新公告為準。本站資料庫每月更新一次，個別項目可能已有異動。</p>
     <p>本報告為使用者本機下載留存，網站本身不儲存任何填表資料。</p>
   </div>
 </body>

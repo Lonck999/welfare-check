@@ -80,7 +80,7 @@ function pageCount(list: BenefitResult[]) {
 
     <p class="data-freshness">
       查詢日期：{{ result.generatedAt }}
-      <span v-if="result.oldestVerifiedDate">｜本次結果中最舊的資料查證日期：{{ result.oldestVerifiedDate }}（資料庫每週更新一次，個別項目仍可能已有異動，請以各單位最新公告為準）</span>
+      <span v-if="result.oldestVerifiedDate">｜本次結果中最舊的資料查證日期：{{ result.oldestVerifiedDate }}（資料庫每月更新一次，個別項目仍可能已有異動，請以各單位最新公告為準）</span>
     </p>
 
     <section class="computed-summary">
