@@ -130,11 +130,60 @@ def main() -> int:
           ev > 0 and no_trig / ev <= 0.10, f"缺 trigger {no_trig}/{ev}")
 
     print("\n── ⑥ 既有資料未受損 ──")
+    # 🔴 不可寫死筆數 —— 匯入新來源後必然增加。
+    #    要驗的是「原有的沒被刪」，不是「總數沒變」。
     cur.execute("SELECT count(*) FROM benefits")
-    check("benefits 仍有 499 筆", cur.fetchone()[0] == 499)
+    total_now = cur.fetchone()[0]
+    cur.execute("""SELECT count(*) FROM information_schema.tables
+                    WHERE table_name = 'benefits_bk_before_opendata'""")
+    if cur.fetchone()[0]:
+        cur.execute("""SELECT count(*) FROM benefits_bk_before_opendata b
+                        WHERE NOT EXISTS (SELECT 1 FROM benefits n
+                                           WHERE n.id = b.id)""")
+        lost = cur.fetchone()[0]
+        check("匯入前的資料一筆都沒掉", lost == 0, f"掉了 {lost} 筆")
+    check("benefits 筆數只增不減", total_now >= 499, f"現有 {total_now}")
     cur.execute("""SELECT count(*) FROM benefits
                     WHERE description IS NOT NULL AND length(description) > 50""")
     check("有實質內容的筆數未減少", cur.fetchone()[0] >= 157)
+
+    print("\n── ⑦ 🔴 開放資料匯入品質 ──")
+    cur.execute("""SELECT count(*) FROM benefits
+                    WHERE agency LIKE '%%社會局' OR agency LIKE '%%社會處'""")
+    imported = cur.fetchone()[0]
+    if imported:
+        # 🔴 同縣市同名不可重複 —— 重複執行匯入就會產生
+        cur.execute("""SELECT count(*) FROM (
+                         SELECT county, name FROM benefits
+                          GROUP BY 1,2 HAVING count(*) > 1) x""")
+        dup = cur.fetchone()[0]
+        check("沒有同縣市同名的重複補助", dup == 0, f"重複 {dup} 組")
+
+        # 🔴 source_url 必須是真的網址，不可是佔位字串
+        cur.execute("""SELECT count(*) FROM benefits
+                        WHERE source_url IS NULL OR source_url !~ '^https?://'""")
+        bad_url = cur.fetchone()[0]
+        check("每筆都有合法 source_url", bad_url == 0, f"{bad_url} 筆沒有")
+
+        # 🔴 資格條件的鍵名必須與既有 491 筆一致，否則比對程式查不到
+        #    ⚠️ 既有 64 筆本來就缺（全國性補助沒有縣市限制）——
+        #    這裡驗的是「匯入的不可缺」，不是「全庫都要有」。
+        cur.execute("""SELECT count(*) FROM benefits
+                        WHERE eligibility_conditions IS NOT NULL
+                          AND NOT jsonb_exists(eligibility_conditions,
+                                               'counties')
+                          AND (agency LIKE '%%社會局' OR agency LIKE '%%社會處')
+                          AND created_at::date >= CURRENT_DATE - 1""")
+        no_cty = cur.fetchone()[0]
+        check("匯入的資料都有 counties 鍵", no_cty == 0, f"{no_cty} 筆缺")
+
+        # 🔴 金額欄位不可被填成 0（轉換失敗時的預設值會變成
+        #    「收入上限 0 元」＝沒人符合，而且完全不報錯）
+        cur.execute("""SELECT count(*) FROM benefits
+                        WHERE (eligibility_conditions->>'incomeMonthlyMax')::int = 0
+                           OR (eligibility_conditions->>'movableAssetsMax')::int = 0""")
+        zero = cur.fetchone()[0]
+        check("沒有金額條件被填成 0", zero == 0, f"{zero} 筆是 0")
 
     print("\n" + "=" * 46)
     print(f"通過 {len(PASS)}　失敗 {len(FAIL)}")
