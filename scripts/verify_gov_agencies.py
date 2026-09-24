@@ -181,13 +181,19 @@ def main() -> int:
 
             # 🔴 2026-09-24：39 筆（11%）的證據來自學校／採購網／公報／
             #    法規庫 —— 「在官方網域」不等於「在講這個機關」。
-            #    ⚠️ 例外：`data.gov.tw/dataset/146973` 是 e 政府申辦服務
-            #    「資料集本身」，那是合法來源（60 筆靠它證實），
-            #    不可跟「拿某個資料集頁面當某機關的證據」混為一談。
+            #    ⚠️ 兩個合法例外：
+            #    ① `data.gov.tw/dataset/146973` 是 e 政府申辦服務「資料集本身」
+            #    ② 🔴 **教育體系機構自己的官網就在 `.edu.tw`**
+            #       （國立臺灣圖書館＝`ntl.edu.tw`、國立公共資訊圖書館＝`nlpi.edu.tw`、
+            #       新竹縣教育局＝`doe.hcc.edu.tw`）——
+            #       排除 `.edu.tw` 是為了擋「別人的學校轉貼公告」，
+            #       不是擋這些機關自己的站。判準：**網域是不是它自己的**。
             cur.execute(r"""SELECT count(*) FROM agency_verification
                              WHERE has_benefit
                                AND evidence_url <>
                                    'https://data.gov.tw/dataset/146973'
+                               AND NOT (name ~ '(圖書館|教育局|教育處|廣播電臺)'
+                                        AND evidence_url ~ '\.edu\.tw')
                                AND evidence_url ~
                              '(\.edu\.tw|gazette\.nat|ppg\.ly|president\.gov'
                              '|data\.gov\.tw|data\.nat|laws?\..*gov\.tw'
@@ -227,6 +233,23 @@ def main() -> int:
             tot_all = sum(r[2] for r in rows)
             check(f"流程文件合計：{tot_yes} / {tot_all}",
                   f"**{tot_yes}**" in flow_txt and f"**{tot_all}**" in flow_txt)
+
+            cur.execute("""SELECT count(*) FROM agency_verification
+                            WHERE stage <= 4 AND verdict IS NULL""")
+            noverdict = cur.fetchone()[0]
+            check("🔴 每一筆都有查證結論（verdict）", noverdict == 0,
+                  f"{noverdict} 筆沒有 verdict")
+
+            cur.execute("""SELECT verdict, count(*) FROM agency_verification
+                            WHERE stage <= 4 GROUP BY 1""")
+            vd = dict(cur.fetchall())
+            check("verdict 只有四種合法值",
+                  set(vd) <= {"has_benefit", "no_own_site",
+                              "site_no_benefit", "manual_rejected"},
+                  f"出現未知值：{set(vd) - {'has_benefit', 'no_own_site', 'site_no_benefit', 'manual_rejected'}}")
+            check("has_benefit 筆數 = verdict='has_benefit' 筆數",
+                  vd.get("has_benefit", 0) == sum(
+                      r[1] for r in rows), "兩個欄位對不起來")
 
     except Exception as e:                      # pragma: no cover
         check("資料庫檢查可執行", False, str(e)[:120])

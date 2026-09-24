@@ -59,11 +59,23 @@ def own_domain(name: str) -> tuple[str, str]:
        但**教育局／教育處自己的官網就在 `.edu.tw`**
        （新竹縣教育局＝`doe.hcc.edu.tw`）⇒ 對教育類機關放行。
     """
-    is_edu_agency = bool(re.search(r"教育(局|處|署|部)", name))
+    # 🔴 `.edu.tw` 例外不只教育局處（2026-09-24 第二次踩）：
+    #    **國立圖書館、教育廣播電臺等教育體系機構的官網也在 `.edu.tw`**
+    #    （國立臺灣圖書館＝`ntl.edu.tw`），第一版只放行「教育局/處/署/部」，
+    #    害它們全被判成「搜尋不到官網」。
+    is_edu_agency = bool(re.search(
+        r"教育(局|處|署|部)|圖書館|廣播電臺|廣播電台|社教|科學教育", name))
     try:
         results = web_search(f"{name} 官方網站")
     except SearchUnavailable:
         return "", ""
+
+    # ⚠️ 異體字：官方名稱用「臺」，網站標題常用「台」（教育廣播電**臺**
+    #    vs 標題「教育廣播電**台**」）—— 比對前統一，否則永遠對不上。
+    def norm(s: str) -> str:
+        return (s or "").replace("台", "臺").replace("彎", "灣")
+
+    nname = norm(name)
 
     def usable(u: str) -> bool:
         if not OFFICIAL_RE.match(u):
@@ -76,13 +88,13 @@ def own_domain(name: str) -> tuple[str, str]:
 
     doms: Counter[str] = Counter()
     url_of: dict[str, str] = {}
-    short = re.sub(r"^.{2,3}[市縣]政府", "", name)
+    short = norm(re.sub(r"^.{2,3}[市縣]政府", "", name))
     for r in results:
         u = r.get("url", "") or ""
         if not usable(u):
             continue
-        title = r.get("title", "") or ""
-        if name in title or (len(short) >= 3 and short in title):
+        title = norm(r.get("title", "") or "")
+        if nname in title or (len(short) >= 3 and short in title):
             d = re.sub(r"^https?://", "", u).split("/")[0]
             doms[d] += 1
             url_of.setdefault(d, u)
@@ -97,8 +109,9 @@ def own_domain(name: str) -> tuple[str, str]:
         u = r.get("url", "") or ""
         if not usable(u):
             continue
-        blob = (r.get("title", "") or "") + (r.get("description", "") or "")
-        if name in blob or (len(short) >= 3 and short in blob):
+        blob = norm((r.get("title", "") or "")
+                    + (r.get("description", "") or ""))
+        if nname in blob or (len(short) >= 3 and short in blob):
             return re.sub(r"^https?://", "", u).split("/")[0], u
     return "", ""
 
