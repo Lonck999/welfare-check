@@ -9,6 +9,7 @@
 """
 from __future__ import annotations
 
+import collections
 import json
 import re
 import sys
@@ -124,6 +125,43 @@ def main() -> int:
     total = sum(len(v) for v in b.values())
     check(f"文件合計 = {total}", f"**{total:,}**" in doc or f"{total:,}" in doc,
           f"實際合計 {total}")
+
+    print("\n⑨ 補助證據（e政府申辦服務）")
+    ev_path = HERE / "agencies_with_benefits.json"
+    if not ev_path.exists():
+        check("agencies_with_benefits.json 存在", False,
+              "先跑 agency_benefit_evidence.py")
+    else:
+        bev = json.loads(ev_path.read_text())
+        ags = bev["agencies"]
+        check("有補助證據的機關 > 0", len(ags) > 0)
+        check("每個機關都帶 evidence（機關代碼）",
+              all(a["evidence"].get("org_code") for a in ags.values()))
+        check("每個機關都有至少一筆服務",
+              all(a["benefit_service_count"] > 0 for a in ags.values()))
+        check("_meta 記錄了來源網址",
+              bev["_meta"].get("source_url", "").startswith("https://data.gov.tw"))
+        check("🔴 _meta 明寫「不能證明沒有」的警告",
+              "不能證明" in bev["_meta"].get("caveat", ""))
+        # 🔴 negative control：e 政府收錄不全這件事必須是真的
+        for miss in ("衛生福利部國民健康署", "經濟部能源署"):
+            check(f"🔴 {miss} 在 e政府查無（證明資料不完整）",
+                  miss not in ags,
+                  "若這條變綠代表 e政府補上了，流程文件的警告要更新")
+        for has in ("勞動部勞工保險局", "衛生福利部中央健康保險署"):
+            check(f"{has} 有證據", has in ags)
+
+        print("\n⑩ 🔴 流程文件數字必須與證據檔一致")
+        flow = (HERE.parent / "福利清查流程.md").read_text()
+        kinds = collections.Counter(a["kind"] for a in ags.values())
+        for kind, label in (("central2", "中央二級"),
+                            ("central3_top", "中央三級・直屬部會"),
+                            ("local_gov", "縣市政府"),
+                            ("local_dept", "地方一級局處")):
+            n = kinds.get(kind, 0)
+            check(f"{label} 有證據 = {n}",
+                  f"**{n} / {len(b[kind])}**" in flow,
+                  "流程文件與證據檔對不起來 —— 重跑並更新")
 
     print(f"\n{'=' * 46}\n通過 {ok}　失敗 {fail}")
     return 1 if fail else 0
