@@ -3,7 +3,7 @@
 
 資料來源：政府資料開放平臺 dataset/7307「行政院所屬中央及地方機關代碼」
           → https://www.dgpa.gov.tw/open/code/orglist.csv
-          （人事行政總處維護，17,412 筆，含層級與裁撤註記）
+          （人事行政總處維護，17,410 筆，含層級、裁撤註記、生效日期）
 
 🔴 為什麼不用維基或 regex 抓：
    2026-09-24 實測用 regex 從維基沿革文字抓「XX署／XX局」，
@@ -11,12 +11,16 @@
    與**不相干**的（地方檢察署、國安局、參謀本部軍醫局）。
    ⚠️ 那份清單看起來很完整，但把死掉的機關寫進文件 = 之後去抓一個不存在的網站。
 
-篩選邏輯：
-   · 排除已裁撤（裁撤註記 = 是）
-   · 中央：層級 2（部/會）與 3（署/局）
-   · 地方：縣市政府本身與其一級局處
-   · ⚠️ 不含四級（分署/分局）與鄉鎮市區公所 ——
-     它們是**執行/收件**單位，不訂補助辦法，屬於 benefit_locations 的範圍。
+🔴 **每一筆都帶「存在證明」**（2026-09-24 使用者要求）：
+   官方名錄沒有網址欄位，但有更硬的東西 ——
+   · 機關代碼（人事總處編配的正式編碼）
+   · 機關生效日期（民國年，如 0910102）
+   · 地址／電話（幾乎 100% 覆蓋）
+   ⇒ `evidence` 欄把這些組起來，**任何一筆都可以回溯驗證**。
+
+⚠️ 分類與「是否與福利相關」是兩件事：
+   分類（central2/central3/...）是結構，**照官方層級**；
+   福利相關是**推測**，只用來排優先序，絕不用來排除。
 """
 from __future__ import annotations
 
@@ -36,7 +40,6 @@ OUT = Path(__file__).resolve().parent / "gov_agencies.json"
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/125.0 Safari/537.36")
 
-# 22 縣市（用來認地方機關）
 COUNTIES = [
     "臺北市", "新北市", "桃園市", "臺中市", "臺南市", "高雄市",
     "宜蘭縣", "新竹縣", "苗栗縣", "彰化縣", "南投縣", "雲林縣",
@@ -48,11 +51,18 @@ COUNTIES = [
 # 🔴 2026-09-24 實測它很不準：把「財政部印刷廠」「農業部獸醫研究所」
 #    標成福利相關（因為含「財政」「農業」），
 #    而真正發補助的單位名稱裡未必有這些字。
-#    **白名單永遠會漏下一種寫法** —— 哪個機關發補助要靠實際查證，不靠猜名字。
+#    **哪個機關發補助要靠實際查證，不靠猜名字。**
 WELFARE_HINT = ("社會", "衛生", "勞工", "勞動", "教育", "民政", "環保", "環境",
                 "都發", "住宅", "地政", "原住民", "客家", "農業", "文化",
                 "青年", "婦幼", "長照", "財政", "稅務", "健康", "保險",
-                "福利", "家庭", "退除役", "僑務", "移民", "消防", "警政")
+                "福利", "家庭", "退除役", "僑務", "移民", "國民年金")
+
+# 🔴 直屬部會 = 主管機關是「○○部」「○○委員會」「○○總處」。
+#    這是「署／局」那一層，補助的主力。
+#    ⚠️ 2026-09-24 踩過：文件寫「中央三級 216（直屬部會）」，
+#    但 JSON 存的是全部 2739 筆未篩的 —— **文件與檔案對不起來**。
+#    現在篩選寫進腳本，數字只有一個來源。
+TOP_PARENT_SUFFIX = ("部", "委員會", "總處", "總署")
 
 
 def load_csv(*, refresh: bool = False) -> list[dict]:
@@ -78,8 +88,36 @@ def is_alive(row: dict) -> bool:
     return (row.get("裁撤註記") or "").strip() != "是"
 
 
+def roc_to_ad(roc: str) -> str | None:
+    """民國年 0910102 → 2002-01-02。0000000 代表沒填。"""
+    roc = (roc or "").strip()
+    if not roc.isdigit() or len(roc) != 7 or roc == "0000000":
+        return None
+    y, m, d = int(roc[:3]) + 1911, roc[3:5], roc[5:7]
+    if m == "00" or d == "00":
+        return f"{y}"
+    return f"{y}-{m}-{d}"
+
+
+def build_evidence(row: dict) -> dict:
+    """存在證明：官方名錄裡可回溯驗證的欄位。
+
+    🔴 使用者 2026-09-24：「有可以證明他是真的就好，不一定要有網址」。
+    官方名錄沒有網址欄，但機關代碼＋生效日期＋地址電話足以證明存在，
+    而且比網址穩定（網址會改版，機關代碼不會）。
+    """
+    return {
+        "org_code": (row.get("機關代碼") or "").strip(),
+        "effective_date": roc_to_ad(row.get("機關生效日期", "")),
+        "address": (row.get("機關地址") or "").strip(),
+        "phone": re.sub(r"-+$", "", (row.get("機關電話") or "").strip()),
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307",
+    }
+
+
 def classify(row: dict) -> str | None:
-    """回傳 central2 / central3 / local_gov / local_dept，不要的回 None。"""
+    """回傳 central2 / central3 / central3_top / local_gov / local_dept。"""
     name = (row.get("機關名稱") or "").strip()
     level = (row.get("機關層級") or "").strip()
     parent = (row.get("主管機關名稱") or "").strip()
@@ -87,7 +125,6 @@ def classify(row: dict) -> str | None:
     if not name:
         return None
 
-    # 地方：縣市政府本身
     if name in [c + "政府" for c in COUNTIES]:
         return "local_gov"
 
@@ -98,43 +135,53 @@ def classify(row: dict) -> str | None:
     if re.search(r"(大學|學院|學校|高中|國中|國小|醫院|議會|公司|銀行|"
                  r"印製廠|造幣廠|研究院|郵局)$", name):
         return None
-    # 只要行政院體系（排除總統府／立法院／司法院／考試院／監察院／國安會）
     NON_EXEC = ("總統府", "立法院", "司法院", "考試院", "監察院",
                 "國家安全會議", "中央研究院", "國史館")
     if parent in NON_EXEC or name in NON_EXEC:
         return None
 
-    # 地方一級局處：「○○市政府○○局」且主管機關是該府
     if any(name.startswith(c + "政府") for c in COUNTIES) and name != parent:
         rest = re.sub(r"^.{3}(?:市|縣)政府", "", name)
-        # 只取一級局處（不含「科」「股」「所」「隊」「分局」）
-        if rest and not re.search(r"(分局|分署|所|隊|科|股|中心|學校|國小|國中|高中)$", rest):
+        if rest and not re.search(
+                r"(分局|分署|所|隊|科|股|中心|學校|國小|國中|高中)$", rest):
             if re.search(r"(局|處|委員會)$", rest):
                 return "local_dept"
         return None
 
-    # 中央
     if level == "2":
         # 🔴 二級必須直屬行政院（議會的主管機關欄也寫「行政院」，要另外擋）
         if parent != "行政院" or name.endswith("議會"):
             return None
         return "central2"
     if level == "3":
+        # 直屬部會的才是「署／局」那一層（補助主力）
+        if parent.endswith(TOP_PARENT_SUFFIX):
+            return "central3_top"
         return "central3"
     return None
+
+
+KIND_LABEL = {
+    "central2": "中央二級（部／會）",
+    "central3_top": "中央三級・直屬部會（署／局）★補助主力",
+    "central3": "中央三級・其他",
+    "local_gov": "縣市政府",
+    "local_dept": "地方一級局處　★補助主力",
+}
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--refresh", action="store_true", help="重新下載 CSV")
-    ap.add_argument("--kind", help="只印某一類（central2/central3/local_gov/local_dept）")
+    ap.add_argument("--kind", help="只印某一類")
+    ap.add_argument("--hint-only", action="store_true",
+                    help="只印 welfare_hint=True 的（⚠️ 那只是推測）")
     args = ap.parse_args()
 
     rows = load_csv(refresh=args.refresh)
     print(f"官方名錄共 {len(rows)} 筆")
 
-    buckets: dict[str, list[dict]] = {
-        "central2": [], "central3": [], "local_gov": [], "local_dept": []}
+    buckets: dict[str, list[dict]] = {k: [] for k in KIND_LABEL}
     dropped_dead = 0
 
     for r in rows:
@@ -144,30 +191,49 @@ def main() -> int:
         kind = classify(r)
         if kind is None:
             continue
+        name = (r.get("機關名稱") or "").strip()
         buckets[kind].append({
-            "code": (r.get("機關代碼") or "").strip(),
-            "name": (r.get("機關名稱") or "").strip(),
+            "name": name,
             "parent": (r.get("主管機關名稱") or "").strip(),
             "level": (r.get("機關層級") or "").strip(),
-            "phone": (r.get("機關電話") or "").strip(),
-            "address": (r.get("機關地址") or "").strip(),
-            "welfare_hint": any(k in (r.get("機關名稱") or "")
-                                for k in WELFARE_HINT),
+            # ⚠️ 推測欄位，只排優先序，不可用來排除
+            "welfare_hint": any(k in name for k in WELFARE_HINT),
+            "evidence": build_evidence(r),
         })
 
     print(f"🔴 排除已裁撤 {dropped_dead} 筆\n")
+    total = 0
     for k, v in buckets.items():
-        wf = sum(1 for x in v if x["welfare_related"])
-        print(f"  {k:<12} {len(v):>4} 個　（與福利相關 {wf}）")
+        total += len(v)
+        hint = sum(1 for x in v if x["welfare_hint"])
+        ev = sum(1 for x in v
+                 if x["evidence"]["org_code"] and x["evidence"]["address"])
+        print(f"  {KIND_LABEL[k]:<34} {len(v):>4} 個"
+              f"　hint {hint:>3}　有代碼+地址 {ev}/{len(v)}")
+    print(f"  {'合計':<34} {total:>4} 個")
 
     if args.kind:
         print()
-        for x in sorted(buckets.get(args.kind, []), key=lambda d: d["name"]):
-            mark = "★" if x["welfare_related"] else " "
+        items = buckets.get(args.kind, [])
+        if args.hint_only:
+            items = [x for x in items if x["welfare_hint"]]
+        for x in sorted(items, key=lambda d: (d["parent"], d["name"])):
+            mark = "★" if x["welfare_hint"] else " "
+            ev = x["evidence"]
             print(f"  {mark} {x['name']}　←　{x['parent']}")
+            print(f"      代碼 {ev['org_code']}　生效 {ev['effective_date']}"
+                  f"　{ev['phone']}")
 
-    OUT.write_text(json.dumps(buckets, ensure_ascii=False, indent=2),
-                   encoding="utf-8")
+    OUT.write_text(json.dumps(
+        {"_meta": {
+            "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+            "source_url": "https://data.gov.tw/dataset/7307",
+            "csv_url": CSV_URL,
+            "total_rows_in_source": len(rows),
+            "dropped_dissolved": dropped_dead,
+            "note": "🔴 welfare_hint 只是關鍵字推測，不可當成「這個機關發補助」的判準",
+        }, "buckets": buckets}, ensure_ascii=False, indent=2),
+        encoding="utf-8")
     print(f"\n✅ {OUT}")
     return 0
 
