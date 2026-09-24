@@ -8,9 +8,9 @@
       "other": "https://www.gov.tw/govotherservice.json"
     },
     "total_services": 7862,
-    "benefit_services": 1297,
-    "matched": 1260,
-    "unmatched": 37,
+    "benefit_services": 1504,
+    "matched": 1434,
+    "unmatched": 70,
     "caveat": "🔴 只能證明『這個機關有發補助』，不能證明『沒有』—— 各機關上傳意願差異極大（臺中市 575 筆 vs 多數縣市個位數）"
   },
   "agencies": {
@@ -24,7 +24,7 @@
         "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
         "source_url": "https://data.gov.tw/dataset/7307"
       },
-      "benefit_service_count": 605,
+      "benefit_service_count": 608,
       "services": [
         {
           "title": "臺中市政府大安公所-社會課-申請停止育有未滿二歲兒童育兒津貼補助資格線上收件(一致性)",
@@ -205,6 +205,11 @@
           "title": "臺中市政府地稅局-房屋稅-低收入戶房屋減免申請",
           "feed": "online",
           "page": "https://www.gov.tw/News_Content_2_520491.html"
+        },
+        {
+          "title": "臺中市政府地稅局-地方稅-線上申請約定轉帳納稅及直撥退稅",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_863407.html"
         },
         {
           "title": "臺中市政府太平公所-特殊境遇家庭扶助",
@@ -530,6 +535,11 @@
           "title": "臺中市政府沙鹿公所-在營軍人家屬各項補助（特別慰助金）",
           "feed": "counter",
           "page": "https://www.gov.tw/News_Content_2_518365.html"
+        },
+        {
+          "title": "臺中市政府經發局-臺中市政府行政罰鍰分期繳納案件申請書",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_518370.html"
         },
         {
           "title": "臺中市政府太平公所-身心障礙輔具補助領款收據",
@@ -1540,6 +1550,11 @@
           "title": "臺中市政府沙鹿公所-原住民技術士技能檢定獎勵金申請",
           "feed": "counter",
           "page": "https://www.gov.tw/News_Content_2_516036.html"
+        },
+        {
+          "title": "臺中市政府環保局-非自來水用戶免徵申請書",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_516049.html"
         },
         {
           "title": "臺中市政府中區公所-台中市中低收入老人重病看護費用補助收據",
@@ -3622,6 +3637,515 @@
         }
       ]
     },
+    "財政部臺北國稅局": {
+      "kind": "central3_top",
+      "evidence": {
+        "org_code": "A07030000D",
+        "effective_date": "2013-01-01",
+        "address": "台北市萬華區中華路一段二號",
+        "phone": "02-23113711",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 99,
+      "services": [
+        {
+          "title": "營業稅(使用、異動、取消)直接劃撥退稅同意書",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513487.html"
+        },
+        {
+          "title": "遺產稅延期或分期繳納(自然人憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513545.html"
+        },
+        {
+          "title": "遺產稅延期或分期繳納(健保卡登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513546.html"
+        },
+        {
+          "title": "申請贈與稅延期或分期繳納(自然人憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513553.html"
+        },
+        {
+          "title": "申請贈與稅延期或分期繳納(健保卡登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513554.html"
+        },
+        {
+          "title": "退稅資料及退稅資料抵欠明細（自然人憑證登入）",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513754.html"
+        },
+        {
+          "title": "退稅資料及退稅資料抵欠明細（健保卡登入）",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513755.html"
+        },
+        {
+          "title": "退稅資料及退稅資料抵欠明細（工商憑證登入）",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513756.html"
+        },
+        {
+          "title": "納稅義務人申請調閱綜合所得稅退稅憑單兌領資料(自然人憑證)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513405.html"
+        },
+        {
+          "title": "納稅義務人申請調閱綜合所得稅退稅憑單兌領資料(健保卡)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513406.html"
+        },
+        {
+          "title": "申請加計利息辦理綜合所得稅分期繳納稅款(健保卡)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513410.html"
+        },
+        {
+          "title": "申請因天災事變辦理綜合所得稅延期或分期繳納稅款作業(自然人憑證)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513415.html"
+        },
+        {
+          "title": "申請因天災事變辦理綜合所得稅延期或分期繳納稅款作業(健保卡)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513416.html"
+        },
+        {
+          "title": "申請因經濟弱勢辦理綜合所得稅延期或分期繳納稅款作業(自然人憑證)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513419.html"
+        },
+        {
+          "title": "申請因經濟弱勢辦理綜合所得稅延期或分期繳納稅款作業(健保卡)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513420.html"
+        },
+        {
+          "title": "個人房屋土地交易所得稅重購退稅(適用房地合一新制先售後購案件)(自然人憑證)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513428.html"
+        },
+        {
+          "title": "個人房屋土地交易所得稅重購退稅(適用房地合一新制先售後購案件)(健保卡)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513429.html"
+        },
+        {
+          "title": "申請加計利息辦理個人房屋土地交易所得稅分期繳納稅款(自然人憑證)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513430.html"
+        },
+        {
+          "title": "申請加計利息辦理個人房屋土地交易所得稅分期繳納稅款(健保卡)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513431.html"
+        },
+        {
+          "title": "申請同意綜合所得稅直接劃撥退稅(自然人憑證)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513438.html"
+        },
+        {
+          "title": "申請同意綜合所得稅直接劃撥退稅(健保卡)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513439.html"
+        },
+        {
+          "title": "申請同意綜合所得稅直接劃撥退稅(限定納稅義務人本人之退稅帳戶)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513440.html"
+        },
+        {
+          "title": "申請加計利息辦理營利事業所得稅分期繳納稅款(工商憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513448.html"
+        },
+        {
+          "title": "申請加計利息辦理營利事業所得稅分期繳納稅款(組織及團體憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513449.html"
+        },
+        {
+          "title": "申請因天災事變或不可抗力之事由辦理營利事業所得稅延期或分期繳納稅款作業(工商憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513450.html"
+        },
+        {
+          "title": "申請減免查定營業額",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513464.html"
+        },
+        {
+          "title": "貨物稅外銷退稅(免用憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513513.html"
+        },
+        {
+          "title": "申請因天災事變或不可抗力之事由辦理貨物稅延期或分期繳納稅款作業(工商憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513520.html"
+        },
+        {
+          "title": "申請因天災事變或不可抗力之事由辦理菸酒稅延期或分期繳納稅款作業(工商憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513530.html"
+        },
+        {
+          "title": "國庫退稅支票污損、遺失申請補發(免用憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513573.html"
+        },
+        {
+          "title": "申請重溢繳退稅(免用憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513574.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(自然人憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513599.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(健保卡登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513600.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(工商憑證登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513601.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(組織及團體登入)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_513602.html"
+        },
+        {
+          "title": "營業稅(使用、異動、取消)直接劃撥退稅同意書",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513487.html"
+        },
+        {
+          "title": "遺產稅延期或分期繳納(自然人憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513545.html"
+        },
+        {
+          "title": "遺產稅延期或分期繳納(健保卡登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513546.html"
+        },
+        {
+          "title": "申請贈與稅延期或分期繳納(自然人憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513553.html"
+        },
+        {
+          "title": "申請贈與稅延期或分期繳納(健保卡登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513554.html"
+        },
+        {
+          "title": "納稅義務人申請調閱綜合所得稅退稅憑單兌領資料(自然人憑證)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513405.html"
+        },
+        {
+          "title": "納稅義務人申請調閱綜合所得稅退稅憑單兌領資料(健保卡)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513406.html"
+        },
+        {
+          "title": "申請加計利息辦理綜合所得稅分期繳納稅款(健保卡)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513410.html"
+        },
+        {
+          "title": "申請因天災事變辦理綜合所得稅延期或分期繳納稅款作業(自然人憑證)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513415.html"
+        },
+        {
+          "title": "申請因天災事變辦理綜合所得稅延期或分期繳納稅款作業(健保卡)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513416.html"
+        },
+        {
+          "title": "申請因經濟弱勢辦理綜合所得稅延期或分期繳納稅款作業(自然人憑證)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513419.html"
+        },
+        {
+          "title": "申請因經濟弱勢辦理綜合所得稅延期或分期繳納稅款作業(健保卡)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513420.html"
+        },
+        {
+          "title": "個人房屋土地交易所得稅重購退稅(適用房地合一新制先售後購案件)(自然人憑證)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513428.html"
+        },
+        {
+          "title": "個人房屋土地交易所得稅重購退稅(適用房地合一新制先售後購案件)(健保卡)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513429.html"
+        },
+        {
+          "title": "申請加計利息辦理個人房屋土地交易所得稅分期繳納稅款(自然人憑證)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513430.html"
+        },
+        {
+          "title": "申請加計利息辦理個人房屋土地交易所得稅分期繳納稅款(健保卡)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513431.html"
+        },
+        {
+          "title": "申請同意綜合所得稅直接劃撥退稅(自然人憑證)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513438.html"
+        },
+        {
+          "title": "申請同意綜合所得稅直接劃撥退稅(健保卡)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513439.html"
+        },
+        {
+          "title": "申請同意綜合所得稅直接劃撥退稅(限定納稅義務人本人之退稅帳戶)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513440.html"
+        },
+        {
+          "title": "申請加計利息辦理營利事業所得稅分期繳納稅款(工商憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513448.html"
+        },
+        {
+          "title": "申請加計利息辦理營利事業所得稅分期繳納稅款(組織及團體憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513449.html"
+        },
+        {
+          "title": "申請因天災事變或不可抗力之事由辦理營利事業所得稅延期或分期繳納稅款作業(工商憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513450.html"
+        },
+        {
+          "title": "申請減免查定營業額",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513464.html"
+        },
+        {
+          "title": "貨物稅外銷退稅(免用憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513513.html"
+        },
+        {
+          "title": "申請因天災事變或不可抗力之事由辦理貨物稅延期或分期繳納稅款作業(工商憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513520.html"
+        },
+        {
+          "title": "申請因天災事變或不可抗力之事由辦理菸酒稅延期或分期繳納稅款作業(工商憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513530.html"
+        },
+        {
+          "title": "國庫退稅支票污損、遺失申請補發(免用憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513573.html"
+        },
+        {
+          "title": "申請重溢繳退稅(免用憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513574.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(自然人憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513599.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(健保卡登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513600.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(工商憑證登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513601.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(組織及團體登入)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_513602.html"
+        },
+        {
+          "title": "納稅義務人申請調閱綜合所得稅退稅憑單兌領資料(自然人憑證)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513405.html"
+        },
+        {
+          "title": "納稅義務人申請調閱綜合所得稅退稅憑單兌領資料(健保卡)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513406.html"
+        },
+        {
+          "title": "申請加計利息辦理綜合所得稅分期繳納稅款(健保卡)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513410.html"
+        },
+        {
+          "title": "申請因天災事變辦理綜合所得稅延期或分期繳納稅款作業(自然人憑證)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513415.html"
+        },
+        {
+          "title": "申請因天災事變辦理綜合所得稅延期或分期繳納稅款作業(健保卡)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513416.html"
+        },
+        {
+          "title": "申請因經濟弱勢辦理綜合所得稅延期或分期繳納稅款作業(自然人憑證)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513419.html"
+        },
+        {
+          "title": "申請因經濟弱勢辦理綜合所得稅延期或分期繳納稅款作業(健保卡)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513420.html"
+        },
+        {
+          "title": "個人房屋土地交易所得稅重購退稅(適用房地合一新制先售後購案件)(自然人憑證)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513428.html"
+        },
+        {
+          "title": "個人房屋土地交易所得稅重購退稅(適用房地合一新制先售後購案件)(健保卡)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513429.html"
+        },
+        {
+          "title": "申請加計利息辦理個人房屋土地交易所得稅分期繳納稅款(自然人憑證)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513430.html"
+        },
+        {
+          "title": "申請加計利息辦理個人房屋土地交易所得稅分期繳納稅款(健保卡)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513431.html"
+        },
+        {
+          "title": "申請同意綜合所得稅直接劃撥退稅(自然人憑證)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513438.html"
+        },
+        {
+          "title": "申請同意綜合所得稅直接劃撥退稅(健保卡)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513439.html"
+        },
+        {
+          "title": "申請同意綜合所得稅直接劃撥退稅(限定納稅義務人本人之退稅帳戶)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513440.html"
+        },
+        {
+          "title": "申請加計利息辦理營利事業所得稅分期繳納稅款(工商憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513448.html"
+        },
+        {
+          "title": "申請加計利息辦理營利事業所得稅分期繳納稅款(組織及團體憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513449.html"
+        },
+        {
+          "title": "申請因天災事變或不可抗力之事由辦理營利事業所得稅延期或分期繳納稅款作業(工商憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513450.html"
+        },
+        {
+          "title": "申請減免查定營業額",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513464.html"
+        },
+        {
+          "title": "營業稅(使用、異動、取消)直接劃撥退稅同意書",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513487.html"
+        },
+        {
+          "title": "貨物稅外銷退稅(免用憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513513.html"
+        },
+        {
+          "title": "申請因天災事變或不可抗力之事由辦理貨物稅延期或分期繳納稅款作業(工商憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513520.html"
+        },
+        {
+          "title": "申請因天災事變或不可抗力之事由辦理菸酒稅延期或分期繳納稅款作業(工商憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513530.html"
+        },
+        {
+          "title": "遺產稅延期或分期繳納(自然人憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513545.html"
+        },
+        {
+          "title": "遺產稅延期或分期繳納(健保卡登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513546.html"
+        },
+        {
+          "title": "申請贈與稅延期或分期繳納(自然人憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513553.html"
+        },
+        {
+          "title": "申請贈與稅延期或分期繳納(健保卡登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513554.html"
+        },
+        {
+          "title": "國庫退稅支票污損、遺失申請補發(免用憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513573.html"
+        },
+        {
+          "title": "申請重溢繳退稅(免用憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513574.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(自然人憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513599.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(健保卡登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513600.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(工商憑證登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513601.html"
+        },
+        {
+          "title": "退稅申請(102年4月1日前200元以下未辦退稅-國稅)(組織及團體登入)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_513602.html"
+        }
+      ]
+    },
     "勞動部勞工保險局": {
       "kind": "central3_top",
       "evidence": {
@@ -4784,6 +5308,195 @@
         }
       ]
     },
+    "新竹市稅務局": {
+      "kind": "central3",
+      "evidence": {
+        "org_code": "376581300D",
+        "effective_date": "2008-10-08",
+        "address": "新竹市東區中央路112號",
+        "phone": "03-5225161",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 35,
+      "services": [
+        {
+          "title": "土地增值稅申請(直撥)退稅",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_627255.html"
+        },
+        {
+          "title": "使用牌照稅退稅申請作業",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_628511.html"
+        },
+        {
+          "title": "使用牌照稅重複繳納申請(直撥)退稅",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_628513.html"
+        },
+        {
+          "title": "災害損失減免使用牌照稅申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_628515.html"
+        },
+        {
+          "title": "受災房屋申請房屋稅減免",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_628621.html"
+        },
+        {
+          "title": "房屋稅申請(直撥)退稅",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_628622.html"
+        },
+        {
+          "title": "地價稅減免申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_628627.html"
+        },
+        {
+          "title": "地價稅申請巷道或騎樓用地減免",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_628629.html"
+        },
+        {
+          "title": "地價稅申請(直撥)退稅",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_628631.html"
+        },
+        {
+          "title": "新竹市地方稅延期或分期繳納申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_629614.html"
+        },
+        {
+          "title": "申請契稅退稅（不含撤案）",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_814252.html"
+        },
+        {
+          "title": "延期或分期繳納申請書(天災、事變、不可抗力之事及經濟弱勢者適用)",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_625267.html"
+        },
+        {
+          "title": "使用牌照稅退稅申請作業",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_628511.html"
+        },
+        {
+          "title": "使用牌照稅重複繳納申請(直撥)退稅",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_628513.html"
+        },
+        {
+          "title": "災害損失減免使用牌照稅申請",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_628515.html"
+        },
+        {
+          "title": "退稅申請",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_628605.html"
+        },
+        {
+          "title": "土地增值稅自用住宅用地重購退稅申請",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_628609.html"
+        },
+        {
+          "title": "受災房屋申請房屋稅減免",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_628621.html"
+        },
+        {
+          "title": "房屋稅申請(直撥)退稅",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_628622.html"
+        },
+        {
+          "title": "地價稅減免申請",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_628627.html"
+        },
+        {
+          "title": "地價稅申請巷道或騎樓用地減免",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_628629.html"
+        },
+        {
+          "title": "地價稅申請(直撥)退稅",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_628631.html"
+        },
+        {
+          "title": "新竹市地方稅延期或分期繳納申請",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_629614.html"
+        },
+        {
+          "title": "延期或分期繳納申請書(天災、事變、不可抗力之事及經濟弱勢者適用)",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_625267.html"
+        },
+        {
+          "title": "使用牌照稅退稅申請作業",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_628511.html"
+        },
+        {
+          "title": "使用牌照稅重複繳納申請(直撥)退稅",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_628513.html"
+        },
+        {
+          "title": "災害損失減免使用牌照稅申請",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_628515.html"
+        },
+        {
+          "title": "退稅申請",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_628605.html"
+        },
+        {
+          "title": "土地增值稅自用住宅用地重購退稅申請",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_628609.html"
+        },
+        {
+          "title": "受災房屋申請房屋稅減免",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_628621.html"
+        },
+        {
+          "title": "房屋稅申請(直撥)退稅",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_628622.html"
+        },
+        {
+          "title": "地價稅減免申請",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_628627.html"
+        },
+        {
+          "title": "地價稅申請巷道或騎樓用地減免",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_628629.html"
+        },
+        {
+          "title": "地價稅申請(直撥)退稅",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_628631.html"
+        },
+        {
+          "title": "新竹市地方稅延期或分期繳納申請",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_629614.html"
+        }
+      ]
+    },
     "國軍退除役官兵輔導委員會": {
       "kind": "central2",
       "evidence": {
@@ -5266,6 +5979,120 @@
         }
       ]
     },
+    "屏東縣政府": {
+      "kind": "local_gov",
+      "evidence": {
+        "org_code": "376530000A",
+        "effective_date": null,
+        "address": "屏東縣屏東市自由路527號",
+        "phone": "08-7320415",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 20,
+      "services": [
+        {
+          "title": "屏東縣政府-申請居家身心障礙者使用維持器材及必要生活輔具_發電機租金補助",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_847198.html"
+        },
+        {
+          "title": "屏東縣政府-發展遲緩兒童早期療育費用補助申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_847200.html"
+        },
+        {
+          "title": "屏東縣政府-屏東縣未滿一歲嬰幼兒營養補助",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_860947.html"
+        },
+        {
+          "title": "屏東縣政府-身障者購買停車位貸款利息補貼或承租停車位補助",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_861236.html"
+        },
+        {
+          "title": "屏東縣政府-身障者購買/承租公有公共場所商店攤販低利貸款、租金補助申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_861237.html"
+        },
+        {
+          "title": "屏東縣政府-身心障礙者生活補助申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_863410.html"
+        },
+        {
+          "title": "屏東縣政府-中低收入老人生活津貼",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_863413.html"
+        },
+        {
+          "title": "屏東縣政府 國民年金保費減免認定(所得未達一定標準)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_749649.html"
+        },
+        {
+          "title": "屏東縣政府-孕婦產檢交通補助(好孕車劵)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_818668.html"
+        },
+        {
+          "title": "屏東縣政府-婦女生育津貼補助(獅子鄉公所)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_802198.html"
+        },
+        {
+          "title": "屏東縣政府-使用牌照稅轉帳退稅申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_781536.html"
+        },
+        {
+          "title": "屏東縣政府-身心障礙者日間照顧及住宿式照顧費用補助申請(東港鎮公所)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_781537.html"
+        },
+        {
+          "title": "屏東縣政府-地價稅(加油站、停車場)優惠稅率",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_773456.html"
+        },
+        {
+          "title": "屏東縣政府-國民年金保費減免認定(所得未達一定標準)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_773460.html"
+        },
+        {
+          "title": "屏東縣政府-農業天然災害救助申請(車城鄉公所)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_803167.html"
+        },
+        {
+          "title": "屏東縣政府-綠色環境給付計畫(休耕轉作)申請(車城鄉公所)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_803096.html"
+        },
+        {
+          "title": "屏東縣政府-地價稅巷道、騎樓用地減免",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_833242.html"
+        },
+        {
+          "title": "屏東縣政府-弱勢兒少生活扶助申請(東港鎮公所)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_768880.html"
+        },
+        {
+          "title": "屏東縣政府 政府補助私有文化資產申請",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_702010.html"
+        },
+        {
+          "title": "屏東縣政府 政府補助私有文化資產申請",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_702010.html"
+        }
+      ]
+    },
     "臺南市政府": {
       "kind": "local_gov",
       "evidence": {
@@ -5380,112 +6207,112 @@
         }
       ]
     },
-    "屏東縣政府": {
-      "kind": "local_gov",
+    "宜蘭縣政府財政稅務局": {
+      "kind": "local_dept",
       "evidence": {
-        "org_code": "376530000A",
-        "effective_date": null,
-        "address": "屏東縣屏東市自由路527號",
-        "phone": "08-7320415",
+        "org_code": "376421400D",
+        "effective_date": "2018-08-01",
+        "address": "宜蘭縣宜蘭市中山路二段165號",
+        "phone": "03-9325101-350",
         "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
         "source_url": "https://data.gov.tw/dataset/7307"
       },
       "benefit_service_count": 19,
       "services": [
         {
-          "title": "屏東縣政府-申請居家身心障礙者使用維持器材及必要生活輔具_發電機租金補助",
+          "title": "宜蘭縣政府財政稅務局-申請地價稅退稅",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_847198.html"
+          "page": "https://www.gov.tw/News_Content_2_379462.html"
         },
         {
-          "title": "屏東縣政府-發展遲緩兒童早期療育費用補助申請",
+          "title": "宜蘭縣政府財政稅務局-延期或分期繳納-房屋稅",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_847200.html"
+          "page": "https://www.gov.tw/News_Content_2_683941.html"
         },
         {
-          "title": "屏東縣政府-屏東縣未滿一歲嬰幼兒營養補助",
+          "title": "宜蘭縣政府財政稅務局-申請使用牌照稅退稅",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_860947.html"
+          "page": "https://www.gov.tw/News_Content_2_708843.html"
         },
         {
-          "title": "屏東縣政府-身障者購買停車位貸款利息補貼或承租停車位補助",
+          "title": "宜蘭縣政府財政稅務局-申請房屋稅退稅",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_861236.html"
+          "page": "https://www.gov.tw/News_Content_2_379488.html"
         },
         {
-          "title": "屏東縣政府-身障者購買/承租公有公共場所商店攤販低利貸款、租金補助申請",
+          "title": "宜蘭縣政府財政稅務局-申請契稅退稅（不含撤案）",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_861237.html"
+          "page": "https://www.gov.tw/News_Content_2_379499.html"
         },
         {
-          "title": "屏東縣政府-身心障礙者生活補助申請",
+          "title": "宜蘭縣政府財政稅務局-申請娛樂稅退稅",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_863410.html"
+          "page": "https://www.gov.tw/News_Content_2_379507.html"
         },
         {
-          "title": "屏東縣政府-中低收入老人生活津貼",
+          "title": "宜蘭縣政府財政稅務局-受災娛樂業者申請娛樂稅減免",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_863413.html"
+          "page": "https://www.gov.tw/News_Content_2_379508.html"
         },
         {
-          "title": "屏東縣政府 國民年金保費減免認定(所得未達一定標準)",
+          "title": "宜蘭縣政府財政稅務局-各稅退稅申請",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_749649.html"
+          "page": "https://www.gov.tw/News_Content_2_379517.html"
         },
         {
-          "title": "屏東縣政府-孕婦產檢交通補助(好孕車劵)",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_818668.html"
-        },
-        {
-          "title": "屏東縣政府-婦女生育津貼補助(獅子鄉公所)",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_802198.html"
-        },
-        {
-          "title": "屏東縣政府-身心障礙者日間照顧及住宿式照顧費用補助申請(東港鎮公所)",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_781537.html"
-        },
-        {
-          "title": "屏東縣政府-地價稅(加油站、停車場)優惠稅率",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_773456.html"
-        },
-        {
-          "title": "屏東縣政府-國民年金保費減免認定(所得未達一定標準)",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_773460.html"
-        },
-        {
-          "title": "屏東縣政府-農業天然災害救助申請(車城鄉公所)",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_803167.html"
-        },
-        {
-          "title": "屏東縣政府-綠色環境給付計畫(休耕轉作)申請(車城鄉公所)",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_803096.html"
-        },
-        {
-          "title": "屏東縣政府-地價稅巷道、騎樓用地減免",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_833242.html"
-        },
-        {
-          "title": "屏東縣政府-弱勢兒少生活扶助申請(東港鎮公所)",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_768880.html"
-        },
-        {
-          "title": "屏東縣政府 政府補助私有文化資產申請",
+          "title": "宜蘭縣政府財政稅務局-申請房屋稅退稅",
           "feed": "counter",
-          "page": "https://www.gov.tw/News_Content_2_702010.html"
+          "page": "https://www.gov.tw/News_Content_2_379488.html"
         },
         {
-          "title": "屏東縣政府 政府補助私有文化資產申請",
+          "title": "宜蘭縣政府財政稅務局-申請契稅退稅（不含撤案）",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_379499.html"
+        },
+        {
+          "title": "宜蘭縣政府財政稅務局-受災娛樂業者申請娛樂稅減免",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_379508.html"
+        },
+        {
+          "title": "宜蘭縣政府財政稅務局-各稅退稅申請",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_379517.html"
+        },
+        {
+          "title": "宜蘭縣政府財政稅務局-申請土地增值稅退稅",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_379580.html"
+        },
+        {
+          "title": "宜蘭縣政府財政稅務局-申請使用牌照稅退稅",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_708843.html"
+        },
+        {
+          "title": "宜蘭縣政府財政稅務局-申請使用牌照稅退稅",
           "feed": "other",
-          "page": "https://www.gov.tw/News_Content_2_702010.html"
+          "page": "https://www.gov.tw/News_Content_2_708843.html"
+        },
+        {
+          "title": "宜蘭縣政府財政稅務局-申請地價稅退稅",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_379462.html"
+        },
+        {
+          "title": "宜蘭縣政府財政稅務局-申請房屋稅退稅",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_379488.html"
+        },
+        {
+          "title": "宜蘭縣政府財政稅務局-申請契稅退稅（不含撤案）",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_379499.html"
+        },
+        {
+          "title": "宜蘭縣政府財政稅務局-申請土地增值稅退稅",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_379580.html"
         }
       ]
     },
@@ -5657,77 +6484,67 @@
         }
       ]
     },
-    "新竹市稅務局": {
+    "彰化縣地方稅務局": {
       "kind": "central3",
       "evidence": {
-        "org_code": "376581300D",
-        "effective_date": "2008-10-08",
-        "address": "新竹市東區中央路112號",
-        "phone": "03-5225161",
+        "org_code": "376471300D",
+        "effective_date": "2008-01-23",
+        "address": "彰化縣彰化市中山路2段187號",
+        "phone": "04-7239131",
         "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
         "source_url": "https://data.gov.tw/dataset/7307"
       },
-      "benefit_service_count": 12,
+      "benefit_service_count": 10,
       "services": [
         {
-          "title": "災害損失減免使用牌照稅申請",
+          "title": "彰化縣地方稅務局-使用牌照稅加計利息分期繳納申請(有繳稅意願而無力一次繳納稅捐)",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_628515.html"
+          "page": "https://www.gov.tw/News_Content_2_779097.html"
         },
         {
-          "title": "受災房屋申請房屋稅減免",
+          "title": "彰化縣地方稅務局-地價稅延期或分期繳納申請(適用納稅義務人因天災、事變、不可抗力事由或為經濟弱勢者)",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_628621.html"
+          "page": "https://www.gov.tw/News_Content_2_775713.html"
         },
         {
-          "title": "地價稅減免申請",
+          "title": "彰化縣地方稅務局-轉帳退稅申請",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_628627.html"
+          "page": "https://www.gov.tw/News_Content_2_775714.html"
         },
         {
-          "title": "地價稅申請巷道或騎樓用地減免",
+          "title": "彰化縣地方稅務局-低收入戶房屋稅減免申請",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_628629.html"
+          "page": "https://www.gov.tw/News_Content_2_775717.html"
         },
         {
-          "title": "災害損失減免使用牌照稅申請",
-          "feed": "counter",
-          "page": "https://www.gov.tw/News_Content_2_628515.html"
+          "title": "彰化縣地方稅務局-地價稅加計利息分期繳納申請(有繳稅意願而無力一次繳納稅捐)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_775730.html"
         },
         {
-          "title": "受災房屋申請房屋稅減免",
-          "feed": "counter",
-          "page": "https://www.gov.tw/News_Content_2_628621.html"
+          "title": "彰化縣地方稅務局-使用牌照稅延期或分期繳納申請(因天災、事變、不可抗力事由或為經濟弱勢者)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_775738.html"
         },
         {
-          "title": "地價稅減免申請",
-          "feed": "counter",
-          "page": "https://www.gov.tw/News_Content_2_628627.html"
+          "title": "彰化縣地方稅務局-娛樂稅申請延期或分期繳納",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_775744.html"
         },
         {
-          "title": "地價稅申請巷道或騎樓用地減免",
-          "feed": "counter",
-          "page": "https://www.gov.tw/News_Content_2_628629.html"
+          "title": "彰化縣地方稅務局-房屋稅延期或分期繳納申請(因天災、事變、不可抗力事由或為經濟弱勢者)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_775748.html"
         },
         {
-          "title": "災害損失減免使用牌照稅申請",
-          "feed": "other",
-          "page": "https://www.gov.tw/News_Content_2_628515.html"
+          "title": "彰化縣地方稅務局-房屋稅退稅申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_775750.html"
         },
         {
-          "title": "受災房屋申請房屋稅減免",
-          "feed": "other",
-          "page": "https://www.gov.tw/News_Content_2_628621.html"
-        },
-        {
-          "title": "地價稅減免申請",
-          "feed": "other",
-          "page": "https://www.gov.tw/News_Content_2_628627.html"
-        },
-        {
-          "title": "地價稅申請巷道或騎樓用地減免",
-          "feed": "other",
-          "page": "https://www.gov.tw/News_Content_2_628629.html"
+          "title": "彰化縣地方稅務局-房屋稅加計利息分期繳納申請(有繳稅意願而無力一次繳納稅捐)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_775898.html"
         }
       ]
     },
@@ -5787,6 +6604,124 @@
           "title": "彰化縣政府-低收入戶生活扶助",
           "feed": "counter",
           "page": "https://www.gov.tw/News_Content_2_512097.html"
+        }
+      ]
+    },
+    "南投縣政府": {
+      "kind": "local_gov",
+      "evidence": {
+        "org_code": "376480000A",
+        "effective_date": null,
+        "address": "南投縣南投市中興路660號",
+        "phone": "049-2222106",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 9,
+      "services": [
+        {
+          "title": "南投縣政府-南投市公所新生兒生育補助",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_864879.html"
+        },
+        {
+          "title": "南投縣政府-南投縣多元脫貧服務補助低收入戶及中低收入戶購置學習設備計畫(第一階段)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_864880.html"
+        },
+        {
+          "title": "南投縣政府-房屋稅低收入戶減免",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_766864.html"
+        },
+        {
+          "title": "南投縣政府-國民年金所得未達一定標準保費補助",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_773477.html"
+        },
+        {
+          "title": "南投縣政府-發展遲緩兒童早期療育費用補助費",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_773478.html"
+        },
+        {
+          "title": "南投縣政府-罰鍰分期繳納申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_773877.html"
+        },
+        {
+          "title": "南投縣政府-身心障礙者使用車輛免徵使用牌照稅",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_802062.html"
+        },
+        {
+          "title": "南投縣政府-「好彩投」好孕乘車補助服務",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_822609.html"
+        },
+        {
+          "title": "南投縣政府-生育獎勵金申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_834712.html"
+        }
+      ]
+    },
+    "臺中市政府地方稅務局": {
+      "kind": "local_dept",
+      "evidence": {
+        "org_code": "387260000D",
+        "effective_date": "2010-12-25",
+        "address": "臺中市西屯區文心路2段99號",
+        "phone": "04-22585000",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 9,
+      "services": [
+        {
+          "title": "臺中市政府地方稅務局-土地增值稅自用住宅用地重購退稅申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_817452.html"
+        },
+        {
+          "title": "臺中市政府地方稅務局-房屋稅退稅申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_817458.html"
+        },
+        {
+          "title": "臺中市政府地方稅務局-地價稅道路(或騎樓)用地減免申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_817461.html"
+        },
+        {
+          "title": "臺中市政府地方稅務局-使用牌照稅延期或分期繳納申請(因天災、事變、不可抗力事由或為經濟弱勢者)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_827444.html"
+        },
+        {
+          "title": "臺中市政府地方稅務局-地價稅延期或分期繳納(適用納稅義務人因天災、事變、不可抗力事由或為經濟弱勢者)申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_834734.html"
+        },
+        {
+          "title": "臺中市政府地方稅務局-印花稅延期或分期繳納申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_834746.html"
+        },
+        {
+          "title": "臺中市政府地方稅務局-延期或分期繳納申請(因天災、事變、不可抗力事由或為經濟弱勢者)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_834725.html"
+        },
+        {
+          "title": "臺中市政府地方稅務局-娛樂稅申請延期或分期繳納申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_834726.html"
+        },
+        {
+          "title": "臺中市政府地方稅務局-低收入戶房屋減免申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_833700.html"
         }
       ]
     },
@@ -5942,55 +6877,6 @@
         }
       ]
     },
-    "南投縣政府": {
-      "kind": "local_gov",
-      "evidence": {
-        "org_code": "376480000A",
-        "effective_date": null,
-        "address": "南投縣南投市中興路660號",
-        "phone": "049-2222106",
-        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
-        "source_url": "https://data.gov.tw/dataset/7307"
-      },
-      "benefit_service_count": 7,
-      "services": [
-        {
-          "title": "南投縣政府-南投市公所新生兒生育補助",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_864879.html"
-        },
-        {
-          "title": "南投縣政府-南投縣多元脫貧服務補助低收入戶及中低收入戶購置學習設備計畫(第一階段)",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_864880.html"
-        },
-        {
-          "title": "南投縣政府-房屋稅低收入戶減免",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_766864.html"
-        },
-        {
-          "title": "南投縣政府-國民年金所得未達一定標準保費補助",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_773477.html"
-        },
-        {
-          "title": "南投縣政府-發展遲緩兒童早期療育費用補助費",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_773478.html"
-        },
-        {
-          "title": "南投縣政府-「好彩投」好孕乘車補助服務",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_822609.html"
-        },
-        {
-          "title": "南投縣政府-生育獎勵金申請",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_834712.html"
-        }
-      ]
-    },
     "臺中市政府文化局": {
       "kind": "local_dept",
       "evidence": {
@@ -6037,6 +6923,50 @@
           "title": "臺中市政府文化局-【視覺藝術科】臺中市政府文化局視覺藝術類活動補助案核銷經費文件格式",
           "feed": "counter",
           "page": "https://www.gov.tw/News_Content_2_516512.html"
+        }
+      ]
+    },
+    "嘉義市政府": {
+      "kind": "local_gov",
+      "evidence": {
+        "org_code": "376600000A",
+        "effective_date": null,
+        "address": "嘉義市東區中山路199號",
+        "phone": "05-2254321",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 6,
+      "services": [
+        {
+          "title": "嘉義市政府智慧科技處-低收入戶房屋稅減免申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_834386.html"
+        },
+        {
+          "title": "嘉義市政府智慧科技處-使用牌照稅延期或分期繳納申請(因天災、事變、不可抗力事由或為經濟弱勢者)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_834387.html"
+        },
+        {
+          "title": "嘉義市政府智慧科技處-房屋稅延期或分期繳納申請(因天災、事變、不可抗力事由或為經濟弱勢者)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_834395.html"
+        },
+        {
+          "title": "嘉義市政府社會處-育兒照顧喘息服務費用補助申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_822617.html"
+        },
+        {
+          "title": "嘉義市政府智慧科技處-地價稅延期或分期繳納申請(適用納稅義務人因天災、事變、不可抗力事由或為經濟弱勢者)",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_834385.html"
+        },
+        {
+          "title": "嘉義市政府智慧科技處-公益彩券回饋金排除就醫障礙計畫弱勢族群就醫補助申請",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_834741.html"
         }
       ]
     },
@@ -6493,35 +7423,6 @@
         }
       ]
     },
-    "財政部臺北國稅局": {
-      "kind": "central3_top",
-      "evidence": {
-        "org_code": "A07030000D",
-        "effective_date": "2013-01-01",
-        "address": "台北市萬華區中華路一段二號",
-        "phone": "02-23113711",
-        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
-        "source_url": "https://data.gov.tw/dataset/7307"
-      },
-      "benefit_service_count": 3,
-      "services": [
-        {
-          "title": "申請減免查定營業額",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_513464.html"
-        },
-        {
-          "title": "申請減免查定營業額",
-          "feed": "counter",
-          "page": "https://www.gov.tw/News_Content_2_513464.html"
-        },
-        {
-          "title": "申請減免查定營業額",
-          "feed": "other",
-          "page": "https://www.gov.tw/News_Content_2_513464.html"
-        }
-      ]
-    },
     "僑務委員會": {
       "kind": "central2",
       "evidence": {
@@ -6577,35 +7478,6 @@
           "title": "苗栗縣政府-苗栗幸福 好孕來-體外受精人工生殖技術補助",
           "feed": "online",
           "page": "https://www.gov.tw/News_Content_2_817501.html"
-        }
-      ]
-    },
-    "嘉義市政府": {
-      "kind": "local_gov",
-      "evidence": {
-        "org_code": "376600000A",
-        "effective_date": null,
-        "address": "嘉義市東區中山路199號",
-        "phone": "05-2254321",
-        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
-        "source_url": "https://data.gov.tw/dataset/7307"
-      },
-      "benefit_service_count": 3,
-      "services": [
-        {
-          "title": "嘉義市政府智慧科技處-低收入戶房屋稅減免申請",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_834386.html"
-        },
-        {
-          "title": "嘉義市政府社會處-育兒照顧喘息服務費用補助申請",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_822617.html"
-        },
-        {
-          "title": "嘉義市政府智慧科技處-公益彩券回饋金排除就醫障礙計畫弱勢族群就醫補助申請",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_834741.html"
         }
       ]
     },
@@ -6725,6 +7597,35 @@
         }
       ]
     },
+    "臺中市政府財政局": {
+      "kind": "local_dept",
+      "evidence": {
+        "org_code": "387030000D",
+        "effective_date": "2010-12-25",
+        "address": "臺中市西屯區臺灣大道三段99號",
+        "phone": "04-22289111",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 3,
+      "services": [
+        {
+          "title": "臺中市政府財政局-申請行政罰鍰分期繳納",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_517132.html"
+        },
+        {
+          "title": "臺中市政府財政局-臺中市市有土地出售分期申請書",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_516263.html"
+        },
+        {
+          "title": "臺中市政府財政局-分期繳納使用補償金",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_516336.html"
+        }
+      ]
+    },
     "教育部國民及學前教育署": {
       "kind": "central3_top",
       "evidence": {
@@ -6797,51 +7698,51 @@
         }
       ]
     },
-    "宜蘭縣政府財政稅務局": {
-      "kind": "local_dept",
+    "臺東縣稅務局": {
+      "kind": "central3",
       "evidence": {
-        "org_code": "376421400D",
-        "effective_date": "2018-08-01",
-        "address": "宜蘭縣宜蘭市中山路二段165號",
-        "phone": "03-9325101-350",
+        "org_code": "376541300D",
+        "effective_date": "2008-01-31",
+        "address": "臺東縣臺東市中興路二段729號",
+        "phone": "089-231600",
         "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
         "source_url": "https://data.gov.tw/dataset/7307"
       },
       "benefit_service_count": 2,
       "services": [
         {
-          "title": "宜蘭縣政府財政稅務局-受災娛樂業者申請娛樂稅減免",
+          "title": "使用牌照稅退稅申請書",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_379508.html"
+          "page": "https://www.gov.tw/News_Content_2_380335.html"
         },
         {
-          "title": "宜蘭縣政府財政稅務局-受災娛樂業者申請娛樂稅減免",
+          "title": "使用牌照稅退稅申請書",
           "feed": "counter",
-          "page": "https://www.gov.tw/News_Content_2_379508.html"
+          "page": "https://www.gov.tw/News_Content_2_380335.html"
         }
       ]
     },
-    "臺中市政府地方稅務局": {
+    "臺中市政府交通局": {
       "kind": "local_dept",
       "evidence": {
-        "org_code": "387260000D",
+        "org_code": "387290000H",
         "effective_date": "2010-12-25",
-        "address": "臺中市西屯區文心路2段99號",
-        "phone": "04-22585000",
+        "address": "臺中市西區民權路101號",
+        "phone": "04-22289111",
         "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
         "source_url": "https://data.gov.tw/dataset/7307"
       },
       "benefit_service_count": 2,
       "services": [
         {
-          "title": "臺中市政府地方稅務局-地價稅道路(或騎樓)用地減免申請",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_817461.html"
+          "title": "臺中市政府交通局-臺中市停車管理處公有停車場月票退費申請書",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_516733.html"
         },
         {
-          "title": "臺中市政府地方稅務局-低收入戶房屋減免申請",
-          "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_833700.html"
+          "title": "臺中市政府交通局-臺中市停車管理處公有停車場退費申請書",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_515497.html"
         }
       ]
     },
@@ -6866,6 +7767,54 @@
           "title": "臺中市政府衛生局-藥癮弱勢族群戒治就醫補助申請書",
           "feed": "counter",
           "page": "https://www.gov.tw/News_Content_2_516107.html"
+        }
+      ]
+    },
+    "臺中市政府地政局": {
+      "kind": "local_dept",
+      "evidence": {
+        "org_code": "387160000A",
+        "effective_date": "2010-12-25",
+        "address": "臺中市西區三民路1段158號(5、6、7、9樓)",
+        "phone": "04-22218558",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 2,
+      "services": [
+        {
+          "title": "臺中市政府地政局-中山地政-地政退費申請書",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_517256.html"
+        },
+        {
+          "title": "臺中市政府地政局-雅潭地政-退費申請",
+          "feed": "counter",
+          "page": "https://www.gov.tw/News_Content_2_517564.html"
+        }
+      ]
+    },
+    "公平交易委員會": {
+      "kind": "central2",
+      "evidence": {
+        "org_code": "A62000000G",
+        "effective_date": "2012-02-06",
+        "address": "台北市中正區濟南路一段2-2號12樓",
+        "phone": "02-23517588",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 2,
+      "services": [
+        {
+          "title": "公平交易委員會獎助研究生撰寫研究論文",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_379230.html"
+        },
+        {
+          "title": "公平交易委員會行政罰鍰分期繳納申請書",
+          "feed": "other",
+          "page": "https://www.gov.tw/News_Content_2_379242.html"
         }
       ]
     },
@@ -6904,6 +7853,25 @@
           "title": "國立自然科學博物館-補助偏鄉中小學參觀教學活動",
           "feed": "online",
           "page": "https://www.gov.tw/News_Content_2_380013.html"
+        }
+      ]
+    },
+    "法務部": {
+      "kind": "central2",
+      "evidence": {
+        "org_code": "A11000000F",
+        "effective_date": "2012-01-01",
+        "address": "台北市中正區重慶南路一段130號",
+        "phone": "02-21910189",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 1,
+      "services": [
+        {
+          "title": "聲請准予分期繳納罰金",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_372140.html"
         }
       ]
     },
@@ -6983,22 +7951,41 @@
         }
       ]
     },
-    "彰化縣地方稅務局": {
-      "kind": "central3",
+    "基隆市政府": {
+      "kind": "local_gov",
       "evidence": {
-        "org_code": "376471300D",
-        "effective_date": "2008-01-23",
-        "address": "彰化縣彰化市中山路2段187號",
-        "phone": "04-7239131",
+        "org_code": "376570000A",
+        "effective_date": null,
+        "address": "基隆市中正區義一路1號",
+        "phone": "02-24201122",
         "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
         "source_url": "https://data.gov.tw/dataset/7307"
       },
       "benefit_service_count": 1,
       "services": [
         {
-          "title": "彰化縣地方稅務局-低收入戶房屋稅減免申請",
+          "title": "基隆市政府-房屋稅、地價稅、使用牌照稅重複繳納退稅申請",
           "feed": "online",
-          "page": "https://www.gov.tw/News_Content_2_775717.html"
+          "page": "https://www.gov.tw/News_Content_2_822612.html"
+        }
+      ]
+    },
+    "嘉義縣財政稅務局": {
+      "kind": "central3",
+      "evidence": {
+        "org_code": "376501300D",
+        "effective_date": "2008-01-16",
+        "address": "嘉義縣太保市祥和二路東段5號",
+        "phone": "05-3620909",
+        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
+        "source_url": "https://data.gov.tw/dataset/7307"
+      },
+      "benefit_service_count": 1,
+      "services": [
+        {
+          "title": "地方稅轉帳退稅",
+          "feed": "online",
+          "page": "https://www.gov.tw/News_Content_2_757487.html"
         }
       ]
     },
@@ -7132,25 +8119,6 @@
           "title": "臺中市政府沙鹿公所-台電回饋金生育補助",
           "feed": "counter",
           "page": "https://www.gov.tw/News_Content_2_517296.html"
-        }
-      ]
-    },
-    "公平交易委員會": {
-      "kind": "central2",
-      "evidence": {
-        "org_code": "A62000000G",
-        "effective_date": "2012-02-06",
-        "address": "台北市中正區濟南路一段2-2號12樓",
-        "phone": "02-23517588",
-        "source": "人事行政總處「行政院所屬中央及地方機關代碼」",
-        "source_url": "https://data.gov.tw/dataset/7307"
-      },
-      "benefit_service_count": 1,
-      "services": [
-        {
-          "title": "公平交易委員會獎助研究生撰寫研究論文",
-          "feed": "other",
-          "page": "https://www.gov.tw/News_Content_2_379230.html"
         }
       ]
     }

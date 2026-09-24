@@ -35,6 +35,8 @@ import sys
 import urllib.request
 from pathlib import Path
 
+from benefit_keywords import BENEFIT_KW, is_benefit_title  # noqa: F401
+
 HERE = Path(__file__).resolve().parent
 AGENCIES = HERE / "gov_agencies.json"
 OUT = HERE / "agencies_with_benefits.json"
@@ -49,10 +51,8 @@ FEEDS = {
     "other": "https://www.gov.tw/govotherservice.json",
 }
 
-# ⚠️ 這組關鍵字**只用來篩「補助類服務」**，不是用來判斷機關。
-#    寧可寬鬆（多撈進來人工再看），也不要漏。
-BENEFIT_KW = ("補助", "津貼", "給付", "獎助", "減免", "優惠", "救助",
-              "慰問金", "獎勵金", "補貼", "扶助", "年金", "紓困", "救助金")
+# ⚠️ 關鍵字來自 benefit_keywords.py（唯一來源）—— 見該檔說明。
+#    🔴 不可在這裡另外定義一份。
 
 DATASET_URL = "https://data.gov.tw/dataset/146973"
 

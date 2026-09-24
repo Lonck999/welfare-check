@@ -64,6 +64,16 @@ def main() -> int:
           not [n for n in allnames
                if re.search(r"(大學|議會|公司|銀行|醫院)$", n)])
 
+    # 🔴 2026-09-24 同日第二次踩同一個坑：排除 regex 綁了 `$`，
+    #    而學校正式名稱是「國立岡山高級中**學**」—— `高中$` 一個都不 match。
+    #    55 所高中混進 central3_top（佔 25%），39 所被判成有發補助。
+    #    ⇒ 這條改成「出現即檢查」，不綁結尾。
+    schools = [n for n in allnames
+               if re.search(r"(中學|學校|大學|學院|高中|高職|國小|國中|"
+                            r"專科|幼兒園)", n)]
+    check("🔴 清單裡沒有任何學校（不綁結尾的檢查）",
+          not schools, f"殘留 {len(schools)} 筆，例：{schools[:3]}")
+
     print("\n④ 存在證明（使用者要求：能證明它真的存在）")
     flat = [x for v in b.values() for x in v]
     withcode = [x for x in flat if x["evidence"]["org_code"]]
@@ -151,17 +161,75 @@ def main() -> int:
         for has in ("勞動部勞工保險局", "衛生福利部中央健康保險署"):
             check(f"{has} 有證據", has in ags)
 
-        print("\n⑩ 🔴 流程文件數字必須與證據檔一致")
+        print("\n⑩ 🔴 流程文件的實查結果必須與資料庫一致")
+        # ⚠️ 這節原本比對「e政府證據數」，但 2026-09-24 逐一查證完成後，
+        #    流程文件改記**實查結果**（478 個機關的有無），
+        #    那才是使用者會看的數字。e政府證據數只是中間產物。
         flow = (HERE.parent / "福利清查流程.md").read_text()
-        kinds = collections.Counter(a["kind"] for a in ags.values())
-        for kind, label in (("central2", "中央二級"),
-                            ("central3_top", "中央三級・直屬部會"),
-                            ("local_gov", "縣市政府"),
-                            ("local_dept", "地方一級局處")):
-            n = kinds.get(kind, 0)
-            check(f"{label} 有證據 = {n}",
-                  f"**{n} / {len(b[kind])}**" in flow,
-                  "流程文件與證據檔對不起來 —— 重跑並更新")
+        check("流程文件已改記實查結果（非 e政府中間數字）",
+              "全部查完" in flow and "478" in flow,
+              "流程文件還停在 e政府階段 —— 重跑查證並更新")
+
+    print("\n⑪ 🔴 查證結果的證據純度（資料庫）")
+    try:
+        import psycopg2
+        with psycopg2.connect(dbname="welfare_check") as c, c.cursor() as cur:
+            cur.execute("""SELECT count(*) FROM agency_verification
+                            WHERE stage <= 4 AND status = 'pending'""")
+            pending = cur.fetchone()[0]
+            check("階段 1-4 全部查完", pending == 0, f"還有 {pending} 未查")
+
+            # 🔴 2026-09-24：39 筆（11%）的證據來自學校／採購網／公報／
+            #    法規庫 —— 「在官方網域」不等於「在講這個機關」。
+            #    ⚠️ 例外：`data.gov.tw/dataset/146973` 是 e 政府申辦服務
+            #    「資料集本身」，那是合法來源（60 筆靠它證實），
+            #    不可跟「拿某個資料集頁面當某機關的證據」混為一談。
+            cur.execute(r"""SELECT count(*) FROM agency_verification
+                             WHERE has_benefit
+                               AND evidence_url <>
+                                   'https://data.gov.tw/dataset/146973'
+                               AND evidence_url ~
+                             '(\.edu\.tw|gazette\.nat|ppg\.ly|president\.gov'
+                             '|data\.gov\.tw|data\.nat|laws?\..*gov\.tw'
+                             '|pcc\.gov)'""")
+            bad_src = cur.fetchone()[0]
+            check("🔴 沒有不可靠來源（學校/採購網/公報/法規庫）",
+                  bad_src == 0, f"殘留 {bad_src} 筆")
+
+            cur.execute("""SELECT count(*) FROM agency_verification
+                            WHERE has_benefit
+                              AND (evidence_url IS NULL OR evidence_url = '')""")
+            no_url = cur.fetchone()[0]
+            check("每個「有補助」的機關都有證據網址",
+                  no_url == 0, f"{no_url} 筆缺網址")
+
+            # 🔴 negative control：has_benefit=False 不該存在 ——
+            #    我們從不寫 False，因為「查不到」≠「沒有」
+            cur.execute("""SELECT count(*) FROM agency_verification
+                            WHERE has_benefit IS FALSE""")
+            false_n = cur.fetchone()[0]
+            check("🔴 沒有任何機關被標成『確定沒有補助』",
+                  false_n == 0,
+                  f"{false_n} 筆 —— 「查不到」不可寫成 False")
+            cur.execute("""SELECT stage, count(*) FILTER (WHERE has_benefit),
+                                  count(*)
+                             FROM agency_verification
+                            WHERE stage <= 4 GROUP BY 1 ORDER BY 1""")
+            rows = cur.fetchall()
+            # 🔴 流程文件的表格數字必須真的來自資料庫，不是手打的。
+            #    2026-09-24 第一版就是文件與檔案對不起來（詳見單位清查 ⑤）。
+            flow_txt = (HERE.parent / "福利清查流程.md").read_text()
+            for stage, yes, total in rows:
+                check(f"流程文件階段{stage}：有補助 {yes} / 合計 {total}",
+                      f"**{yes}**" in flow_txt and f"| {total} |" in flow_txt,
+                      "文件數字與資料庫對不起來 —— 重跑並更新")
+            tot_yes = sum(r[1] for r in rows)
+            tot_all = sum(r[2] for r in rows)
+            check(f"流程文件合計：{tot_yes} / {tot_all}",
+                  f"**{tot_yes}**" in flow_txt and f"**{tot_all}**" in flow_txt)
+
+    except Exception as e:                      # pragma: no cover
+        check("資料庫檢查可執行", False, str(e)[:120])
 
     print(f"\n{'=' * 46}\n通過 {ok}　失敗 {fail}")
     return 1 if fail else 0
