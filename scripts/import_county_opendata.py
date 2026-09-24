@@ -275,7 +275,7 @@ def main() -> int:
             VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb, %s, %s,
                     CURRENT_DATE, true, 'unknown')
             RETURNING id""",
-            (nm, src["agency"], args.county,
+            (nm, src["agency"], county,
              # 🔴 優先用來源自己的描述（新北/桃園有完整說明），
              #    沒有才退回「縣市+名稱」這種只有骨架的字串
              (pick(r, "desc")[:1500] if pick(r, "desc")
