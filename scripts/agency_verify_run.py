@@ -61,7 +61,7 @@ STAGE_LABEL = {
 EXCLUDE_DOMAIN_RE = re.compile(
     r"https?://[^/]*("
     r"pcc\.gov\.tw"            # 政府電子採購網（招標公告）
-    r"|law[s]?\.[^/]*gov\.tw"  # 各級法規資料庫（含 laws.taipei）
+    r"|law[s]?\.[^/]*gov\.(tw|taipei)"  # 各級法規庫（含 laws.taipei/laws.gov.taipei）
     r"|law\.moj\.gov\.tw|lawbank|edu\.law"
     r"|\.edu\.tw"              # 🔴 所有學校網站
     r"|gazette\.nat\.gov\.tw"  # 政府公報
