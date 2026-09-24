@@ -310,10 +310,15 @@ def main() -> int:
                                    VALUES (%s, %s, %s)""",
                                 (bid, d[:200], pick(r, "office")[:200] or None))
         if office := pick(r, "office"):
+            # 🔴 截斷長度必須對上**資料庫實際上限**，不可憑印象寫。
+            #    2026-09-25 踩到：我截 100，但 phone 欄位是 varchar(50)
+            #    ⇒ StringDataRightTruncation 讓**整批 10 筆 rollback**，
+            #    而批次腳本 grep 濾掉了錯誤訊息 ——
+            #    **輸出看起來一切正常，資料一筆都沒進**。
             cur.execute("""INSERT INTO benefit_locations
                              (benefit_id, name, phone)
                            VALUES (%s, %s, %s)""",
-                        (bid, office[:200], phone[:100] or None))
+                        (bid, office[:200], (phone[:50] or None)))
     conn.commit()
     print(f"\n✅ 寫入 {ins} 筆")
     return 0
