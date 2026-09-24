@@ -208,10 +208,29 @@ def main() -> int:
     args = ap.parse_args()
 
     with psycopg2.connect(dbname="welfare_check") as c, c.cursor() as cur:
-        cur.execute("""SELECT name, stage FROM agency_verification
-                        WHERE has_benefit IS NULL AND stage <= 4
-                        ORDER BY stage, name LIMIT %s""", (args.limit,))
+        # 🔴 **絕不重跑人工判讀過的機關**（2026-09-24 自己踩到）：
+        #    我重置 pending 時連 verdict 一起清空，第三輪就把 8 筆
+        #    已經人工判退的（詐騙提醒、招標公告、表單欄位…）全部翻回
+        #    「有補助」—— **人工判定被自動規則覆蓋，而且沒有任何訊號**。
+        #    ⇒ manual_rejected 一律跳過；要重查必須人工明確清掉那個 verdict。
+        WHERE = ("""WHERE has_benefit IS NULL AND stage <= 4
+                      AND coalesce(verdict, '') <> 'manual_rejected'""")
+        cur.execute(f"""SELECT name, stage FROM agency_verification
+                        {WHERE} ORDER BY stage, name LIMIT %s""",
+                    (args.limit,))
         rows = cur.fetchall()
+
+        # 🔴 **數量必須從資料庫讀，不可手打 --limit**（同日踩兩次）：
+        #    第一次 `UPDATE 22` 卻跑 `--limit 20` → 差的 9 筆靜默沒處理，
+        #    而我後來批次補了 verdict，於是它們**看起來跟真的跑過一模一樣**。
+        cur.execute(f"SELECT count(*) FROM agency_verification {WHERE}")
+        total_pending = cur.fetchone()[0]
+
+    if len(rows) < total_pending:
+        print(f"🔴 待處理 {total_pending} 筆，但 --limit {args.limit} "
+              f"只會跑 {len(rows)} 筆 —— 差的 {total_pending - len(rows)} 筆"
+              f"會靜默沒處理。請改用 --limit {total_pending} 或不設限。")
+        return 1
 
     print(f"第三輪（讀網頁內容）：{len(rows)} 個機關"
           f"{'　dry-run' if args.dry_run else ''}\n")
