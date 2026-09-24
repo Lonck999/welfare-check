@@ -203,6 +203,20 @@ def main() -> int:
     # 🔴 key 可能是「臺中市-112084」（同縣市多個資料集），
     #    真正的縣市名要從 src["county"] 取，取不到才退回 key。
     county = src.get("county", args.county)
+    # 🔴 county 必須是**真的縣市名**，不可是來源 key（2026-09-25 踩到）：
+    #    SOURCES 的 key 會是「臺中市-112090」（同縣市多個資料集），
+    #    寫進 benefits.county 就變成一個不存在的縣市 ——
+    #    **臺中市使用者查不到那 29 筆，而且完全沒有錯誤訊息**。
+    VALID_COUNTIES = {
+        "臺北市", "新北市", "桃園市", "臺中市", "臺南市", "高雄市",
+        "基隆市", "新竹市", "新竹縣", "苗栗縣", "彰化縣", "南投縣",
+        "雲林縣", "嘉義市", "嘉義縣", "屏東縣", "宜蘭縣", "花蓮縣",
+        "臺東縣", "澎湖縣", "金門縣", "連江縣",
+    }
+    if county not in VALID_COUNTIES:
+        print(f"🔴 county「{county}」不是合法縣市名 —— "
+              f"請在 SOURCES[\"{args.county}\"] 裡補上 \"county\" 欄位")
+        return 1
     rows = fetch(src["url"])
     print(f"{args.county}（縣市={county}）：抓到 {len(rows)} 筆")
 

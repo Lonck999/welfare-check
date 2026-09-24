@@ -196,6 +196,29 @@ def main() -> int:
         zero = cur.fetchone()[0]
         check("沒有金額條件被填成 0", zero == 0, f"{zero} 筆是 0")
 
+        # 🔴 county 必須是真的縣市名（2026-09-25 踩到）：
+        #    匯入時誤用 SOURCES 的 key，29 筆變成「臺中市-112090」——
+        #    那個縣市不存在，臺中使用者永遠查不到，且完全不報錯。
+        cur.execute("""SELECT count(*) FROM benefits
+                        WHERE county IS NOT NULL AND county <> ''
+                          AND county NOT IN (
+                            '臺北市','新北市','桃園市','臺中市','臺南市','高雄市',
+                            '基隆市','新竹市','新竹縣','苗栗縣','彰化縣','南投縣',
+                            '雲林縣','嘉義市','嘉義縣','屏東縣','宜蘭縣','花蓮縣',
+                            '臺東縣','澎湖縣','金門縣','連江縣','全國')""")
+        bad_cty = cur.fetchone()[0]
+        check("county 都是合法縣市名", bad_cty == 0, f"{bad_cty} 筆不合法")
+
+        # 🔴 benefits.county 必須與 eligibility_conditions.counties 一致 ——
+        #    兩邊分岔會讓「縣市篩選」與「資格比對」給出不同答案
+        cur.execute("""SELECT count(*) FROM benefits
+                        WHERE county IS NOT NULL AND county <> ''
+                          AND jsonb_exists(eligibility_conditions, 'counties')
+                          AND NOT (eligibility_conditions->'counties')
+                                   @> to_jsonb(county)""")
+        mismatch = cur.fetchone()[0]
+        check("county 與 counties 一致", mismatch == 0, f"{mismatch} 筆不一致")
+
     print("\n" + "=" * 46)
     print(f"通過 {len(PASS)}　失敗 {len(FAIL)}")
     conn.rollback()
