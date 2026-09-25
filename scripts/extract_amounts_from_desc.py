@@ -162,10 +162,17 @@ def extract_amounts(text: str) -> tuple[int | None, int | None, str | None,
             v = int(m.group(2).replace(",", ""))
         except ValueError:
             continue
-        # 🔴 排除明顯不是金額的數字（年份、電話、身分證）
+        # 🔴 排除明顯不是金額的數字（電話、身分證）
         if v < 100 or v > 50_000_000:
             continue
-        if 1900 <= v <= 2100:          # 年份
+        # ⚠️ 年份排除**只在沒有「元」以外的金額語境時**才套用。
+        #    2026-09-26 踩到：「每人每胎次補助新臺幣2,000元」被
+        #    `1900 <= v <= 2100` 當成年份擋掉 ——
+        #    🔴 那條規則會誤殺**所有 2,000 元的補助**，
+        #       而結果是「這頁沒有金額」，跟真的沒有長得一模一樣。
+        #    正確判準：帶千分位逗號的（2,000）一定是金額，年份不會這樣寫；
+        #    裸數字 2026 才可能是年份。
+        if 1900 <= v <= 2100 and "," not in m.group(2):
             continue
         found.append((v, re.sub(r"\s+", " ", m.group(0))[:80]))
 
