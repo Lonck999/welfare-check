@@ -80,6 +80,26 @@ export const benefitLocations = pgTable('benefit_locations', {
 })
 
 /**
+ * 🔴 P4：每項福利「可以為誰申請」（一對多）
+ *
+ * Lonck 2026-09-24 訂：「有要幫家人申請才給其他人的選項，
+ * 沒有就只給自身」⇒ 使用者沒勾「幫家人」時，只顯示 role='self' 的。
+ *
+ * ⚠️ role 的字串必須與 questionnaire.ts 的 ApplyForRole、
+ *    前端 types.ts **三邊一致** —— 任何一邊改字串，
+ *    比對就查不到對應項目，而且**不會報錯，只會少給補助**。
+ */
+export const benefitApplicants = pgTable('benefit_applicants', {
+  id: serial('id').primaryKey(),
+  benefitId: integer('benefit_id')
+    .notNull()
+    .references(() => benefits.id, { onDelete: 'cascade' }),
+  role: text('role').notNull(),        // self / spouse / household / family
+  relation: text('relation'),          // parent / child / sibling / grandparent / other
+  note: text('note'),
+})
+
+/**
  * 每月批次更新的異動紀錄（網站化規劃第四節「6. 版本紀錄」）。
  * 一筆代表一次「找差異」的結果，approvedAt 為 null 代表尚未人工核准寫入 benefits 表。
  */

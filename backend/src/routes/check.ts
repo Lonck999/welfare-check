@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { and, eq, isNull, or } from 'drizzle-orm'
 import { db } from '../db/client.js'
-import { benefits, benefitDocuments, benefitLocations } from '../db/schema.js'
+import { benefits, benefitDocuments, benefitLocations, benefitApplicants } from '../db/schema.js'
 import { ALL_22_COUNTIES } from '../db/seed-data/counties.js'
 import { calculateAge, calculatePerCapitaAssets, calculatePerCapitaMonthlyIncome, evaluateIncomeThreshold } from '../logic/calculations.js'
 import { evaluateEligibility, type ApplicantProfile, type EligibilityConditions } from '../logic/eligibility.js'
@@ -144,6 +144,8 @@ export interface BenefitResult {
   documents: Array<{ name: string; obtainLocation: string | null }>
   locations: Array<{ name: string; address: string | null; phone: string | null; website: string | null }>
   priority: Priority
+  /** 🔴 P4：這筆補助可以為誰申請（self/spouse/household/family）；空陣列＝尚未標註 */
+  applicantRoles: string[]
   /** 🔴 P2-① 成功率：1 好申請 / 2 普通 / 3 難。null = 未評估（不可當成好申請） */
   effortLevel: number | null
   /** 名額有限或競爭審查 —— 搶不到就沒了 */
@@ -171,7 +173,13 @@ function computePriority(isTimeSensitive: boolean, verdict: 'confirmed' | 'possi
 const PRIORITY_ORDER: Record<Priority, number> = { urgent: 0, normal: 1, review: 2 }
 
 /** 對單一 ApplicantProfile 跑完整資格比對，回傳 confirmed/possible 兩組（含所需文件與申請地點） */
-async function evaluateAllBenefits(profile: ApplicantProfile, county: string, workCounty: string | undefined) {
+async function evaluateAllBenefits(
+  profile: ApplicantProfile,
+  county: string,
+  workCounty: string | undefined,
+  // 🔴 P4：使用者勾了要幫誰申請（沒勾＝只找自己的）
+  applyForRoles: string[] = [],
+) {
   const allBenefits = await db
     .select()
     .from(benefits)
@@ -195,12 +203,21 @@ async function evaluateAllBenefits(profile: ApplicantProfile, county: string, wo
 
   const documentsByBenefit = new Map<number, Array<{ name: string; obtainLocation: string | null }>>()
   const locationsByBenefit = new Map<number, BenefitResult['locations']>()
+  // 🔴 P4：每項補助可以為誰申請（role 集合）
+  const applicantsByBenefit = new Map<number, Set<string>>()
 
   if (relevantIds.length > 0) {
-    const [documents, locations] = await Promise.all([
+    const [documents, locations, applicants] = await Promise.all([
       db.select().from(benefitDocuments),
       db.select().from(benefitLocations),
+      db.select().from(benefitApplicants),
     ])
+    for (const a of applicants) {
+      if (!relevantIds.includes(a.benefitId)) continue
+      const set = applicantsByBenefit.get(a.benefitId) ?? new Set<string>()
+      set.add(a.role)
+      applicantsByBenefit.set(a.benefitId, set)
+    }
     for (const doc of documents) {
       if (!relevantIds.includes(doc.benefitId)) continue
       const list = documentsByBenefit.get(doc.benefitId) ?? []
@@ -238,6 +255,20 @@ async function evaluateAllBenefits(profile: ApplicantProfile, county: string, wo
       priority: computePriority(benefit.isTimeSensitive, verdict),
       effortLevel: benefit.effortLevel ?? null,
       quotaLimited: benefit.quotaLimited ?? null,
+      applicantRoles: [...(applicantsByBenefit.get(benefit.id) ?? [])],
+    }
+
+    // 🔴 P4 篩選（Lonck 2026-09-24 訂）：
+    //    「沒有要幫家人申請，就只給自身」
+    //    ⇒ 使用者沒勾 applyForRoles 時，排除「只能為別人申請」的項目
+    //      （例如喪葬補助、托育補助 —— 那些沒有 role='self'）
+    //    ⚠️ 沒標註申請對象的（空集合）一律保留 —— 未標註 ≠ 不能申請，
+    //       367 筆還沒標，丟掉它們等於憑資料缺漏少給補助。
+    const roles = applicantsByBenefit.get(benefit.id)
+    const wants = applyForRoles
+    if (roles && roles.size > 0) {
+      const ok = roles.has('self') || wants.some((w: string) => roles.has(w))
+      if (!ok) continue
     }
     if (verdict === 'confirmed') confirmed.push(entry)
     else possible.push(entry)
@@ -294,7 +325,11 @@ export async function registerCheckRoute(app: FastifyInstance) {
     const incomeThresholdResult = evaluateIncomeThreshold(perCapitaMonthlyIncome, minLivingExpense)
 
     const selfProfile = buildApplicantProfile(answers, incomeThresholdResult, asOf)
-    const self = await evaluateAllBenefits(selfProfile, answers.county, answers.workCounty)
+    const self = await evaluateAllBenefits(
+      selfProfile, answers.county, answers.workCounty,
+      // 🔴 P4：本人這組只給「自己能申請的」＋使用者明確勾選要幫誰辦的
+      answers.applyForRoles ?? [],
+    )
 
     // 第 13 題：非同戶籍家人——依 SKILL.md 原始規格「依家人的戶籍縣市與年齡分別搜索」，
     // 只用戶籍縣市/年齡/（若為單人戶）所得動產做比對，其餘缺乏資料的條件一律列入⚠️可能符合，
@@ -319,7 +354,12 @@ export async function registerCheckRoute(app: FastifyInstance) {
         incomeThresholdResult: memberIncomeThreshold,
         perCapitaAssets: memberPerCapitaAssets,
       }
-      const memberResult = await evaluateAllBenefits(memberProfile, member.county, undefined)
+      const memberResult = await evaluateAllBenefits(
+        memberProfile, member.county, undefined,
+        // 🔴 家庭成員這組本來就是「幫別人找」——
+        //    以該成員為主體，四種 role 全開，不再二次篩選
+        ['self', 'spouse', 'household', 'family'],
+      )
       familyMembers.push({
         relationship: member.relationship,
         county: member.county,
