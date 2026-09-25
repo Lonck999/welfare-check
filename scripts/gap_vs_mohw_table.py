@@ -132,11 +132,16 @@ def main() -> int:
             if i >= len(flags) or flags[i] != "V":
                 continue
             total_should += 1
-            # 🔴 用 name 或 description 比對（同義詞任一命中即算有）
+            # 🔴 比對要含「全國層級」的筆（2026-09-25 修）：
+            #    這 6 項是中央訂辦法、地方執行的**全國統一制度**
+            #    （育兒津貼、弱勢兒少生活扶助、國民年金保費減免…），
+            #    主條目存成 county='全國' —— 任何縣市居民都適用。
+            #    ⚠️ 只比對 county=該縣市的話，會把「已經有的」報成缺口，
+            #    然後我就會去抓 10 份一模一樣的中央規定。
             like = " OR ".join(
                 ["name ~ %s"] * len(pats) + ["description ~ %s"] * len(pats))
             cur.execute(f"""SELECT count(*) FROM benefits
-                             WHERE county = %s AND ({like})""",
+                             WHERE county IN (%s, '全國') AND ({like})""",
                         (cty, *pats, *pats))
             if cur.fetchone()[0]:
                 total_have += 1
