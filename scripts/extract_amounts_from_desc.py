@@ -54,7 +54,13 @@ NOT_AMOUNT = re.compile(r"工本費|規費|手續費|掛號費|郵資|自付|負
                         r"收費|費用為|應繳|預算|經費|億")
 
 UNIT_MONTHLY = re.compile(r"每月|按月|月領|每人每月")
-UNIT_YEARLY = re.compile(r"每年|年度|每學年")
+# 🔴 「年度預算」「年度結束」是政府自己的會計年度，**不是給付週期**
+#    （2026-09-26 踩到：嘉義市生育津貼「每胎三萬元」被判成 yearly，
+#      真因是頁尾「由本府編列年度預算支應」）
+#    ⚠️ 判錯單位會讓使用者以為每年都能領一次。
+UNIT_YEARLY = re.compile(r"每年(?!度預算)|每學年|每一年|按年(?!度)")
+UNIT_ONCE = re.compile(r"每胎|每一胎|每名新生兒|每一新生兒|一次性|"
+                       r"每人一次|限領一次")
 
 # 🔴 中文數字金額（2026-09-25 發現，影響全部法規頁）：
 #    政府**法規條文**一律用中文數字寫金額 ——
@@ -109,6 +115,26 @@ CN_FOLLOW_RE = re.compile(
 )
 
 
+def _near(text: str, start: int, end: int, span: int = 25) -> str:
+    """取金額前後的上下文，🔴 **不跨句**。
+
+    ⚠️ 2026-09-26 踩到：嘉義市「每生育一名新生兒補助新臺幣三萬元。
+       六、經費來源：由本府編列年度預算支應」——
+       固定 25 字視窗跨過句號吃到下一句的「經費/預算」，
+       於是 NOT_AMOUNT 把**正確的金額**擋掉了。
+    🔴 而擋掉的結果是「這頁沒有金額」，跟真的沒有長得一模一樣。
+    """
+    left = text[max(0, start - span): start]
+    right = text[end: end + span]
+    # 只取最後一個句界之後 / 第一個句界之前
+    for sep in "。；\n":
+        if sep in left:
+            left = left.rsplit(sep, 1)[1]
+        if sep in right:
+            right = right.split(sep, 1)[0]
+    return left + text[start:end] + right
+
+
 def extract_amounts(text: str) -> tuple[int | None, int | None, str | None,
                                         list[str]]:
     """回傳 (min, max, unit, 證據片段)。抽不到回 (None, None, None, [])。"""
@@ -116,7 +142,7 @@ def extract_amounts(text: str) -> tuple[int | None, int | None, str | None,
     # 🔴 順序很重要：先把「X萬Y,Z00元」整段吃掉並從文字中移除，
     #    否則後面兩個 regex 會把它拆成兩個錯誤的數字。
     for m in MIXED_RE.finditer(text):
-        near = text[max(0, m.start(2) - 25): m.end(3) + 25]
+        near = _near(text, m.start(2), m.end(3))
         if NOT_AMOUNT.search(near):
             continue
         try:
@@ -129,7 +155,7 @@ def extract_amounts(text: str) -> tuple[int | None, int | None, str | None,
     text = MIXED_RE.sub(" ", text)
 
     for m in PAY_RE.finditer(text):
-        near = text[max(0, m.start(2) - 25): m.end(2) + 25]
+        near = _near(text, m.start(2), m.end(2))
         if NOT_AMOUNT.search(near):
             continue
         try:
@@ -144,7 +170,7 @@ def extract_amounts(text: str) -> tuple[int | None, int | None, str | None,
         found.append((v, re.sub(r"\s+", " ", m.group(0))[:80]))
 
     for m in WAN_RE.finditer(text):
-        near = text[max(0, m.start(2) - 25): m.end(2) + 25]
+        near = _near(text, m.start(2), m.end(2))
         if NOT_AMOUNT.search(near):
             continue
         try:
@@ -158,7 +184,7 @@ def extract_amounts(text: str) -> tuple[int | None, int | None, str | None,
     # 🔴 中文數字金額（法規條文專用寫法）
     cn_hit = False
     for m in CN_AMOUNT_RE.finditer(text):
-        near = text[max(0, m.start(2) - 25): m.end(2) + 25]
+        near = _near(text, m.start(2), m.end(2))
         if NOT_AMOUNT.search(near):
             continue
         base = cn_to_int(m.group(2))
@@ -177,7 +203,7 @@ def extract_amounts(text: str) -> tuple[int | None, int | None, str | None,
     #    （必須帶「萬/千」單位詞，否則「三個月」「二款」會被誤抓）
     if cn_hit:
         for m in CN_FOLLOW_RE.finditer(text):
-            near = text[max(0, m.start(1) - 25): m.end(1) + 25]
+            near = _near(text, m.start(1), m.end(1))
             if NOT_AMOUNT.search(near):
                 continue
             base = cn_to_int(m.group(1))
@@ -193,7 +219,9 @@ def extract_amounts(text: str) -> tuple[int | None, int | None, str | None,
     if not found:
         return None, None, None, []
     vals = [v for v, _ in found]
-    unit = ("monthly" if UNIT_MONTHLY.search(text)
+    # 🔴 順序有意義：「每胎」這類一次性語句最明確，要先判
+    unit = ("one_time" if UNIT_ONCE.search(text)
+            else "monthly" if UNIT_MONTHLY.search(text)
             else "yearly" if UNIT_YEARLY.search(text)
             else "one_time")
     return min(vals), max(vals), unit, [e for _, e in found[:3]]
