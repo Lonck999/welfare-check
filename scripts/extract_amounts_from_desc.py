@@ -56,6 +56,58 @@ NOT_AMOUNT = re.compile(r"工本費|規費|手續費|掛號費|郵資|自付|負
 UNIT_MONTHLY = re.compile(r"每月|按月|月領|每人每月")
 UNIT_YEARLY = re.compile(r"每年|年度|每學年")
 
+# 🔴 中文數字金額（2026-09-25 發現，影響全部法規頁）：
+#    政府**法規條文**一律用中文數字寫金額 ——
+#      金門「單胞胎新臺幣二萬元，雙胞胎新臺幣六萬元」
+#      連江「第一胎新臺幣三萬元，第二胎六萬元…第四胎十五萬元」
+#      嘉義市「每生育一名新生兒補助新臺幣三萬元」
+#    ⚠️ 只認阿拉伯數字時，這些頁面會回報「0 個金額」——
+#       而那看起來跟「這頁真的沒有補助」一模一樣，**完全沒有訊號**。
+#    這正是 5 個縣市裡 4 個抓到官方頁卻抽不到金額的真因。
+_CN_DIGIT = {"〇": 0, "零": 0, "一": 1, "二": 2, "兩": 2, "三": 3, "四": 4,
+             "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
+
+
+def cn_to_int(s: str) -> int | None:
+    """把「十五」「二」「一百二十」轉成整數。看不懂回 None。"""
+    s = s.strip()
+    if not s or any(ch not in _CN_DIGIT and ch not in "十百千" for ch in s):
+        return None
+    total, section, digit = 0, 0, 0
+    for ch in s:
+        if ch in _CN_DIGIT:
+            digit = _CN_DIGIT[ch]
+        elif ch == "十":
+            section += (digit or 1) * 10
+            digit = 0
+        elif ch == "百":
+            section += (digit or 1) * 100
+            digit = 0
+        elif ch == "千":
+            section += (digit or 1) * 1000
+            digit = 0
+    return total + section + digit
+
+
+# ⚠️ 觸發詞可能離金額很遠（連江：「…申請補助者，以設籍本縣之日後出生之
+#    胞胎起算第一胎新臺幣三萬元」—— 中間隔了 20 幾個字）
+#    ⇒ 視窗放寬到 40 字，並把「新臺幣」本身也當成觸發詞
+CN_AMOUNT_RE = re.compile(
+    r"(補助|津貼|發給|發放|核給|核發|給付|獎勵|新臺幣|新台幣|為)"
+    r"[^。；\n]{0,40}?"
+    r"([〇零一二三四五六七八九十百千兩]{1,8})\s*(萬|千)?\s*元"
+)
+
+# 🔴 接續列舉的金額（同一句裡的第 2、3、4 個）：
+#    「第一胎新臺幣三萬元，第二胎六萬元，第三胎九萬元，第四胎十五萬元」
+#    ⚠️ 只有第一個前面有「補助/新臺幣」，後面全是裸的
+#       ⇒ 用 CN_AMOUNT_RE 只會抓到第一個，區間變成 30000~30000，
+#          而**那個數字本身是對的**，所以看起來完全正常（沒有訊號）。
+#    ⇒ 一句裡已命中過中文金額時，才用這個寬鬆式抓其餘的。
+CN_FOLLOW_RE = re.compile(
+    r"([〇零一二三四五六七八九十百千兩]{1,8})\s*(萬|千)\s*元"
+)
+
 
 def extract_amounts(text: str) -> tuple[int | None, int | None, str | None,
                                         list[str]]:
@@ -103,9 +155,43 @@ def extract_amounts(text: str) -> tuple[int | None, int | None, str | None,
             continue
         found.append((v, re.sub(r"\s+", " ", m.group(0))[:80]))
 
+    # 🔴 中文數字金額（法規條文專用寫法）
+    cn_hit = False
+    for m in CN_AMOUNT_RE.finditer(text):
+        near = text[max(0, m.start(2) - 25): m.end(2) + 25]
+        if NOT_AMOUNT.search(near):
+            continue
+        base = cn_to_int(m.group(2))
+        if base is None or base == 0:
+            continue
+        mult = {"萬": 10_000, "千": 1_000}.get(m.group(3) or "", 1)
+        v = base * mult
+        # ⚠️ 沒有單位詞時（「五千元」以外的裸中文數字）多半是條號、期數，
+        #    例如「第三條」「三個月內」—— 要求至少 100 元才採信
+        if not (100 <= v <= 50_000_000):
+            continue
+        found.append((v, re.sub(r"\s+", " ", m.group(0))[:80]))
+        cn_hit = True
+
+    # 🔴 同句裡已命中中文金額 ⇒ 用寬鬆式補抓接續列舉的
+    #    （必須帶「萬/千」單位詞，否則「三個月」「二款」會被誤抓）
+    if cn_hit:
+        for m in CN_FOLLOW_RE.finditer(text):
+            near = text[max(0, m.start(1) - 25): m.end(1) + 25]
+            if NOT_AMOUNT.search(near):
+                continue
+            base = cn_to_int(m.group(1))
+            if base is None or base == 0:
+                continue
+            v = base * {"萬": 10_000, "千": 1_000}[m.group(2)]
+            if not (100 <= v <= 50_000_000):
+                continue
+            ev = re.sub(r"\s+", " ", m.group(0))[:80]
+            if all(v != x for x, _ in found):
+                found.append((v, ev))
+
     if not found:
         return None, None, None, []
-
     vals = [v for v, _ in found]
     unit = ("monthly" if UNIT_MONTHLY.search(text)
             else "yearly" if UNIT_YEARLY.search(text)
