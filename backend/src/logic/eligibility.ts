@@ -119,6 +119,12 @@ function checkElderOver(conditions: EligibilityConditions, applicant: ApplicantP
 
 function checkCounties(conditions: EligibilityConditions, applicant: ApplicantProfile): ConditionCheck {
   if (!conditions.counties || conditions.counties.length === 0) return 'satisfied'
+  // 🔴 「全國」是萬用值，不是一個縣市（2026-09-25 加）：
+  //    全國統一制度（勞保老年年金、育兒津貼、國民年金保費補助…）
+  //    存成 counties: ['全國']，任何縣市的居民都適用。
+  //    ⚠️ 不加這條的話，那 21 筆會**永遠 failed** ——
+  //    使用者少領到最多人能領的那幾項，而且完全沒有錯誤訊息。
+  if (conditions.counties.includes('全國')) return 'satisfied'
   if (!applicant.county && !applicant.workCounty) return 'missing_data'
   const matched = conditions.counties.some(
     (c) => c === applicant.county || c === applicant.workCounty,
