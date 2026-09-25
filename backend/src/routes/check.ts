@@ -144,6 +144,10 @@ export interface BenefitResult {
   documents: Array<{ name: string; obtainLocation: string | null }>
   locations: Array<{ name: string; address: string | null; phone: string | null; website: string | null }>
   priority: Priority
+  /** 🔴 P2-① 成功率：1 好申請 / 2 普通 / 3 難。null = 未評估（不可當成好申請） */
+  effortLevel: number | null
+  /** 名額有限或競爭審查 —— 搶不到就沒了 */
+  quotaLimited: boolean | null
 }
 
 /** 依居住縣市查第 1 類「低收入戶/中低收入戶認定」的官方門檻數字（見 01-low-income-threshold.ts） */
@@ -232,12 +236,27 @@ async function evaluateAllBenefits(profile: ApplicantProfile, county: string, wo
       documents: documentsByBenefit.get(benefit.id) ?? [],
       locations: locationsByBenefit.get(benefit.id) ?? [],
       priority: computePriority(benefit.isTimeSensitive, verdict),
+      effortLevel: benefit.effortLevel ?? null,
+      quotaLimited: benefit.quotaLimited ?? null,
     }
     if (verdict === 'confirmed') confirmed.push(entry)
     else possible.push(entry)
   }
 
-  const byPriority = (a: BenefitResult, b: BenefitResult) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
+  // 🔴 P2 排序（Lonck 訂的順位）：① 成功率高 ② 期限近 ③ 金額大
+  //    effortLevel 1(易) < 2 < 3(難)；null = 未評估，排在已評估的後面
+  //    ⚠️ 不可把 null 當成「好申請」—— 那會讓「沒查過」的排到最前面
+  const byPriority = (a: BenefitResult, b: BenefitResult) => {
+    const p = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
+    if (p !== 0) return p
+    const ea = a.effortLevel ?? 99
+    const eb = b.effortLevel ?? 99
+    if (ea !== eb) return ea - eb
+    // 名額有限的往前（搶不到就沒了）
+    const qa = a.quotaLimited ? 0 : 1
+    const qb = b.quotaLimited ? 0 : 1
+    return qa - qb
+  }
   confirmed.sort(byPriority)
   possible.sort(byPriority)
 

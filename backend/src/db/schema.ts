@@ -1,5 +1,6 @@
 import {
   pgTable,
+  smallint,
   serial,
   integer,
   text,
@@ -38,6 +39,17 @@ export const benefits = pgTable('benefits', {
   sourceUrl: text('source_url').notNull(),
   sourceExcerpt: text('source_excerpt').notNull(), // 從官方頁面擷取、支撐內容的原文片段
   lastVerifiedDate: date('last_verified_date').notNull(),
+  // 🔴 2026-09-24 migration 加的欄位，但當時**漏了同步這份 schema**
+  //    ⇒ 後端讀不到，等於資料庫填了也用不到（2026-09-25 補）
+  effortLevel: smallint('effort_level'),       // 1 好申請 / 2 普通 / 3 難；null = 未評估
+  quotaLimited: boolean('quota_limited'),      // 有名額或競爭審查
+  amountMin: integer('amount_min'),
+  amountMax: integer('amount_max'),
+  amountUnit: text('amount_unit'),             // monthly / yearly / one_time
+  amountNote: text('amount_note'),
+  deadlineType: text('deadline_type'),         // always/announced/event/annual/fixed/unknown
+  deadlineDate: date('deadline_date'),
+  deadlineRule: jsonb('deadline_rule'),
 
   isActive: boolean('is_active').notNull().default(true), // false = 疑似已下架，保留歷史但不再顯示給使用者
 
