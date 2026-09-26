@@ -39,6 +39,38 @@ ITEM_RE = re.compile(
     re.M,
 )
 
+# 🔴 第二種格式：政府公文常用「(N)項目名：金額」或「a.條件，金額」
+#    且**同一行內**用 <br> 分隔多個項目（2026-09-26 從高雄實查）：
+#
+#      求職交通補助金：每人每次得發給新臺幣500元
+#      <br>a.就業地點…30公里以上未滿50公里，每月發給新臺幣一千元
+#      <br>b.…50公里以上未滿70公里，每月發給新臺幣二千元
+#      <br>(2)搬遷補助金：以搬遷費用收據所列總額核實發給，最高發給新臺幣三萬元
+#
+#    ⚠️ ITEM_RE 對這頁**拆出 0 項** ⇒ fallback 回整頁一筆
+#       → 區間變成 500~30,000（60 倍），而 500 是求職交通、
+#         30,000 是搬遷補助 —— **兩種完全不同的補助**
+#    🔴 而那個區間看起來完全合理，使用者無從分辨。
+#
+# 判準：①「名稱：…金額」的具名項目（名稱不含數字、長度 3~18）
+#      ② a./b./c. 這種**同一項目的分級**要合併，不是拆開
+NAMED_RE = re.compile(
+    # 前綴：行首／<br>／全形空白／標點，後面可跟「(N)」「N.」「a.」等編號
+    r"(?:^|<br>|　|[\s、，。；])"
+    r"\s*(?:[(（]\s*(?:\d{1,2}|[a-z])\s*[)）]|(?:\d{1,2}|[a-z])[.、])?\s*"
+    # 項目名：不含冒號、標籤、數字、括號
+    # 🔴 必須非貪婪（{3,18}?）—— 貪婪會吃掉「搬遷補助金」全部，
+    #    後面的 (?:補助金|補助|…) 就沒東西可配 ⇒ 整條 regex 失敗
+    #    ⚠️ 症狀是「只命中第一個項目」，看起來像格式不支援
+    r"([^：:<>\n0-9()（）]{2,16}?(?:補助金|補助費|補助|津貼|獎勵金|給付|費))"
+    r"\s*[：:]",
+    re.M,
+)
+
+# ③ 分級條件行（a./b./c. 或「…以上未滿…」）—— 同一項目的級距，不可拆成不同項目
+TIER_RE = re.compile(r"(?:^|<br>)\s*(?:[a-z]|\([a-z]\))[.、]|以上未滿|"
+                     r"級距|依.{0,8}距離|按.{0,6}年資")
+
 # ② 分組標題：「114年出生新生兒」「一百十四年起」「自115年1月1日起」
 GROUP_RE = re.compile(
     r"^\s*(?:自)?\s*(\d{3})\s*年(?:度)?"
@@ -165,7 +197,34 @@ def split_items(text: str) -> list[SubsidyItem]:
             period=period_at.get(i),
             evidence=ev,
         ))
-    return items
+    if items:
+        return items
+
+    # 🔴 第二種格式（ITEM_RE 拆不出來才用）：
+    #    「項目名：…」用 NAMED_RE 找具名項目，以它們的位置切段落
+    #    ⚠️ 必須以**位置**切，不能逐行 —— 高雄那頁整段擠在同一行用 <br> 分隔
+    marks = [(m.start(1), SP.sub("", m.group(1)))
+             for m in NAMED_RE.finditer(text)]
+    if len(marks) < 2:
+        return []
+    for idx, (pos, nm) in enumerate(marks):
+        end = marks[idx + 1][0] if idx + 1 < len(marks) else len(text)
+        seg = text[pos:end]
+        # ⚠️ 段落過長多半是抓錯邊界（整頁被當成一段）
+        if len(seg) > 1200:
+            seg = seg[:1200]
+        amin, amax, unit, ev = extract_amounts(seg)
+        if amin is None:
+            continue
+        items.append(SubsidyItem(
+            name=nm,
+            raw=SP.sub(" ", seg[:200]),
+            amount_min=amin, amount_max=amax, amount_unit=unit,
+            period=None,
+            evidence=ev,
+        ))
+    # 🔴 只拆出 1 項等於沒拆 —— 回空讓呼叫端 fallback，別假裝成功
+    return items if len(items) >= 2 else []
 
 
 def latest_only(items: list[SubsidyItem]) -> list[SubsidyItem]:
