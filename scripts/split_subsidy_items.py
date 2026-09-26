@@ -51,6 +51,7 @@ GROUP_RE = re.compile(
 @dataclass
 class SubsidyItem:
     """一頁裡的單一補助項目。"""
+
     name: str
     raw: str
     amount_min: int | None = None
@@ -70,6 +71,64 @@ def roc_to_ad(roc: str) -> str | None:
     if not (100 <= n <= 130):
         return None
     return str(n + 1911)
+
+
+# 🔴 政府給付類型的固定變體（2026-09-26 從資料庫實查，不是憑印象列）
+#    實際尾字分佈：補助 125／救助 24／扶助 19／津貼 17／補助費 5／
+#                  減免 3／補助金 3／禮金 2／慰問金 2／獎勵金 2／優惠 1／給付 1
+#
+# ⚠️ 為什麼需要它：這批 363 筆的主題名是**我們自己取的**，
+#    跟官方用語系統性不一致。已撞到三次：
+#      我們「生育獎勵金」  官方「生育津貼」
+#      我們「房屋修繕補助」官方「改善低收入戶住宅設施設備補助」
+#      我們「中低醫療看護」官方「中低收入老人傷病醫療暨看護費用補助」
+# 🔴 名稱對不上時原本 fallback 成「取金額最大」——
+#    這次剛好對（20,000 > 3,000），但主項目金額**不保證**比附屬項目大。
+PAYOUT_SUFFIX = re.compile(
+    r"(津貼|獎勵金|獎助金|補助金|補助費|補助款|補助|慰問金|禮金|"
+    r"給付|代金|扶助|救助|優惠|減免|點數|費用)+$"
+)
+
+
+def core_name(name: str) -> str:
+    """剝掉給付類型尾字，只留主題核心。
+
+    「生育獎勵金」→「生育」；「生育津貼」→「生育」⇒ 兩者可比對。
+    🔴 剝到空字串就回原字串 —— 否則「津貼」這種純類型名會變成 ""，
+       而空字串會命中**任何**名稱（`"" in x` 永遠 True），
+       ⚠️ 那會讓第一個項目永遠被當成主項目，且完全沒有訊號。
+    """
+    s = re.sub(r"[（(].*?[)）]", "", name).strip()
+    s = re.sub(r"^(地方|中央|全國|本市|本縣)", "", s)
+    stripped = PAYOUT_SUFFIX.sub("", s).strip()
+    return stripped or s
+
+
+def same_topic(a: str, b: str) -> bool:
+    """兩個名稱是否指同一個補助主題（過同義詞後比對）。
+
+    🔴 三層判準，由嚴到寬（2026-09-26 雙向驗證後定案）：
+      ① 核心名互為子字串 —— 「生育」⊂「生育」✅
+      ② 🔴 **字元交集比例** —— 詞序不同時用（「老人重陽禮金」↔
+         「重陽敬老禮金」核心名是「老人重陽」vs「重陽敬老」，
+         互不為子字串但共用「重陽」）
+      ③ 都不成立 → False
+
+    ⚠️ ②的門檻設 0.5 是因為 negative control 逼出來的：
+       「房屋修繕」vs「房屋租金」共用「房屋」= 0.5，**必須擋掉**
+       （那是兩種完全不同的補助），所以門檻要 **> 0.5** 而非 >=。
+    """
+    ca, cb = core_name(a), core_name(b)
+    if not ca or not cb:
+        return False
+    if ca in cb or cb in ca:
+        return True
+    # ② 字元交集（短的那邊有幾成字出現在長的那邊）
+    short, long = (ca, cb) if len(ca) <= len(cb) else (cb, ca)
+    if len(short) < 2:
+        return False
+    hit = sum(1 for ch in short if ch in long)
+    return hit / len(short) > 0.5
 
 
 def split_items(text: str) -> list[SubsidyItem]:

@@ -34,6 +34,9 @@ from extract_amounts_from_desc import extract_amounts  # noqa: E402
 from fetch_local_benefit import (  # noqa: E402
     COUNTY_DOMAIN, extract, search, strip_noise,
 )
+from split_subsidy_items import (  # noqa: E402
+    SubsidyItem, latest_only, same_topic, split_items,
+)
 
 SP = re.compile(r"\s+")
 # 🔴 這些字出現在描述裡＝這筆是空殼
@@ -140,8 +143,40 @@ def main() -> int:
             print("      🔴 找不到該縣市官方頁 → 保持原樣不動")
             continue
         url, txt = hit
-        amin, amax, unit, ev = extract_amounts(txt)
-        desc = build_desc(county, name, url, txt, amin, amax, unit, ev)
+        # 🔴 C 方案優先：先試著把一頁拆成多個補助項目
+        #    拆得出來 → 主筆用「最新年度的主項目」，其餘寫進描述
+        #    拆不出來 → fallback 回 A（整頁一筆，列出金額出處）
+        items = latest_only(split_items(txt))
+        if len(items) >= 2:
+            # 🔴 主項目：先過同義詞比對（Lonck 2026-09-26 選 B）
+            #    ⚠️ 原本 fallback 是「取金額最大」—— 宜蘭那次剛好對
+            #       （生育津貼 20,000 > 產檢交通費 3,000），但主項目金額
+            #       **不保證**比附屬項目大，那個 fallback 只是運氣好。
+            main = next((i for i in items if same_topic(i.name, name)), None)
+            fallback = main is None
+            if main is None:
+                main = max(items, key=lambda i: i.amount_max or 0)
+            others = [i for i in items if i is not main]
+            amin, amax, unit = (main.amount_min, main.amount_max,
+                                main.amount_unit)
+            ev = main.evidence
+            extra = ("　⚠️ 同一頁另有：" +
+                     "；".join(f"{i.name} {i.amount_min:,} 元"
+                               + (f"（{i.period} 年起）" if i.period else "")
+                               for i in others[:4]) + "。")
+            print(f"      🔸 拆出 {len(items)} 項　主項目「{main.name}」"
+                  f"{amin}~{amax}"
+                  + ("　🔴 同義詞對不上→取金額最大（推測）" if fallback else ""))
+            # 🔴 fallback 時必須讓使用者看得出「這是推測的」
+            #    ⚠️ 不標的話，推測出來的主項目跟比對出來的長得一模一樣
+            if fallback:
+                extra += ("🔴 主項目由金額大小推測（官方頁的項目名與本筆名稱"
+                          "對不上），請點來源網址確認哪一項才是你要申請的。")
+        else:
+            amin, amax, unit, ev = extract_amounts(txt)
+            extra = ""
+            main = None
+        desc = build_desc(county, name, url, txt, amin, amax, unit, ev) + extra
         ok += 1
         print(f"      ✅ {url[:66]}")
         print(f"         {len(txt)} 字　金額 {amin}~{amax}　描述 {len(desc)} 字")
