@@ -62,6 +62,37 @@ def own_domain(url: str, county: str) -> bool:
     return any(d in url for d in doms)
 
 
+def topic_hit(txt: str, topic: str) -> bool:
+    """🔴 抓回來的頁面主題對不對（2026-09-27 加，這是最嚴重的一個洞）。
+
+    ⚠️ 踩雷經過：查「瓦斯費補助」抓回**冷氣汰換補助**的頁面 ——
+       金門記成「750~1,000,000 元」、雲林「300~2,000,000 元」。
+    🔴 這比「沒抓到」糟糕得多：使用者看到的是**完全錯的補助**，
+       而金額、資格、來源網址全都長得很正常，**沒有任何訊號**。
+       根因是搜尋找不到那個主題時，會回「最接近的補助頁」。
+
+    判準：主題的**核心詞**至少要有一個出現在正文裡。
+      「瓦斯費補助（地方明細）」→ 核心詞「瓦斯」
+      ⚠️ 不能用整個主題名比對 —— 官方用語與我們的分類名常常不同
+         （已知三例：房屋修繕 vs 住宅設施設備、
+           中低醫療看護 vs 傷病醫療暨看護費用、生育獎勵金 vs 生育津貼）
+      ⇒ 拆成 2 字詞組，任一命中即可；但**必須是主題特有的詞**，
+        所以先剝掉「補助/津貼/地方/明細」這類到處都有的字。
+    """
+    # 🔴 括號內常是**最關鍵的限定詞**，不可整段剝掉（2026-09-27 踩到）：
+    #    「環保節能補助（電動機車地方加碼）」剝掉括號 → 只剩「環保節能」
+    #    ⇒ 真正的電動機車補助頁反而被判「主題不符」而誤殺
+    #    ⇒ 改成把括號換成分隔符，內容一併參與比對
+    clean = re.sub(r"[（()）]", "／", topic)
+    clean = re.sub(r"補助|津貼|獎勵金|補貼|方案|地方|明細|加碼|優惠|"
+                   r"縣市政府|工作地點|其他|福利|入口|申請|／", "", clean).strip()
+    # 剝完太短（例如「食物銀行」剝成「食物銀行」還算長，但「租金補貼」剝成「租金」）
+    if len(clean) < 2:
+        return True          # 🔴 無法判斷就放行，交給人工抽查 —— 不誤殺
+    grams = {clean[i:i + 2] for i in range(len(clean) - 1)}
+    return any(g in txt for g in grams)
+
+
 def best_page(county: str, topic: str, tries: int = 2
               ) -> tuple[str, str] | None:
     """回傳 (url, 正文)。找不到回 None。"""
@@ -86,6 +117,11 @@ def best_page(county: str, topic: str, tries: int = 2
             except Exception:
                 continue
             if len(txt) >= 400:
+                # 🔴 主題必須對得上 —— 否則會抓回「最接近的補助頁」
+                #    （實測：查瓦斯費抓到冷氣汰換，金額記成 750~1,000,000）
+                if not topic_hit(txt, topic):
+                    print(f"      ⏭ 主題不符，跳過：{u[:56]}")
+                    continue
                 return u, txt
     return None
 
