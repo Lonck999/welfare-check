@@ -154,6 +154,15 @@ def build_desc(county: str, topic: str, url: str, txt: str,
         parts.append(SP.sub(" ", s).strip() + "。")
     if not amin:
         parts.append("🔴 金額未在官方頁面列出，詳見來源網址。")
+        # 🔴 就算沒取到單一金額，也要把抓到的金額原文寫進描述（2026-09-27）
+        #    ⚠️ 兩種情況會走到這裡：
+        #      ① 頁面真的沒寫金額
+        #      ② 區間跨度 >20 倍被安全網擋下（同頁多個不同補助混在一起）
+        #    ②的原文對使用者有價值 —— 他能自己看出哪一項是他要的。
+        #    不寫的話等於把查到的東西丟掉，而且兩種情況在畫面上分不出來。
+        if ev:
+            parts.append("⚠️ 該頁出現多種金額，無法判定哪一項屬於本補助："
+                         + "；".join(ev[:3]) + "。")
     parts.append(f"（來源：{url}）")
     return "".join(parts)[:1800]
 
