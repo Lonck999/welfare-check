@@ -42,6 +42,17 @@ SP = re.compile(r"\s+")
 # 🔴 這些字出現在描述裡＝這筆是空殼
 EMPTY_MARK = re.compile(r"未查得|查無|待補|尚未")
 
+# 🔴 Firecrawl 整站抓不到的網域（2026-09-27 實測）
+#    屏東 pthg.gov.tw：ERR_TUNNEL_CONNECTION_FAILED，8/8 全失敗
+#    但 curl 測 HTTP 200、181KB ⇒ **網站是好的，是 Firecrawl proxy 到不了**
+#    ⚠️ 不跳過的話每筆要耗完重試（實測約 5 分鐘），334 筆裡約 15 筆
+#       ⇒ 白等 75 分鐘，而且結果一定是「找不到」
+#    🔴 標註成「工具限制」而不是「官方沒有」—— 兩者完全不同，
+#       日後換抽取後端就能補，不可記成「這個縣市沒補助」
+UNREACHABLE_COUNTY = {
+    "屏東縣": "pthg.gov.tw 整站 Firecrawl 抓不到（proxy 問題，非官方無資料）",
+}
+
 
 def own_domain(url: str, county: str) -> bool:
     """🔴 只採信該縣市自己的網域 —— 上一輪就是漏了這步抓到別縣市的。"""
@@ -137,6 +148,23 @@ def main() -> int:
     ok = miss = 0
     for bid, county, name in rows:
         print(f"  · {county} {name[:34]}")
+        # 🔴 已知整站抓不到的縣市：直接標註原因，不浪費 5 分鐘重試
+        if county in UNREACHABLE_COUNTY:
+            why = UNREACHABLE_COUNTY[county]
+            miss += 1
+            print(f"      ⏭ 跳過（{why}）")
+            if args.apply:
+                cur.execute("""UPDATE benefits
+                                  SET description = %s,
+                                      last_verified_date = CURRENT_DATE
+                                WHERE id = %s""",
+                            (f"{county}{re.sub(r'[（(].*?[)）]', '', name).strip()}。"
+                             f"🔴 本筆內容尚未取得 —— 原因是抓取工具限制"
+                             f"（{why}），**不是該縣市沒有這項補助**。"
+                             f"請逕洽 {county}政府相關局處，或日後改用其他"
+                             f"抽取後端重新取得。", bid))
+                conn.commit()
+            continue
         hit = best_page(county, name)
         if not hit:
             miss += 1
