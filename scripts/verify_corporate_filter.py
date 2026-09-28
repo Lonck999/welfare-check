@@ -55,6 +55,70 @@ except FileNotFoundError:
     print("  SKIP (cached page missing) - run web_extract on"
           " https://ly.chiayi.gov.tw/cl.aspx?n=9220")
 
+# 🔴 第二個真實頁面（2026-09-28 第三輪）：花蓮「新建托兒設施最高補助500萬」
+#    ⚠️ 它溜過前兩版濾網 —— 「事業單位」出現 10 次但全是我沒列的句型
+#       （「請有意申請經費補助之事業單位」「鼓勵事業單位提供員工托兒服務」），
+#       而「縣民」兩次都在**導覽選單**「[縣民園地](...)」裡，
+#       讓「1 命中 + 無個人視角」那條規則失效。
+_REAL2 = ("/Users/lonck/.hermes/cache/web/www.hl.gov.tw-5c0f214cb0.md")
+try:
+    with open(_REAL2, encoding="utf-8") as f:
+        t(f.read(), True, "hualien childcare facility 500w (REAL page)")
+except FileNotFoundError:
+    print("  SKIP (cached page missing) - run web_extract on"
+          " https://www.hl.gov.tw/News_Content.aspx?n=32725&s=180712")
+
+print("-- MUST PASS: real cached PERSONAL benefit pages (false-positive check) --")
+# 🔴 這一段是整支測試最重要的部分 —— 誤殺個人補助 = 弱勢者查不到
+#    自己能領的錢，比留一筆法人資料嚴重得多。
+#
+# ⚠️ 2026-09-28 實測抓到「密度判準」根本上是錯的（已丟棄），兩個原因：
+#    ① 長度偏誤：花蓮社會處那頁是 **146,466 字元的整站列表**，
+#       自然累積 13 次法人詞 —— 越長的頁面越容易被誤判，調門檻沒用。
+#    ② 🔴 「申請單位」有兩種**相反**的意思：
+#         「受理申請單位：兒童發展通報轉介中心」← 民眾去申請的窗口
+#         「請有意申請補助之事業單位提出」      ← 申請人是法人
+#    ⇒ 改用「申請人身分的直接宣告」（補助對象/申請資格 + 法人主體）。
+import glob as _glob
+for _pat, _tag in [("sa.hl.gov.tw", "hualien caregiver 5000"),
+                   ("law.chiayi.gov.tw", "chiayi emergency relief"),
+                   ("service.ntpc.gov.tw", "ntpc housing repair 50k"),
+                   ("older.kcg.gov.tw", "kaohsiung caregiver")]:
+    _fs = sorted(_glob.glob("/Users/lonck/.hermes/cache/web/" + _pat + "*.md"))
+    # 🔴 寬 glob 會抓到同網域的**別的快取檔**（實測 www.hl.gov.tw-* 有 4 個，
+    #    corp_subj 從 11 掉到 1），驗證就會拿錯檔案卻照樣全綠。
+    #    ⇒ 挑最大的那個（完整頁面），並印出實際用了哪一個。
+    if len(_fs) > 1:
+        _fs = [max(_fs, key=lambda p: __import__("os").path.getsize(p))]
+    if not _fs:
+        print("  SKIP (cached page missing): " + _tag)
+        continue
+    with open(_fs[0], encoding="utf-8") as f:
+        t(f.read(), False, _tag + " (REAL page)")
+
+# ═══ 植入驗證結果（2026-09-28 實測）═══
+# 🔴 兩個真實案例各靠**不同**規則擋下，這正是留多條的理由：
+#      嘉義雇主補助   → form（「雇主提供…補助申請書」）＋ clause（「(一)雇主」）
+#      花蓮托兒設施   → count（「雇用人數達100人以上的雇主」）
+#
+# 單條植入的結果與解讀：
+#      關掉 count  → 14/15  ✅ 花蓮只靠它，有獨立鑑別力
+#      關掉 form   → 15/15  ⚠️ 不是無效 —— 嘉義還有 clause 頂著
+#      關掉 clause → 15/15  ⚠️ 同上，嘉義還有 form 頂著
+#      關掉 decl / req → 15/15  ⚠️ 這批樣本沒觸發到它們
+#
+# 🔴 依 AGENTS.md 判準：植入不掉分要分清兩種情況 ——
+#    「測試漏了」要補斷言，「植入無害」要註明原因。
+#    這裡 form/clause 屬於**互相備援**（同一頁兩條都命中），
+#    decl/req 屬於**樣本未觸發**，兩者都不該補假斷言湊掉分。
+#
+# ⚠️ 過程踩到三個假訊號，每一個都讓驗證看起來成功：
+#    ① `__pycache__` 讓還原後仍是舊行為 → 每次跑前 rm -rf scripts/__pycache__
+#    ② glob "www.hl.gov.tw-*" 抓到**別的快取檔**（corp_subj 11 → 1），
+#       害我一度以為三條規則全失效。🔴 指定完整檔名或取最大檔。
+#    ③ 🔴 最嚴重：`統一編號` 當法人證據 —— 政府網站**頁尾都有**，
+#       嘉義急難救助那頁 3,700 字也命中 ⇒ 完全沒有鑑別力，卻誤殺個人補助。
+
 print("")
 print(str(ok) + "/" + str(tot))
 sys.exit(0 if ok == tot else 1)
