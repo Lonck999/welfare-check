@@ -43,6 +43,18 @@ t("每一新生兒補助新臺幣2萬元，由新生兒之父或母親自向戶�
 t("中低收入戶瓦斯費補助，每戶每月300元，請民眾攜帶身分證親自到區公所辦理",
   False, "gas subsidy (person)")
 
+print("-- MUST BLOCK: real cached page (16,341 chars, not synthetic) --")
+# 🔴 人造文本會不知不覺照著判準寫 —— 真實頁面才抓得到判準的盲區。
+#    ⚠️ 這頁曾溜過第一版濾網：它寫「雇主**已依照**…」與
+#       「**雇主提供**…補助申請書」，而我列的片語是「雇主應於/檢附/申請」。
+_REAL = ("/Users/lonck/.hermes/cache/web/ly.chiayi.gov.tw-9d34c6e86a.md")
+try:
+    with open(_REAL, encoding="utf-8") as f:
+        t(f.read(), True, "chiayi employer subsidy (REAL page)")
+except FileNotFoundError:
+    print("  SKIP (cached page missing) - run web_extract on"
+          " https://ly.chiayi.gov.tw/cl.aspx?n=9220")
+
 print("")
 print(str(ok) + "/" + str(tot))
 sys.exit(0 if ok == tot else 1)
