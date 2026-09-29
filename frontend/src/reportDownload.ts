@@ -43,6 +43,30 @@ function dedupeByCategory(list: BenefitResult[]): BenefitResult[] {
   return result
 }
 
+/**
+ * 🔴 C-2 來源等級（2026-09-29）。
+ *
+ * ⚠️ 用詞刻意不寫「可信／不可信」—— 媒體整理文常常正確，
+ *    真正的差別是「政策改了誰會回頭改」：官網會，媒體不會。
+ *
+ * 🔴 文字必須跟 BenefitCard.vue 的 SOURCE_TIER_LABEL 一致。
+ *    ⚠️ 兩處不同步的話，畫面上寫「媒體整理」而下載的報告寫別的，
+ *    使用者無從判斷哪個才對 —— 回歸測試有專門的斷言在比。
+ */
+const SOURCE_TIER_TEXT: Record<string, string> = {
+  official: '政府官網',
+  opendata: '政府開放資料',
+  ngo: '民間團體',
+  media: '媒體整理',
+  unknown: '來源待確認',
+}
+
+function sourceTierText(tier: string | null): string {
+  if (!tier) return ''
+  const label = SOURCE_TIER_TEXT[tier]
+  return label ? `　[${label}]` : ''
+}
+
 function renderBenefitCard(b: BenefitResult, kind: 'confirmed' | 'possible'): string {
   const badge = kind === 'confirmed' ? '✅ 確定符合' : '⚠️ 可能符合'
   const priorityDot = `<span class="priority-dot">${PRIORITY_EMOJI[b.priority]}</span>`
@@ -79,7 +103,10 @@ function renderBenefitCard(b: BenefitResult, kind: 'confirmed' | 'possible'): st
       ${locations}
       ${b.notes ? `<p class="notes">備註：${escapeHtml(b.notes)}</p>` : ''}
       ${missing}
-      <p class="source">資料來源：<a href="${escapeHtml(b.sourceUrl)}">${escapeHtml(b.sourceUrl)}</a>（查證日期：${b.lastVerifiedDate}）</p>
+      <p class="source">資料來源：<a href="${escapeHtml(b.sourceUrl)}">${escapeHtml(b.sourceUrl)}</a>${sourceTierText(b.sourceTier)}（查證日期：${b.lastVerifiedDate}）</p>
+      ${b.sourceTier === 'media'
+        ? '<p class="tier-warning">⚠️ 本筆依據為媒體或整理型網站，政策異動時不一定會更新 —— 申請前請以主管機關公告為準。</p>'
+        : ''}
     </article>`
 }
 
@@ -178,6 +205,9 @@ export function buildReportHtml(result: CheckResponse): string {
   .badge.urgent { background: #fbe6d8; color: #97441f; }
   .missing { color: #8a6414; }
   .source, .notes, .agency { font-size: 13px; color: #7a7062; }
+  /* 🔴 C-2 media 來源的警告（2026-09-29）——
+     標籤只有四個字，使用者不會知道那代表什麼風險。 */
+  .tier-warning { margin-top: 6px; padding: 6px 10px; font-size: 12.5px; line-height: 1.65; color: #7a4f16; background: #fdf4e7; border-left: 3px solid #d9963a; border-radius: 3px; }
   .priority-dot { margin-right: 4px; }
   .hint { font-size: 13px; color: #7a7062; }
   table.overview { width: 100%; border-collapse: collapse; margin-top: 12px; }

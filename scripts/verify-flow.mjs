@@ -123,6 +123,17 @@ try {
     textLen: document.body.innerText.length,
     stillForm: /第 \\d+ 題/.test(document.body.innerText),
     head: document.body.innerText.slice(0, 420),
+    // 🔴 C-2（2026-09-29）：來源等級真的渲染出來了嗎。
+    //    ⚠️ 「資料庫有 source_tier」跟「使用者看得到」是兩件事 ——
+    //    schema.ts 漏同步過一次（2026-09-24 加欄位、09-25 才發現後端讀不到），
+    //    所以這裡驗的是**畫面上的元素**，不是 API 有沒有回。
+    tierBadges: document.querySelectorAll('.source-tier').length,
+    tierTexts: [...new Set([...document.querySelectorAll('.source-tier')]
+      .map(e => e.innerText.trim()))],
+    mediaWarnings: document.querySelectorAll('.tier-warning').length,
+    // 🔴 每張卡片都該有來源等級 —— 少數卡片沒有的話，
+    //    那是 null tier（分類沒覆蓋到），不是樣式問題。
+    cards: document.querySelectorAll('.benefit-card').length,
   }))()`)
   console.log('\n=== 最終畫面 ===')
   console.log(JSON.stringify(final, null, 2))
@@ -151,6 +162,22 @@ try {
     ['算出最低生活費', /最低生活費/.test(head)],
     ['列出補助總覽', /補助總覽/.test(head)],
     ['沒有主控台錯誤', errors.length === 0],
+    // ── 🔴 C-2 來源等級（2026-09-29）──
+    //    ⚠️ 「資料庫填了」跟「使用者看得到」是兩件事。
+    //    schema.ts 漏同步過一次（2026-09-24 加欄位、隔天才發現後端讀不到），
+    //    所以這裡驗的是畫面上的元素。
+    ['🔴 C-2 來源等級標籤有渲染出來', (final?.tierBadges ?? 0) > 0],
+    // 🔴 每張卡片都要有 —— 少幾個代表分類沒覆蓋到（null tier），
+    //    而那會靜默：使用者只是「有些卡片沒標」，看不出是 bug。
+    ['🔴 C-2 每張卡片都有來源等級',
+      (final?.cards ?? 0) > 0 && final?.tierBadges === final?.cards],
+    // 🔴 標籤文字必須是五個合法值之一 —— 打錯字會渲染成空白或亂碼，
+    //    而空白標籤看起來就像「這筆沒有來源」。
+    ['🔴 C-2 標籤文字都是合法值',
+      (final?.tierTexts ?? []).length > 0 &&
+      (final?.tierTexts ?? []).every(t =>
+        ['政府官網', '政府開放資料', '民間團體', '媒體整理', '來源待確認']
+          .includes(t))],
   ]
   console.log('\n=== 斷言 ===')
   let bad = 0

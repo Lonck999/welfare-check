@@ -50,6 +50,11 @@ export const benefits = pgTable('benefits', {
   deadlineType: text('deadline_type'),         // always/announced/event/annual/fixed/unknown
   deadlineDate: date('deadline_date'),
   deadlineRule: jsonb('deadline_rule'),
+  // 🔴 2026-09-29 migration 20260929_source_tier.sql（階段 C-2）
+  //    official / opendata / ngo / media / unknown；null = 還沒分類
+  //    ⚠️ official/opendata 才是可查證的權威來源；
+  //       media 的內容可能正確，但政策改了不會回頭改文章。
+  sourceTier: text('source_tier'),
 
   isActive: boolean('is_active').notNull().default(true), // false = 疑似已下架，保留歷史但不再顯示給使用者
 

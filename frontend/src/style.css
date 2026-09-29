@@ -407,6 +407,50 @@ button {
   margin-top: 8px;
 }
 
+/* 🔴 C-2 來源等級標示（2026-09-29）。
+   ⚠️ 顏色刻意不用紅／綠 —— 那會讀成「可信／不可信」，
+      但媒體整理文常常是正確的，差別在於政策改了誰會回頭改。 */
+.source-tier {
+  display: inline-block;
+  margin: 0 6px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  border: 1px solid currentColor;
+  vertical-align: baseline;
+}
+
+.tier-official,
+.tier-opendata {
+  color: #1d4e89;
+  background: #eef4fb;
+}
+
+.tier-ngo {
+  color: #5b4b8a;
+  background: #f3f0fa;
+}
+
+.tier-media,
+.tier-unknown {
+  color: #8a5a1d;
+  background: #fdf4e7;
+}
+
+/* 🔴 media 額外給一行完整說明 —— 標籤只有四個字，
+      使用者不會知道那代表什麼風險。 */
+.tier-warning {
+  margin-top: 6px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: #7a4f16;
+  background: #fdf4e7;
+  border-left: 3px solid #d9963a;
+  border-radius: 3px;
+}
+
 .empty {
   color: var(--text);
   font-style: italic;

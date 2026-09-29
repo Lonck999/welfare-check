@@ -111,6 +111,13 @@ export interface BenefitResult {
   sourceUrl: string
   sourceExcerpt: string
   lastVerifiedDate: string
+  /**
+   * 🔴 C-2 來源等級：official / opendata / ngo / media / unknown。
+   * null = 還沒分類。
+   * ⚠️ official/opendata 才是可查證的權威來源；
+   *    media 的內容可能正確，但政策改了不會回頭改文章。
+   */
+  sourceTier: string | null
   missingConditions: string[]
   documents: Array<{ name: string; obtainLocation: string | null }>
   locations: Array<{ name: string; address: string | null; phone: string | null; website: string | null }>
