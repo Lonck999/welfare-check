@@ -119,6 +119,32 @@ for _pat, _tag in [("sa.hl.gov.tw", "hualien caregiver 5000"),
 #    ③ 🔴 最嚴重：`統一編號` 當法人證據 —— 政府網站**頁尾都有**，
 #       嘉義急難救助那頁 3,700 字也命中 ⇒ 完全沒有鑑別力，卻誤殺個人補助。
 
+print("-- MUST HOLD under the exa backend too (short clean text) --")
+# 🔴 2026-09-29：切換 web.extract_backend firecrawl → exa 後必須重驗 ——
+#    這三條判準（form/clause/count）原本是針對 **Firecrawl 的長頁面** 調的。
+#    ⚠️ exa 只回純正文（706~1,007 字元 vs Firecrawl 16,341~146,466），
+#       所以「附件檔名」「導覽選單」這類細節**會消失**。
+#
+# 實測差異（同一個嘉義雇主補助頁）：
+#    Firecrawl 版 → form（「雇主提供…補助申請書」）＋ clause（「(一)雇主」）
+#    exa 版      → 🔴 **只剩 clause** —— form 那條的證據是附件檔名，exa 剝掉了
+#    花蓮兩邊都靠 count（「雇用人數達100人以上的雇主」）
+#
+# 🔴 結論：exa 下的防線比 Firecrawl 薄（嘉義從兩條變一條）。
+#    ⇒ fixture 存在 repo 內（tests/fixtures/），不依賴 ~/.hermes/cache ——
+#      那個目錄會被後續 web_extract 覆蓋，實測踩過（corp_subj 11 → 1）。
+_FIX = "/Users/lonck/Agent/welfare-check/tests/fixtures/"
+for _fn, _exp, _tag in [
+        ("exa_chiayi_employer.txt", True, "exa chiayi employer (corp)"),
+        ("exa_hualien_childcare.txt", True, "exa hualien childcare (corp)"),
+        ("exa_kaohsiung_caregiver.txt", False, "exa kaohsiung caregiver (person)"),
+        ("exa_keelung_caregiver.txt", False, "exa keelung caregiver (person)")]:
+    try:
+        with open(_FIX + _fn, encoding="utf-8") as f:
+            t(f.read(), _exp, _tag)
+    except FileNotFoundError:
+        print("  SKIP (fixture missing): " + _fn)
+
 print("")
 print(str(ok) + "/" + str(tot))
 sys.exit(0 if ok == tot else 1)
