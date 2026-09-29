@@ -360,18 +360,88 @@ def build_desc(county: str, topic: str, url: str, txt: str,
     return "".join(parts)[:1800]
 
 
+# ── 目標集合（--target）──────────────────────────────────────────
+# 🔴 兩種要重抓的資料，成因完全不同：
+#
+#   empty　　　　　　描述寫著「未查得／查無／待補／尚未」＝**誠實的空殼**
+#                   使用者看得出來沒資料（KNOWN-ISSUES W-004）
+#
+#   excerpt-mismatch 佐證片段講的是**別的縣市**（KNOWN-ISSUES W-001）
+#                   ⚠️ 比空殼危險 —— 有網址、有原文、有查證日期，
+#                   **每個欄位都填滿了**，使用者無從分辨
+#
+# 🔴 mismatch 的 SQL 必須把「臺」正規化成「台」，
+#    否則「臺東縣 vs 台東縣」被判成不符（實測多報 11 筆）。
+# 🔴 判準是「提到別的縣市 **且** 沒提到自己」，不是「提到別的縣市」——
+#    一篇比較全台補助的文章提到 22 個縣市是正常的（不加這條多報 51 筆）。
+_COUNTY_RE = (
+    "(台北市|新北市|桃園市|台中市|台南市|高雄市|基隆市|新竹市|新竹縣"
+    "|苗栗縣|彰化縣|南投縣|雲林縣|嘉義市|嘉義縣|屏東縣|宜蘭縣|花蓮縣"
+    "|台東縣|澎湖縣|金門縣|連江縣)"
+)
+
+# 🔴 標記前綴。稽核腳本要靠它判斷「這筆已經承認佐證不對了」，
+#    所以它必須是**唯一且不會出現在真實原文裡**的字串。
+BAD_EXCERPT_MARK = "🔴【佐證與本縣市不符】"
+
+TARGET_SQL = {
+    "empty": """SELECT id, county, name FROM benefits
+                 WHERE description ~ '未查得|查無|待補|尚未'
+                   AND county IS NOT NULL""",
+    "excerpt-mismatch": f"""
+        SELECT id, county, name FROM benefits
+         WHERE county IS NOT NULL
+           AND source_excerpt NOT LIKE '{BAD_EXCERPT_MARK}%%'
+           AND replace(source_excerpt,'臺','台') ~ '{_COUNTY_RE}'
+           AND replace(source_excerpt,'臺','台')
+               NOT LIKE '%%' || replace(county,'臺','台') || '%%'""",
+}
+
+
+def mark_bad_excerpt(cur, conn, bid: int, county: str, why: str) -> None:
+    """把「佐證講的是別的縣市」這件事標進 source_excerpt 本身。
+
+    🔴 為什麼標在 source_excerpt 而不是 description：
+       問題就在這個欄位。標在別的地方等於「修了一個不是問題的地方」，
+       而真正錯的那段原文仍然原封不動被 API 吐出去。
+
+    🔴 為什麼**不動 last_verified_date**：
+       這一步沒有取得新的佐證，只是承認舊的不對。
+       推日期會讓這筆變成「今天剛查證過」——
+       **比昨天更可信，而它其實更不可信。**
+       ⚠️ 2026-09-29 第一版就是這樣寫的，實跑 45 秒撞到屏東縣才發現。
+
+    原文保留在標記後面：它對「這個補助存在」仍然是證據，
+    只是不能拿來支撐「本縣市的金額／條件」。
+    """
+    cur.execute("SELECT source_excerpt FROM benefits WHERE id = %s", (bid,))
+    row = cur.fetchone()
+    old = (row[0] if row else "") or ""
+    if old.startswith(BAD_EXCERPT_MARK):
+        return  # 已標過，不重複疊加
+    cur.execute(
+        "UPDATE benefits SET source_excerpt = %s WHERE id = %s",
+        (f"{BAD_EXCERPT_MARK}本段原文講的並不是{county}"
+         f"（來源是跨縣市整理文），**不可用來支撐{county}的金額或條件**。"
+         f"重抓狀況：{why}。以下為原文，僅供佐證「這項補助存在」：\n{old}",
+         bid))
+    conn.commit()
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--topic", help="只跑這個主題（子字串比對）")
     ap.add_argument("--limit", type=int, default=0, help="最多處理幾筆")
+    ap.add_argument("--target", choices=sorted(TARGET_SQL),
+                    default="empty",
+                    help="要重抓哪一批（empty＝空殼；"
+                         "excerpt-mismatch＝佐證講別縣市）")
     args = ap.parse_args()
 
     conn = psycopg2.connect(dbname="welfare_check")
     cur = conn.cursor()
-    sql = """SELECT id, county, name FROM benefits
-              WHERE description ~ '未查得|查無|待補|尚未'
-                AND county IS NOT NULL"""
+    sql = TARGET_SQL[args.target]
     params: list = []
     if args.topic:
         sql += " AND name LIKE %s"
@@ -383,7 +453,18 @@ def main() -> int:
         rows = rows[: args.limit]
     print(f"待處理 {len(rows)} 筆\n")
 
-    ok = miss = failed = 0
+    # 🔴 excerpt-mismatch 的「抓不到」跟 empty 的「抓不到」要做相反的事。
+    #
+    #    empty：描述本來就空 → 改寫描述說明原因，是**增加資訊**
+    #    excerpt-mismatch：問題在 source_excerpt（它講的是別的縣市）
+    #      ⇒ 只改 description 等於**完全沒修到那個問題**，
+    #        而 last_verified_date 被推到今天 ⇒ 那筆變成「今天剛查證過」
+    #        —— 錯的佐證原封不動留著，卻看起來比昨天更可信。
+    #
+    #    🔴 2026-09-29 實跑 45 秒就撞到：屏東縣 10 筆全部會走這條路。
+    is_excerpt_mode = args.target == "excerpt-mismatch"
+
+    ok = miss = failed = marked = 0
     for bid, county, name in rows:
         print(f"  · {county} {name[:34]}")
         # 🔴 已知整站抓不到的縣市：直接標註原因，不浪費 5 分鐘重試
@@ -391,7 +472,13 @@ def main() -> int:
             why = UNREACHABLE_COUNTY[county]
             miss += 1
             print(f"      ⏭ 跳過（{why}）")
-            if args.apply:
+            if args.apply and is_excerpt_mode:
+                marked += 1
+                miss -= 1
+                mark_bad_excerpt(cur, conn, bid, county, why)
+                print("      🔸 佐證標記為「講的是別的縣市」"
+                      "（不動 last_verified_date）")
+            elif args.apply:
                 cur.execute("""UPDATE benefits
                                   SET description = %s,
                                       last_verified_date = CURRENT_DATE
@@ -405,8 +492,16 @@ def main() -> int:
             continue
         hit = best_page(county, name)
         if not hit:
-            miss += 1
-            print("      🔴 找不到該縣市官方頁 → 保持原樣不動")
+            print("      🔴 找不到該縣市官方頁", end="")
+            if args.apply and is_excerpt_mode:
+                marked += 1
+                mark_bad_excerpt(cur, conn, bid, county,
+                                 "重抓時找不到該縣市官方頁")
+                print(" → 佐證標記為「講的是別的縣市」"
+                      "（不動 last_verified_date）")
+            else:
+                miss += 1
+                print(" → 保持原樣不動")
             continue
         url, txt = hit
         # 🔴 C 方案優先：先試著把一頁拆成多個補助項目
@@ -475,6 +570,9 @@ def main() -> int:
 
     # 🔴 寫入失敗筆數必須出現在結尾摘要 —— 否則它會被算進「找不到官方頁」
     tail = f"　🔴 寫入失敗 {failed}" if failed else ""
+    # 🔴 marked 同理：它是「承認佐證不對」不是「修好了」，
+    #    不印出來的話跟 ok 混在一起 ⇒ 看起來像整批都修好了。
+    tail += f"　🔸 標記佐證不符 {marked}" if marked else ""
     print(f"\n{'✅ 已寫入' if args.apply else '（dry-run）'}"
           f"　成功 {ok}　找不到官方頁 {miss}{tail}")
     return 1 if failed else 0
