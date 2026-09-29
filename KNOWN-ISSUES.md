@@ -70,14 +70,14 @@
 
 ---
 
-## 🔴 W-002　`benefit_change_log` 0 筆：分不出「做過」與「沒做」
+## ✅ W-002　`benefit_change_log` 0 筆：分不出「做過」與「沒做」
 
-**發現：** 2026-09-29（階段 B 收尾）
+**發現：** 2026-09-29（階段 B 收尾）　**修復：** 2026-09-29（C-3）
 
 表存在且 schema 設計得對（`source_url`／`source_excerpt` 皆 NOT NULL
 ⇒ 沒佐證寫不進去），**但從來沒有任何一筆寫入**。
 
-現在「這個月查證過了」只反映在 `last_verified_date`，
+原本「這個月查證過了」只反映在 `last_verified_date`，
 🔴 **沒有任何東西記錄「這次改了什麼」**。
 
 ⚠️ 後果不是資料錯，是**下個月分不出兩種情況**：
@@ -86,9 +86,33 @@
 
 **兩者在資料庫裡長得一模一樣。**
 
-**怎麼查：** `select count(*) from benefit_change_log;`
+---
 
-**狀態：** ⬜ 未修。已寫進每月提醒訊息裡
+### ✅ 怎麼修的
+
+新增 **`verification_runs`** 表（`migrations/20260929_verification_runs.sql`）——
+**不管有沒有異動都留一筆**，記 scope／四個計數／`finished_at`。
+
+⚠️ **為什麼不塞進 `benefit_change_log`**：那兩個 NOT NULL 是**刻意的**。
+一次「跑過但沒異動」沒有對應的 URL 與原文，硬塞會逼我們放寬 NOT NULL，
+**等於把那道防線拆掉**。
+
+🔴 **run 在開跑前就寫入** —— 中斷時 `finished_at` 留 NULL，那本身是訊號。
+
+比對腳本：`~/.hermes/scripts/welfare_monthly_diff.py`（回歸測試 35 條）。
+🔴 **AI 只找差異＋附證據，`approved_at` 留 NULL＝待審** ——
+實測跑完 `benefits` 完全沒被改（植入的假金額還在）。
+
+**怎麼查：**
+```sql
+select count(*) from verification_runs;                  -- 有沒有跑過
+select * from verification_runs order by id desc limit 3; -- 最近三次的範圍與計數
+select count(*) from benefit_change_log where approved_at is null; -- 待審幾筆
+```
+
+**狀態：** ✅ 已修（C-3 核心）。
+⬜ 還差**接成 cron 月更流程** —— 現在是手動跑，見
+`02-Projects/welfare-check階段C-手動更新流程工具化.md`。
 （cron `946e54dc9654` 會印「benefit_change_log：0 筆　← 零筆代表
 月更從沒留下異動紀錄」）。
 
