@@ -385,11 +385,11 @@ _COUNTY_RE = (
 BAD_EXCERPT_MARK = "🔴【佐證與本縣市不符】"
 
 TARGET_SQL = {
-    "empty": """SELECT id, county, name FROM benefits
+    "empty": """SELECT id, county, name, source_url FROM benefits
                  WHERE description ~ '未查得|查無|待補|尚未'
                    AND county IS NOT NULL""",
     "excerpt-mismatch": f"""
-        SELECT id, county, name FROM benefits
+        SELECT id, county, name, source_url FROM benefits
          WHERE county IS NOT NULL
            AND source_excerpt NOT LIKE '{BAD_EXCERPT_MARK}%%'
            AND replace(source_excerpt,'臺','台') ~ '{_COUNTY_RE}'
@@ -449,6 +449,26 @@ def main() -> int:
     sql += " ORDER BY name, county"
     cur.execute(sql, params)
     rows = cur.fetchall()
+
+    is_excerpt_mode = args.target == "excerpt-mismatch"
+
+    # 🔴 來源是本縣市自己的官網 → 佐證提到別縣市是正常的，不該重抓。
+    #    實例：#170 澎湖縣社會住宅，來源 penghu.gov.tw（**澎湖自己的官網**），
+    #    但那份 PDF 是中央租金補貼申請書，列了全國各縣市金額表。
+    #    ⚠️ 這不會放過真問題：台中市網域用在新竹縣那筆時，
+    #       來源不是新竹縣的網域 ⇒ 照樣被撈出來。
+    #    🔴 在 Python 層過濾（COUNTY_DOMAIN 是 Python dict，
+    #       搬進 SQL 等於抄第二份，而兩份必然漂移）。
+    if is_excerpt_mode:
+        before = len(rows)
+        rows = [r for r in rows
+                if not any(d in (r[3] or "")
+                           for d in COUNTY_DOMAIN.get(r[1], ()))]
+        skipped = before - len(rows)
+        if skipped:
+            print(f"（略過 {skipped} 筆：來源是該縣市自己的官網，"
+                  f"引用全國對照表屬正常）")
+
     if args.limit:
         rows = rows[: args.limit]
     print(f"待處理 {len(rows)} 筆\n")
@@ -462,10 +482,9 @@ def main() -> int:
     #        —— 錯的佐證原封不動留著，卻看起來比昨天更可信。
     #
     #    🔴 2026-09-29 實跑 45 秒就撞到：屏東縣 10 筆全部會走這條路。
-    is_excerpt_mode = args.target == "excerpt-mismatch"
 
     ok = miss = failed = marked = 0
-    for bid, county, name in rows:
+    for bid, county, name, _src_url in rows:
         print(f"  · {county} {name[:34]}")
         # 🔴 已知整站抓不到的縣市：直接標註原因，不浪費 5 分鐘重試
         if county in UNREACHABLE_COUNTY:
