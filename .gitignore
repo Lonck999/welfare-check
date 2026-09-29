@@ -1,3 +1,8 @@
 welfare-result*.html
 .claude/settings.local.json
 .claude/progress.md
+
+# Python 編譯產物（2026-09-29：原本 5 個 .pyc 被追蹤，
+# 每次跑腳本都產生假異動，且 rm -rf __pycache__ 會變成「刪檔」commit）
+__pycache__/
+*.pyc
