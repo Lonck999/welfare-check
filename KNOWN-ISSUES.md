@@ -94,38 +94,47 @@
 
 ---
 
-## ⚠️ W-003　285 筆的來源是媒體／民間網站，不是官方
+## ✅ W-003　285 筆的來源是媒體／民間網站，不是官方（2026-09-29 標示完成）
 
 **發現：** 2026-09-29
+**處理：** C-2 加 `source_tier` 欄位並顯示給使用者。
 
-| 來源類型 | 筆數 |
-|---|---|
-| `.gov.tw` / `.gov.taipei` / `.edu.tw` | 572 |
-| **其他**（媒體、民間整理站） | **285** |
+🔴 **資料本身沒動** —— 媒體整理文常常是正確的。
+做的是**讓使用者看得到依據是哪一種**。
 
-前幾大：`businesstoday.com.tw` 43、`businessweekly.com.tw` 34、
-`faqs.tw` 24、`twneed.org` 23、`uptogo.com.tw` 23、`cava.tw` 23、
-`socialhousing.tw` 23、`mercycare.com.tw` 22、`yannigo.com` 22、
-`city.gvm.com.tw` 22。
+| 來源等級 | 筆數 | 畫面標籤 |
+|---|---|---|
+| `official`（政府機關官網） | 459 | 藍色「政府官網」|
+| `opendata`（data.gov.tw） | 180 | 藍色「政府開放資料」|
+| `media`（媒體／商業站） | **192** | 橘色「媒體整理」＋**完整警告框** |
+| `ngo`（基金會／民間團體） | 26 | 紫色「民間團體」|
 
-🔴 **這是 W-001 的成因**：媒體整理文一篇談 22 個縣市，
-所以「一個網址 → 22 筆資料」的展開必然產生跨縣市佐證。
+⚠️ **不是說媒體一定錯** —— 問題是**政策改了媒體不會回頭改文章，官網會**。
+所以警告文字寫的是「政策異動時不一定會更新」，
+**刻意不寫「不可信」**（那會讓使用者直接忽略那 192 筆）。
 
-⚠️ **不是說媒體一定錯** —— 媒體整理文常常比官網好讀、且資訊正確。
-問題在於**它不是可查證的權威來源**：
-政策改了媒體不會回頭改文章，而官網會。
+### 🔴 三個不能用直覺判的地雷
+
+| # | 地雷 | 不處理會怎樣 |
+|---|---|---|
+| ① | **`.gov.taipei` 不以 `.gov.tw` 結尾** | 台北市那批靜默判成 media |
+| ② | **`data.gov.tw` 是官方但不是原始公告頁** | 180 筆被當成「已經是官方公告」|
+| ③ | **`.org.tw` 不等於民間團體** —— `laf.org.tw`（法扶會）是依《法律扶助法》設立、經費來自司法院的財團法人；`twneed.org` 是民間整理站 | 後綴判不出來，只能列名單 |
 
 **怎麼查：**
-```sql
-select count(*), substring(source_url from 'https?://([^/]+)')
-from benefits
-where source_url !~ '\.gov\.tw$|\.gov\.taipei$|\.edu\.tw$|gov\.tw/'
-group by 2 order by 1 desc;
+```bash
+~/.hermes/hermes-agent/venv/bin/python \
+  ~/.hermes/scripts/welfare_source_tier.py     # 預覽
+psql -d welfare_check -c \
+  "select source_tier, count(*) from benefits group by 1 order by 2 desc"
 ```
 
-**狀態：** ⬜ 未修。階段 C 的「來源依據欄位」子項要處理 ——
-至少要能**標示出這筆的來源等級**（官方／媒體／民間），
-讓前端可以誠實顯示。
+🔴 **分類邏輯只有一份**：`welfare_source_tier.py` 的 `classify()`。
+前端、API 一律讀 `benefits.source_tier`，**不可以各自再判一次網域** ——
+兩份必然漂移，而漂移看起來像資料問題不像程式問題。
+
+**狀態：** ✅ 已標示。新資料進來時要記得跑一次分類
+（🔴 尚未接進月更流程，C-3 要處理）。
 
 ---
 
