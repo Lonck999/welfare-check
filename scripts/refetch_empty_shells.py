@@ -334,7 +334,7 @@ def main() -> int:
         rows = rows[: args.limit]
     print(f"待處理 {len(rows)} 筆\n")
 
-    ok = miss = 0
+    ok = miss = failed = 0
     for bid, county, name in rows:
         print(f"  · {county} {name[:34]}")
         # 🔴 已知整站抓不到的縣市：直接標註原因，不浪費 5 分鐘重試
@@ -399,23 +399,36 @@ def main() -> int:
         print(f"         {len(txt)} 字　金額 {amin}~{amax}　描述 {len(desc)} 字")
         if not args.apply:
             continue
-        cur.execute("""UPDATE benefits
-                          SET description=%s, source_url=%s,
-                              source_excerpt=%s,
-                              amount_min=%s, amount_max=%s, amount_unit=%s,
-                              amount_note=%s,
-                              last_verified_date=CURRENT_DATE
-                        WHERE id=%s""",
-                    (desc, url, SP.sub(" ", txt[:900]),
-                     amin, amax, unit,
-                     ("官方頁面實抓：" + "；".join(ev)) if ev else None,
-                     bid))
-        conn.commit()
+        # 🔴 單筆寫入失敗不可讓整批停掉（2026-09-29 踩到）：
+        #    exa 回的內容含 NUL(0x00) → psycopg2 ValueError →
+        #    **前 17 筆已寫入、後 35 筆一筆都沒跑**，
+        #    而 log 尾巴只有 traceback，「做了一半」完全沒有訊號。
+        #    ⚠️ 下次看到「空殼少了 17」會以為那批只有 17 筆要處理。
+        try:
+            cur.execute("""UPDATE benefits
+                              SET description=%s, source_url=%s,
+                                  source_excerpt=%s,
+                                  amount_min=%s, amount_max=%s, amount_unit=%s,
+                                  amount_note=%s,
+                                  last_verified_date=CURRENT_DATE
+                            WHERE id=%s""",
+                        (desc, url, SP.sub(" ", txt[:900]),
+                         amin, amax, unit,
+                         ("官方頁面實抓：" + "；".join(ev)) if ev else None,
+                         bid))
+            conn.commit()
+        except Exception as e:                            # noqa: BLE001
+            conn.rollback()
+            ok -= 1
+            failed += 1
+            print(f"      🔴 寫入失敗（已跳過這筆，整批繼續）：{str(e)[:90]}")
         time.sleep(1)
 
+    # 🔴 寫入失敗筆數必須出現在結尾摘要 —— 否則它會被算進「找不到官方頁」
+    tail = f"　🔴 寫入失敗 {failed}" if failed else ""
     print(f"\n{'✅ 已寫入' if args.apply else '（dry-run）'}"
-          f"　成功 {ok}　找不到官方頁 {miss}")
-    return 0
+          f"　成功 {ok}　找不到官方頁 {miss}{tail}")
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

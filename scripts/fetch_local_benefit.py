@@ -144,6 +144,14 @@ def extract(url: str, char_limit: int = 40000, retries: int = 3) -> str:
             r = json.loads(r)
         results = r.get("results", []) if isinstance(r, dict) else []
         text = "".join(x.get("content", "") or "" for x in results)
+        # 🔴 PostgreSQL 的 text 欄位**不接受 NUL（0x00）**，塞進去會讓
+        #    整支腳本在 cur.execute 當場 ValueError 掛掉（2026-09-29 踩到）。
+        #    ⚠️ 換到 exa 後端才出現 —— Firecrawl 不會回 NUL。
+        #    🔴 那一輪寫了 17 筆才崩：**前面成功的照樣寫進去、後面 35 筆全沒跑**，
+        #       而 log 尾巴只有 traceback，看不出「做了一半」。
+        #    ⇒ 在唯一的抽取出口清掉，不在 SQL 層或 strip_noise 補 ——
+        #      那樣每個呼叫端都得記得處理一次。
+        text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
         if len(text) >= 200:
             return text
         # 🔴 只有「暫時性錯誤」才重試；真的是空頁就不必浪費配額
