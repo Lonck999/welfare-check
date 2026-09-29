@@ -148,6 +148,17 @@ def extract(url: str, char_limit: int = 40000, retries: int = 3) -> str:
             return text
         # 🔴 只有「暫時性錯誤」才重試；真的是空頁就不必浪費配額
         err = " ".join(str(x.get("error") or "") for x in results)
+        # 🔴 配額／付費錯誤必須**大聲失敗**，不可跟「這頁沒內容」混在一起
+        #    （2026-09-29 踩到）：Firecrawl 額度用完時回
+        #    'Payment Required: Insufficient credits to perform this request'，
+        #    它不在下面的重試清單裡 ⇒ 直接回 ""，
+        #    ⚠️ 看起來跟「政府沒公開這項補助」一模一樣。
+        #    🔴 那一輪 60 筆裡 50 筆被記成「找不到官方頁」，全是假的。
+        if re.search(r"Payment Required|Insufficient credits|quota|"
+                     r"credit limit|upgrade your plan", err, re.I):
+            raise RuntimeError(
+                "🔴 抽取後端配額/授權失敗，不是頁面沒內容：" + err[:150]
+                + " → 換 web.extract_backend 或看 docs/抓取備案-免費路徑.md")
         if not re.search(r"TUNNEL|timeout|proxy|Internal Server|502|503|429",
                          err, re.I):
             return ""
