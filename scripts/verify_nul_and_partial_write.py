@@ -12,6 +12,7 @@
   ② 正常內容不可被動到（不能為了清 NUL 把中文/換行也吃掉）
 """
 import json
+import re
 import sys
 
 sys.path.insert(0, "/Users/lonck/Agent/welfare-check/scripts")
@@ -69,7 +70,14 @@ src = open("/Users/lonck/Agent/welfare-check/scripts/refetch_empty_shells.py",
 chk("UPDATE wrapped in try/except",
     "try:" in src and "conn.rollback()" in src
     and "寫入失敗（已跳過這筆，整批繼續）" in src)
-chk("failed count is initialised", "ok = miss = failed = 0" in src)
+# 🔴 2026-10-01：原本寫死 `"ok = miss = failed = 0" in src` —— 程式後來多了
+#    一個計數器（`ok = miss = failed = marked = 0`）就紅了，**而程式是對的**。
+#    那是 change-detector 測試：凍結具體寫法，每次合法擴充都假報警，
+#    而假報警久了就會被當成「改一下期望值就好」—— 真壞掉那次也一樣被改掉。
+# ⇒ 改成驗**不變量**：`failed` 這個名字有被初始化為 0（允許串接賦值與其他計數器）。
+chk("failed count is initialised",
+    bool(re.search(r"^\s*(?:\w+\s*=\s*)*failed(?:\s*=\s*\w+)*\s*=\s*0\s*$",
+                   src, re.M)))
 chk("failed count reported in summary", "寫入失敗 {failed}" in src)
 chk("nonzero exit when any write failed", "return 1 if failed else 0" in src)
 
