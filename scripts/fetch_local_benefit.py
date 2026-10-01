@@ -162,8 +162,22 @@ def extract(url: str, char_limit: int = 40000, retries: int = 3) -> str:
         #    它不在下面的重試清單裡 ⇒ 直接回 ""，
         #    ⚠️ 看起來跟「政府沒公開這項補助」一模一樣。
         #    🔴 那一輪 60 筆裡 50 筆被記成「找不到官方頁」，全是假的。
-        if re.search(r"Payment Required|Insufficient credits|quota|"
-                     r"credit limit|upgrade your plan", err, re.I):
+        #
+        # 🔴 2026-10-01：**同一條防線對 exa 失效，差一個字母。**
+        #    實測 exa 回（走的也是 results[].error 這條路）：
+        #      Request failed with status code 402: {"error":"You have
+        #      exceeded your credits limit. ...","tag":"NO_MORE_CREDITS"}
+        #    舊 regex 寫 `credit limit`，exa 說的是 **credits limit** ⇒ 漏掉。
+        #    ⚠️ 根因：當初的測試案例是**照著 regex 反寫的**
+        #      （"You have reached your credit limit" 當然會中），
+        #      沒有一條是真的後端輸出 ⇒ 換後端後整條防線無聲失效。
+        #    🔴 **擋配額錯誤不可用「英文訊息字串」當主判準** ——
+        #      每家後端措辭都不同，而漏掉的代價是整批假失敗。
+        #      402 這個 HTTP 狀態碼與 NO_MORE_CREDITS 這類 tag 才是穩定訊號。
+        if re.search(r"status code 40[12]\b|Payment Required|"
+                     r"NO_MORE_CREDITS|insufficient credits|"
+                     r"credits? limit|exceeded your credits|quota|"
+                     r"upgrade your plan|rate limit exceeded", err, re.I):
             raise RuntimeError(
                 "🔴 抽取後端配額/授權失敗，不是頁面沒內容：" + err[:150]
                 + " → 換 web.extract_backend 或看 docs/抓取備案-免費路徑.md")

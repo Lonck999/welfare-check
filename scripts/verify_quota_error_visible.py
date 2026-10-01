@@ -45,6 +45,8 @@ def case(label, err_text, content, expect_raise):
 
 
 print("-- MUST RAISE: quota / payment errors --")
+# 🔴 2026-10-01：前三條是「照著 regex 反寫」的案例 —— 它們永遠會過，
+#    因為我是看著 regex 編出來的句子。真正的防線測不到。
 case("firecrawl insufficient credits",
      "Payment Required: Failed to scrape. Insufficient credits to "
      "perform this request. For more credits, you can upgrade your plan",
@@ -52,10 +54,38 @@ case("firecrawl insufficient credits",
 case("quota exceeded", "API quota exceeded for this month", "", True)
 case("credit limit", "You have reached your credit limit", "", True)
 
+print("-- 🔴 MUST RAISE: 真實後端輸出（逐字貼上，不可改寫）--")
+# 🔴 這一組是 2026-10-01 實際從後端收到的字串，不是我編的。
+#    舊 regex 寫 `credit limit`，exa 說的是 **credits limit** ⇒ 差一個字母，
+#    整條防線對 exa 無聲失效 —— 而換後端這件事沒有任何訊號提醒我重驗。
+#
+# 🔴 新案例的鐵律：**貼真的，不要照 regex 造。**
+#    照 regex 造出來的案例只能證明 regex 等於它自己。
+EXA_402 = ('Request failed with status code 402: {"requestId":'
+           '"c117e66af492da330c281e739e9f5ccc","error":"You have exceeded '
+           'your credits limit. Please top up to keep using Exa at '
+           'dashboard.exa.ai","tag":"NO_MORE_CREDITS"}')
+case("🔴 exa 402 原文（2026-10-01 實收）", EXA_402, "", True)
+
+# 🔴 每條訊號各給一個「只觸發它自己」的案例 ——
+#    上面那串同時命中 4 條（402／exceeded your credits／credits limit／
+#    NO_MORE_CREDITS），任一條失效它都還是會過關。
+case("只有 402 狀態碼", "Request failed with status code 402", "", True)
+case("只有 tag", '{"tag":"NO_MORE_CREDITS"}', "", True)
+case("只有 credits limit（複數）", "You have exceeded your credits limit.", "", True)
+case("401 未授權（key 失效也不可當成空頁）",
+     "Request failed with status code 401: invalid api key", "", True)
+case("429 速率限制", "rate limit exceeded, retry later", "", True)
+
 print("-- MUST NOT RAISE: genuinely empty page --")
 case("empty page, no error", "", "", False)
 case("404 not found", "Not Found (404)", "", False)
 case("robots blocked", "Blocked by robots.txt", "", False)
+# 🔴 negative control：404／403 這些「頁面真的沒了」的狀態碼
+#    不可被新加的 `status code 40[12]` 誤殺 —— 誤殺會讓整批真空頁變成中斷。
+case("🔴 403 禁止存取（不是配額）", "Request failed with status code 403", "", False)
+case("🔴 404（不是配額）", "Request failed with status code 404", "", False)
+case("🔴 400 參數錯", "Request failed with status code 400: bad url", "", False)
 
 print("-- MUST NOT RAISE: page has content --")
 case("normal page", "", "補助金額每月5,000元。" * 40, False)
