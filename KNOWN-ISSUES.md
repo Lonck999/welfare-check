@@ -386,8 +386,19 @@ official ＋ 首頁當來源：27 筆（全部 ok，只缺 source_url）
 
 ### 防線
 
-`scripts/verify_opendata_link_alias.py`（**7 項**，已在 `scripts/` 底下，
-會被每日回歸的 glob 撿到）：
+`scripts/verify_opendata_link_alias.py`（**7 項**）：
+
+🔴 **而且發現 welfare-check 的 12 支測試從來沒進每日回歸** ——
+我原本在這裡寫「會被每日回歸的 glob 撿到」，**那句話是錯的**：
+`run_all_regressions.py` 的 `PROJECT_TESTS` 只列了 `~/AIAgent/stock` 與
+`~/AIAgent/vlog`，而 welfare-check 活在 **`~/Agent/`**（少一個 AI）。
+⇒ 2026-10-07 已補進去（兩個 glob：`verify_*.py` ＋ `test_*.py`），
+每日回歸 **70 → 82 支**。
+⚠️ `test_utility_fee_reduction.py` 需要 `DATABASE_URL`，缺它時會自己回非零
+（註解明寫「這不算通過」）⇒ 回歸腳本新增 `ENV_FILES` 把 `backend/.env`
+載進子行程，**不是去放寬那支測試**。
+
+斷言內容：
 
 - ① `sourceUrl` 必須在別名清單裡，**且排在 `competentAuthorityUrl` 之前**
 - ② 六組 `pick()` 行為：兩者都有取逐筆／只有首頁仍回首頁／逐筆是空白要退回／
