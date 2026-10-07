@@ -302,12 +302,102 @@ source_tier：official 434 ／ media 192 ／ opendata 180 ／ unknown 25 ／ ngo
 official ＋ 首頁當來源：27 筆（全部 ok，只缺 source_url）
 ```
 
-⬜ **剩下的 27 筆**：描述完整但 `source_url` 指向首頁，要重新找出那個頁面。
+⬜ **剩下的 27 筆**：描述完整但 `source_url` 指向首頁。
 **24/27 是桃園市子網域**（`lhrb`／`ipb`／`agriculture`／`sab`／`dowcd`／
 `oes`／`health`／`legal.tycg.gov.tw`）—— 明顯同一批匯入的產物。
-🔴 卡在搜尋後端：exa 402 `NO_MORE_CREDITS`（2026-10-01 13:11 實測仍掛）。
-⚠️ 桃園官網是同一套 CMS（`News.aspx?n=…&sms=…`），**站內搜尋可能繞得過去，
-但要實測** —— 連江縣那次是 HTTP 200 只回 58 字的空殼。
+
+🔴 **2026-10-07：已解決 25 筆，27 → 2。而「卡在搜尋額度」這個方向整個是錯的
+—— 見下面 W-009。**
+
+---
+
+## ✅ W-009　`ALIAS` 漏一個欄位名 ⇒ 26 筆的來源變成首頁（2026-10-07 修完）
+
+**狀態：** ✅ 資料已修（25 筆）＋ 匯入腳本已修 ＋ 回歸測試已進庫。
+
+### 🔴 根因：不是「找不到網址」，是「取錯欄位」
+
+`scripts/import_county_opendata.py` 的 `ALIAS["link"]` 原本是：
+
+```python
+"link": ("詳細資訊[連結]", "詳細資訊網址", "詳細資訊", "sourcePolicyUrl",
+         "competentAuthorityUrl"),          # ← 沒有 sourceUrl
+```
+
+桃園那份 opendata **26 筆每一筆都有 `sourceUrl`**（逐筆申辦頁，
+`e-services.tycg.gov.tw/…/item/detail?item_no=W0199`），
+同時也有 `competentAuthorityUrl`（局處**首頁**，`lhrb.tycg.gov.tw/`）。
+
+`pick()` 取第一個非空的 ⇒ 只認得後者 ⇒ **26 筆全部拿到首頁**。
+
+⚠️ **它不會報錯，也不會留下空值** —— fallback 的那個欄位有值，
+所以匯入成功、`source_tier` 照樣算成 `official`，
+結果是**沒有來源卻掛著官方認證**（W-007 那條判準說的正是這種最危險的狀態）。
+
+### 🔴 「卡在 exa 額度」是一個完全錯誤的方向，而它寫在任務清單上六天
+
+舊的下一步寫「等 exa 恢復／試桃園站內搜尋繞過，**重新找出那個頁面**」。
+
+那預設了「網址遺失、要去外面找」。實際上**逐筆網址一直在原始資料裡**，
+只要重讀一次 API 就有 —— 不需要任何搜尋後端。
+
+⚠️ **判準：看到「某批資料缺某個欄位」，先回去讀原始來源有沒有那個欄位，
+再談去外面找。** 匯入管線丟掉的東西，從外面找回來的成本是它的幾十倍，
+而且找回來的還不一定是同一個。
+
+### 驗證方式：渲染，不是 `web_extract`
+
+🔴 **桃園 e-services 的單筆頁面是 SPA。**
+`web_extract` 兩個網址都只回 **約 150 字的頁尾**（地址、1999 專線、報修信箱）
+—— 看起來完全像死網址或空殼。
+
+渲染後是 **1,246 字的完整內容**（服務簡介、金額三級、應備文件、申辦流程、
+承辦科室電話）。⚠️ **拿 `web_extract` 的結果判斷那個網址死活會得到相反的結論**
+（與 W-007 ① 新竹市那 5 筆同一個形狀，**第二次了**）。
+
+✅ 新增 `scripts/render_page.py`（headless Chrome `--dump-dom`，
+🔴 內建 `pkill` 清理 —— 55 支 spawn Chrome 的腳本都沒做，
+會留下永生瀏覽器且完全靜默）。
+
+**negative control**：假 `item_no=ZZ9999` 渲染後 **0 字、無標題**
+⇒ 證明「有內容」這個訊號真的有鑑別力。
+
+### 怎麼修的
+
+```bash
+~/.hermes/hermes-agent/venv/bin/python scripts/fix_tycg_source_urls.py            # dry-run
+~/.hermes/hermes-agent/venv/bin/python scripts/fix_tycg_source_urls.py --apply
+```
+
+🔴 **逐筆渲染驗證「頁面標題含該筆補助名稱」才寫入，25/25 全通過**，
+不抽樣；有任何一筆不通過就整批不寫（`sys.exit`）。
+備份 `/tmp/wc_backup/tycg_sourceurl_fix.jsonl`（含 old/new 兩個網址）。
+
+**終點驗證：** 重跑 `scan_homepage_as_source.py`
+⇒ `official ＋ 首頁當來源` **27 → 2**，`source_tier` 分布不變
+（official 仍 434 —— 🔴 **這一批只補來源網址，不升降 tier**）。
+
+### ⬜ 剩下 2 筆（各自是不同問題，不是同一批）
+
+| id | 縣市 | 問題 |
+|---|---|---|
+| 34 | 全國 | 原民會補助三合一（創業貸款／獎助學金／急難救助），來源掛 `cipgrant.fju.edu.tw`（輔大代辦的獎助學金系統首頁）—— 🔴 **它其實是「一筆混了三個補助」**，該拆而不是該換網址（同 W-005 區的 `split_subsidy_items.py` 形狀）|
+| 747 | 臺中市 | 原住民幼兒托教補助，描述裡自己寫著「🔴 金額待查證 —— 只找到 2015 年新聞稿」⇒ **它缺的是現行公告頁，真的要去找** |
+
+### 防線
+
+`scripts/verify_opendata_link_alias.py`（**7 項**，已在 `scripts/` 底下，
+會被每日回歸的 glob 撿到）：
+
+- ① `sourceUrl` 必須在別名清單裡，**且排在 `competentAuthorityUrl` 之前**
+- ② 六組 `pick()` 行為：兩者都有取逐筆／只有首頁仍回首頁／逐筆是空白要退回／
+  中文欄位優先序不被破壞／兩者皆無回空字串
+- 🔴 **雙向驗證**：植入①「移除 `sourceUrl`」→ 4/7 紅；
+  植入②「**只把順序顛倒**」→ 5/7 紅；還原 → 7/7 綠
+
+⚠️ **植入②是這支測試存在的理由** —— 「欄位名在清單裡」這個斷言
+對「順序被改掉」完全無感，而順序就是全部的語意。
+🔴 **別名清單的語意在順序裡，所以測試必須測順序，不能只測存在性。**
 
 ---
 

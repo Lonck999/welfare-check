@@ -130,8 +130,15 @@ ALIAS: dict[str, tuple[str, ...]] = {
     "office": ("收件洽辦單位", "agencyName", "cont1"),
     "phone": ("聯絡電話", "聯繫方式"),
     "ext": ("分機",),
+    # 🔴 順序即優先序（`pick()` 取第一個非空的），而且**逐筆網址必須排在
+    #    機關首頁之前** —— 桃園那批 26 筆兩個欄位都有值：
+    #    `sourceUrl` 是逐筆申辦頁、`competentAuthorityUrl` 是局處**首頁**。
+    #    漏掉 `sourceUrl` 的後果不是報錯，是 fallback 到首頁而**看起來正常**
+    #    ⇒ 26 筆「source_tier=official 但來源是首頁」＝沒來源卻掛官方認證
+    #    （2026-10-07 修，W-009）。
+    # ⚠️ 新增別名時一律往**首頁類欄位之前**插，不要往後補。
     "link": ("詳細資訊[連結]", "詳細資訊網址", "詳細資訊", "sourcePolicyUrl",
-             "competentAuthorityUrl"),
+             "sourceUrl", "competentAuthorityUrl"),
     # 🔴 英文格式才有的欄位 —— 內容比中文那批豐富，不可丟掉
     "desc": ("service_desc", "policyDescription", "補助內容"),
     "period": ("cont5", "applicationPeriod"),
