@@ -20,6 +20,7 @@
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -54,15 +55,28 @@ def is_bare_homepage(url: str) -> tuple[bool, str]:
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser()
+    # 🔴 預設只掃 is_active —— 停用的筆不顯示給使用者，所以它的來源網址
+    #    錯不錯都不影響任何人；報它只會讓人去修一個不會被看到的東西。
+    #    ⚠️ 2026-10-08 踩到：id 34 拆成三筆後標 is_active=false（刻意保留，
+    #    否則月更比對會把它當新缺口再抓一次），而這支仍把它算進
+    #    「official ＋ 首頁當來源」⇒ 看起來「修了卻沒變少」。
+    #    🔴 這不是誤報而是真缺陷：**偵測器的範圍要跟「使用者看得到什麼」一致**。
+    ap.add_argument("--include-inactive", action="store_true",
+                    help="連已停用的也掃（查歷史用，預設不掃）")
+    args = ap.parse_args()
+
     conn = psycopg2.connect(dbname="welfare_check")
     cur = conn.cursor()
-    cur.execute("""SELECT id, county, name, source_url, source_tier,
+    cur.execute(f"""SELECT id, county, name, source_url, source_tier,
                           LENGTH(description), description
                      FROM benefits
                     WHERE source_url IS NOT NULL
+                      {"" if args.include_inactive else "AND is_active"}
                     ORDER BY id""")
     rows = cur.fetchall()
-    print(f"全庫 {len(rows)} 筆有 source_url\n")
+    scope = "含已停用" if args.include_inactive else "僅生效中"
+    print(f"全庫 {len(rows)} 筆有 source_url（{scope}）\n")
 
     hits: list[dict] = []
     for bid, county, name, url, tier, dlen, desc in rows:
