@@ -30,6 +30,8 @@ import time
 import psycopg2
 
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+from active_scope import (add_scope_arg, scope_label,  # noqa: E402
+                          scope_sql)
 from extract_amounts_from_desc import extract_amounts  # noqa: E402
 from fetch_local_benefit import (  # noqa: E402
     COUNTY_DOMAIN, extract, search, strip_noise,
@@ -437,18 +439,23 @@ def main() -> int:
                     default="empty",
                     help="要重抓哪一批（empty＝空殼；"
                          "excerpt-mismatch＝佐證講別縣市）")
+    add_scope_arg(ap)
     args = ap.parse_args()
 
     conn = psycopg2.connect(dbname="welfare_check")
     cur = conn.cursor()
     sql = TARGET_SQL[args.target]
     params: list = []
+    # 🔴 這支會**改資料**（重抓描述／標記佐證），而停用的筆不顯示給使用者
+    #    ⇒ 對它做任何寫入都是在修一個不影響任何人的東西。
+    sql += scope_sql(args)
     if args.topic:
         sql += " AND name LIKE %s"
         params.append(f"%{args.topic}%")
     sql += " ORDER BY name, county"
     cur.execute(sql, params)
     rows = cur.fetchall()
+    print(f"（範圍：{scope_label(args)}）")
 
     is_excerpt_mode = args.target == "excerpt-mismatch"
 

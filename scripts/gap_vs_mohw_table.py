@@ -176,6 +176,11 @@ def main() -> int:
             #    然後我就會去抓 10 份一模一樣的中央規定。
             like = " OR ".join(
                 ["name ~ %s"] * len(pats) + ["description ~ %s"] * len(pats))
+            # 🔴 **刻意不濾 `is_active`** —— 這支是「官方清單 vs 我們庫裡有沒有」
+            #    的缺口比對。停用但保留的筆（如拆分後的母筆）仍然代表
+            #    「這個項目我們處理過了」；濾掉它會把它報成新缺口，
+            #    然後月更會去重抓一次 —— 那正是當初保留它的理由。
+            #    ⚠️ 判準見 `active_scope.py`：偵測器要濾、月更比對不可濾。
             cur.execute(f"""SELECT count(*) FROM benefits
                              WHERE county IN (%s, '全國') AND ({like})""",
                         (cty, *pats, *pats))

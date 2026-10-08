@@ -52,6 +52,9 @@ def main() -> int:
         names = {re.sub(r"\s+", "", pick(r, "name"))
                  for r in rows if pick(r, "name")}
         cur.execute("SELECT name FROM benefits WHERE county = %s", (county,))
+        # 🔴 **刻意不濾 `is_active`** —— 這支比「來源有的 vs 庫裡有的」。
+        #    停用但保留的筆仍代表「已匯入過」；濾掉會報成 missing，
+        #    而下一步就是去重抓一次（判準見 `active_scope.py`）。
         have = {re.sub(r"\s+", "", n) for (n,) in cur.fetchall()}
         missing = names - have
 

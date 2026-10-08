@@ -16,6 +16,9 @@ import sys
 
 import psycopg2
 
+from active_scope import (add_scope_arg, scope_label, scope_sql,
+                          scope_where)
+
 S = r"\s*"
 
 # 🔴 順序有意義：由「最具體」排到「最籠統」，第一個命中就採用。
@@ -89,14 +92,17 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true",
                     help="真的寫入（預設只 dry-run）")
+    add_scope_arg(ap)
     args = ap.parse_args()
 
     conn = psycopg2.connect(dbname="welfare_check")
     cur = conn.cursor()
-    cur.execute("""SELECT id, application_period FROM benefits
+    cur.execute(f"""SELECT id, application_period FROM benefits
                     WHERE application_period IS NOT NULL
-                      AND application_period <> ''""")
+                      AND application_period <> ''
+                      {scope_sql(args)}""")
     rows = cur.fetchall()
+    print(f"（範圍：{scope_label(args)}）")
 
     tally: dict[str, int] = {}
     updates: list[tuple[int, str, str | None]] = []

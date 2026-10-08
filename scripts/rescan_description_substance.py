@@ -15,6 +15,7 @@
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from collections import Counter
@@ -24,6 +25,8 @@ from urllib.parse import urlparse
 import psycopg2
 
 sys.path.insert(0, str(Path(__file__).parent))
+from active_scope import (add_scope_arg, scope_label,  # noqa: E402
+                          scope_sql)
 from description_substance import verdict          # noqa: E402
 from scan_homepage_as_source import is_bare_homepage  # noqa: E402
 
@@ -32,14 +35,19 @@ OLD_WHITELIST = ("未查得", "查無", "待補", "尚未")
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser()
+    add_scope_arg(ap)
+    args = ap.parse_args()
+
     conn = psycopg2.connect(dbname="welfare_check")
     cur = conn.cursor()
-    cur.execute("""SELECT id, county, name, source_url, source_tier,
+    cur.execute(f"""SELECT id, county, name, source_url, source_tier,
                           description
                      FROM benefits
+                    WHERE true {scope_sql(args)}
                     ORDER BY id""")
     rows = cur.fetchall()
-    print(f"全庫 {len(rows)} 筆\n")
+    print(f"全庫 {len(rows)} 筆（{scope_label(args)}）\n")
 
     recs = []
     for bid, county, name, url, tier, desc in rows:

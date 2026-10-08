@@ -34,6 +34,9 @@ import sys
 
 import psycopg2
 
+from active_scope import (add_scope_arg, scope_label, scope_sql,
+                          scope_where)
+
 PAT = {
     "child": re.compile(r"兒童|幼兒|嬰兒|新生兒|學童|子女|就學|托育|育兒|"
                         r"少年|學生|國小|國中|高中"),
@@ -87,12 +90,15 @@ def derive(desc: str) -> list[tuple[str, str | None]]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true")
+    add_scope_arg(ap)
     args = ap.parse_args()
 
     conn = psycopg2.connect(dbname="welfare_check")
     cur = conn.cursor()
-    cur.execute("SELECT id, description FROM benefits")
+    cur.execute("SELECT id, description FROM benefits"
+                + scope_where(args))
     rows = cur.fetchall()
+    print(f"（範圍：{scope_label(args)}）")
 
     tally: dict[str, int] = {}
     covered = 0

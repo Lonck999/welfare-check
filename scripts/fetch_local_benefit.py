@@ -31,6 +31,8 @@ HERMES = Path.home() / ".hermes" / "hermes-agent"
 PY = HERMES / "venv" / "bin" / "python"
 
 sys.path.insert(0, str(Path(__file__).parent))
+from active_scope import (add_scope_arg, scope_label,  # noqa: E402,F401
+                          scope_sql, scope_where)
 from benefit_keywords import NOT_BENEFIT_CTX  # noqa: E402
 
 # 🔴 官方網域：gov.tw / gov.taipei（臺北市全台唯一）
@@ -102,6 +104,7 @@ def _run_tool(func: str, payload: dict) -> object:
 import json, sys, asyncio
 sys.path.insert(0, {str(HERMES)!r})
 from tools.web_tools import {func}
+
 payload = {payload!r}
 r = {func}(**payload)
 if asyncio.iscoroutine(r):
@@ -247,12 +250,14 @@ def main() -> int:
                     help="主題詞（可用 / 分隔多個同義詞）")
     ap.add_argument("--counties", type=int, default=3, help="試抓幾個縣市")
     ap.add_argument("--apply", action="store_true", help="真的寫入資料庫")
+    add_scope_arg(ap)
     args = ap.parse_args()
 
     conn = psycopg2.connect(dbname="welfare_check")
     cur = conn.cursor()
-    cur.execute("""SELECT id, county FROM benefits
+    cur.execute(f"""SELECT id, county FROM benefits
                     WHERE name = %s AND description LIKE '%%未查得%%'
+                      {scope_sql(args)}
                     ORDER BY county LIMIT %s""",
                 (args.topic, args.counties))
     rows = cur.fetchall()

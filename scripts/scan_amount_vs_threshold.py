@@ -25,12 +25,17 @@
 """
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import sys
 from pathlib import Path
 
 import psycopg2
+
+sys.path.insert(0, str(Path(__file__).parent))
+from active_scope import (add_scope_arg, scope_label,  # noqa: E402
+                          scope_sql)
 
 # 🔴 這個數字**周圍**出現這些字 ⇒ 它在講資格，不是在講補助
 THRESHOLD_CTX = (
@@ -103,15 +108,20 @@ def ctx_verdict(desc: str, value: int) -> tuple[str, str] | None:
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser()
+    add_scope_arg(ap)
+    args = ap.parse_args()
+
     conn = psycopg2.connect(dbname="welfare_check")
     cur = conn.cursor()
-    cur.execute("""SELECT id, county, name, amount_min, amount_max,
+    cur.execute(f"""SELECT id, county, name, amount_min, amount_max,
                           amount_unit, description, source_url
                      FROM benefits
                     WHERE amount_min IS NOT NULL
+                      {scope_sql(args)}
                     ORDER BY id""")
     rows = cur.fetchall()
-    print(f"有金額的 {len(rows)} 筆\n")
+    print(f"有金額的 {len(rows)} 筆（{scope_label(args)}）\n")
 
     buckets: dict[str, list] = {"threshold": [], "not_in_desc": [],
                                 "unclear": [], "benefit": []}

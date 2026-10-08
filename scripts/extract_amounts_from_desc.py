@@ -24,6 +24,9 @@ import sys
 
 import psycopg2
 
+from active_scope import (add_scope_arg, scope_label, scope_sql,
+                          scope_where)
+
 # 🔴 只抓「明確的給付語句」
 PAY_RE = re.compile(
     r"(補助金額|補助標準|給付金額|核發金額|發給|發放|發放|核給|核發|補助|津貼|最高|給付)"
@@ -266,14 +269,17 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--show", type=int, default=12)
+    add_scope_arg(ap)
     args = ap.parse_args()
 
     conn = psycopg2.connect(dbname="welfare_check")
     cur = conn.cursor()
-    cur.execute("""SELECT id, name, description FROM benefits
+    cur.execute(f"""SELECT id, name, description FROM benefits
                     WHERE amount_max IS NULL
-                      AND description ~ '[0-9][0-9,]{2,}\\s*元'""")
+                      AND description ~ '[0-9][0-9,]{{2,}}\\s*元'
+                      {scope_sql(args)}""")
     rows = cur.fetchall()
+    print(f"（範圍：{scope_label(args)}）")
     print(f"候選（描述含金額但 amount_max 為空）：{len(rows)} 筆\n")
 
     hit = 0

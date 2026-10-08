@@ -31,6 +31,9 @@ import sys
 
 import psycopg2
 
+from active_scope import (add_scope_arg, scope_label, scope_sql,
+                          scope_where)
+
 HARD_IDENTITY = re.compile(r"低收入戶|中低收入|清寒|經濟弱勢|特殊境遇")
 COMPETITIVE = re.compile(r"審查會|評審|評選|擇優|競爭|甄選|評比")
 QUOTA = re.compile(r"名額|限額|額滿|先申請先|經費用罄|預算用罄|依序核給|"
@@ -71,16 +74,19 @@ def classify(desc: str, n_docs: int) -> tuple[int | None, bool | None]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true")
+    add_scope_arg(ap)
     args = ap.parse_args()
 
     conn = psycopg2.connect(dbname="welfare_check")
     cur = conn.cursor()
-    cur.execute("""
+    cur.execute(f"""
         SELECT b.id, b.description,
                (SELECT count(*) FROM benefit_documents d
                  WHERE d.benefit_id = b.id)
-          FROM benefits b""")
+          FROM benefits b
+         WHERE true {scope_sql(args)}""")
     rows = cur.fetchall()
+    print(f"（範圍：{scope_label(args)}）")
 
     tally = {1: 0, 2: 0, 3: 0, None: 0}
     q_count = 0
