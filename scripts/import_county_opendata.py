@@ -137,7 +137,17 @@ ALIAS: dict[str, tuple[str, ...]] = {
     #    ⇒ 26 筆「source_tier=official 但來源是首頁」＝沒來源卻掛官方認證
     #    （2026-10-07 修，W-009）。
     # ⚠️ 新增別名時一律往**首頁類欄位之前**插，不要往後補。
-    "link": ("詳細資訊[連結]", "詳細資訊網址", "詳細資訊", "sourcePolicyUrl",
+    #
+    # 🔴 2026-10-08 第二次漏（臺中 25 筆，W-010）：臺中三個資料集用
+    #    `詳細資訊連結`（**無方括號**）／`相關資訊連結`／`網址`，
+    #    而清單裡只有臺南的 `詳細資訊[連結]`（**有方括號**）。
+    #    ⚠️ 差一個字就 fallback 到 `src["dataset"]`（data.gov.tw 目錄頁），
+    #    **不報錯、不留空值、source_tier 照樣算得出來** ⇒ 看起來完全正常。
+    # 🔴 這是白名單型規則的通病（CLAUDE.md「判準不可用白名單列舉」）：
+    #    補上這三個只修掉今天這一批。真正的防線是
+    #    `verify_opendata_link_alias.py` 的「原始資料有 http 欄位卻沒用到」檢查。
+    "link": ("詳細資訊[連結]", "詳細資訊連結", "詳細資訊網址", "詳細資訊",
+             "相關資訊連結", "網址", "sourcePolicyUrl",
              "sourceUrl", "competentAuthorityUrl"),
     # 🔴 英文格式才有的欄位 —— 內容比中文那批豐富，不可丟掉
     "desc": ("service_desc", "policyDescription", "補助內容"),
