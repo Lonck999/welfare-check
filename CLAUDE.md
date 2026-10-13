@@ -282,7 +282,7 @@ SKILL.md 裡多處用「（41）」「（47）」這種編號引用其他搜索�
      - 若既有問卷資料已足夠 → 直接在新項目下方註明依據第幾題判斷
      - 若問卷沒問過 → 必須新增對應題目（或子題），否則這個新項目永遠無法被正確篩選
   4. 依規則 4 同步更新 README.md／網站化規劃.md 的類別總數
-- **同一次排程也會檢查 `backend/src/db/seed-data/*.ts`**（網站資料庫的建檔來源檔）：逐筆重新查證每個 `SeedBenefit` 的 `sourceUrl` 是否仍支持其 `description`/`notes` 裡的金額或門檻，有異動就直接改 seed-data 檔案並更新該筆的 `lastVerifiedDate`；來源網址查證失敗（404/改版/疑似下架）則保留該筆並加註 ⚠️，不自動刪除；**這個檢查只改 TypeScript 原始檔，不會執行 `npm run seed`、不會碰 Neon 正式資料庫**——要讓異動真正生效，必須人工 review 該分支後自己跑 `cd backend && npm run seed`
+- **同一次排程也會檢查 `backend/src/db/seed-data/*.ts`**（網站資料庫的建檔來源檔）：逐筆重新查證每個 `SeedBenefit` 的 `sourceUrl` 是否仍支持其 `description`/`notes` 裡的金額或門檻，有異動就直接改 seed-data 檔案並更新該筆的 `lastVerifiedDate`；來源網址查證失敗（404/改版/疑似下架）則保留該筆並加註 ⚠️，不自動刪除（🔴 **2026-10-13 起改為：三種工具都抓不到連續兩輪、或官方頁寫明停辦、或找不到官方頁 ⇒ 自動停用 `is_active=false`，寫原因，不真刪**；見 `網站化規劃.md` 第四節第 5 點）；**這個檢查只改 TypeScript 原始檔，不會執行 `npm run seed`、不會碰 Neon 正式資料庫**——要讓異動真正生效，必須人工 review 該分支後自己跑 `cd backend && npm run seed`
 - 上述異動（無論是 SKILL.md 門檻數字、新項目、還是 seed-data 資料庫內容）都遵守同一套流程：「有異動 → 開新分支 `update-thresholds-YYYYMMDD` ＋ 在 `更新紀錄/` 留檔（須寫明新增項目的編號、時限、是否新增問卷題目，以及 seed-data 異動/疑似下架清單）＋ push 新分支，不直接動 main」
 - 若是人工手動更新（非排程觸發），**也要走同樣流程**：開分支、留檔、再讓使用者 review 後決定是否合併到 main，不要直接改 main 上的 SKILL.md
 - 檢查排程是否跑過，用 `git fetch` + `git branch -r` 看有沒有 `update-thresholds-*` 分支，不要用本機 `CronList`（那只列本次 session 建立的排程，看不到 claude.ai routine）
