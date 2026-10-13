@@ -120,6 +120,11 @@ export const benefitChangeLog = pgTable('benefit_change_log', {
   sourceUrl: text('source_url').notNull(),
   sourceExcerpt: text('source_excerpt').notNull(),
   detectedAt: timestamp('detected_at').notNull().defaultNow(),
-  reviewedBy: varchar('reviewed_by', { length: 100 }), // 核准者
-  approvedAt: timestamp('approved_at'), // null = 尚待人工審核
+  reviewedBy: varchar('reviewed_by', { length: 100 }), // 審核者（核准或駁回）
+  approvedAt: timestamp('approved_at'), // 核准時間
+  // 駁回時間（2026-10-13 C-5）。🔴 與 approvedAt 互斥（DB CHECK）；兩個都 null ＝ 待審。
+  //   駁回的紀錄保留不刪，月更遇到同一個錯誤會略過。
+  rejectedAt: timestamp('rejected_at'),
+  // ⚠️ run_id（verification_runs）與 benefits.last_diffed_at 目前只在 migrations/，
+  //   schema.ts 沒有 —— `drizzle-kit push --force` 會把它們刪掉。見 KNOWN-ISSUES W-011。
 })
