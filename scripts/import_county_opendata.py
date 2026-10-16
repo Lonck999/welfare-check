@@ -22,8 +22,10 @@ import csv
 import io
 import json
 import re
+import ssl
 import sys
 import urllib.request
+from pathlib import Path
 from typing import Any
 
 import psycopg2
@@ -172,9 +174,36 @@ def to_int(s: str) -> int | None:
     return int(s) if re.fullmatch(r"\d+", s) else None
 
 
+_EXTRA_CA = Path(__file__).resolve().parent / "certs"
+
+
+def _ssl_context() -> ssl.SSLContext:
+    """🔴 新竹市 odws.hccg.gov.tw **沒送中繼憑證**（只送葉憑證，issuer 是
+    TWCA SSL Certification Authority）⇒ 標準驗證必失敗
+    `CERTIFICATE_VERIFY_FAILED: unable to get local issuer certificate`。
+
+    ⚠️ 修法是**補上那張中繼憑證**（`certs/twca_ssl_ca_2023.pem`，
+    取自葉憑證 AIA 欄位的 TWCA 官方網址，SHA256 01:AF:23:24…E5:31，
+    由 TWCA CYBER Root CA 簽發、2033-02-23 到期），**不是關掉驗證**。
+
+    🔴 這個錯誤**從來沒被當成問題**：`verify_import_completeness.py` 把它歸類為
+    「⚠️ 來源暫時抓不到（非匯入失敗）」——那個分類對「網站暫時掛了」是對的，
+    但對「永遠抓不到」是錯的，於是新竹市每天都被安靜地跳過（2026-10-16 發現）。
+    """
+    ctx = ssl.create_default_context()
+    try:
+        import certifi  # venv 有；系統 python 沒有也不擋
+        ctx.load_verify_locations(certifi.where())
+    except ImportError:
+        pass
+    for pem in sorted(_EXTRA_CA.glob("*.pem")):
+        ctx.load_verify_locations(str(pem))
+    return ctx
+
+
 def fetch(url: str) -> list[dict[str, Any]]:
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    raw = urllib.request.urlopen(req, timeout=60).read()
+    raw = urllib.request.urlopen(req, timeout=60, context=_ssl_context()).read()
     txt = raw.decode("utf-8-sig", "replace")
     try:
         d = json.loads(txt)
@@ -208,6 +237,30 @@ def build_eligibility(row: dict[str, Any], county: str) -> dict[str, Any]:
     if other := pick(row, "other"):
         e["otherConditions"] = other[:500]
     return e
+
+
+def review_gate(cur, county: str, new: list[dict[str, Any]]):
+    """🔴 C-6（2026-10-16）：新福利要先經人工審核才進庫。
+
+    `welfare_new_candidates.py` 每月把「來源有、庫裡沒有」的記成
+    `benefit_change_log.change_type='new_candidate'`，`new_value='<縣市>｜<名稱>'`。
+    ⇒ 只匯**核准過的**；駁回的、還在待審的一律擋下。
+    ⚠️ 不擋的話「❌ 駁回」形同虛設：下次有人跑匯入，它就安靜地進庫了。
+    ⚠️ 從沒被記成候選的（例：新增一個來源後第一次匯入）照舊直接匯 ——
+       那是「建庫」不是「新福利」，不在審核範圍。
+    回傳 (可匯入, 擋下, {名稱鍵: 狀態})。
+    """
+    cur.execute("""SELECT new_value,
+                          CASE WHEN approved_at IS NOT NULL THEN 'approved'
+                               WHEN rejected_at IS NOT NULL THEN 'rejected'
+                               ELSE 'pending' END
+                     FROM benefit_change_log
+                    WHERE change_type = 'new_candidate' AND new_value LIKE %s""",
+                (f"{county}｜%",))
+    review = {re.sub(r"\s+", "", v.split("｜", 1)[1]): s for v, s in cur.fetchall()}
+    held = [r for r in new
+            if review.get(re.sub(r"\s+", "", pick(r, "name"))) in ("rejected", "pending")]
+    return [r for r in new if r not in held], held, review
 
 
 def main() -> int:
@@ -267,6 +320,13 @@ def main() -> int:
         (collide if key in existing else new).append(r)
     print(f"  與現有 {len(existing)} 筆比對："
           f"新增 {len(new)}　已存在 {len(collide)}")
+
+    new, held, review = review_gate(cur, county, new)
+    if held:
+        print(f"  🛑 審核擋下 {len(held)} 筆（駁回或待審，不匯）：")
+        for r in held[:5]:
+            k = re.sub(r"\s+", "", pick(r, "name"))
+            print(f"    · {pick(r, 'name')[:34]}（{review[k]}）")
 
     if collide:
         print("  已存在的（不覆蓋，保留舊資料）：")
