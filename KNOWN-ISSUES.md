@@ -1189,3 +1189,28 @@ ddgs 被限流時回 `No results found.`（不是錯誤）⇒ 第一版把它當
 ⚠️ 未處理：「115年度住宿式服務機構使用者補助方案」（衛福部，最高每年 18 萬）
 在 8 個縣市網站都有轉貼，**全國層級也沒有這筆** —— 依 10-13 規則，縣市轉貼中央方案不算縣市自己的，
 所以 B 沒記；但它應該以 `county='全國'` 收一筆。留給審核時一起決定。
+
+## ✅ W-018　核准的新福利永遠進不了資料庫，而「待審 0 筆」看起來像做完了（2026-10-19 修）
+
+10-19 10:39 Lonck 核准 change_log 267–275 九筆新福利（來源 B 搜尋判讀出來的）。
+`welfare_change_review.py apply --write` 回「✅ 已寫入」、待審數 0 —— 我就回報完成。
+
+🔴 **實際一筆都沒進 `benefits`**：那支只寫 `approved_at`，然後提示
+「跑 `import_county_opendata.py --county <來源> --apply`」—— 而那支**只匯開放資料**，
+來源 B 的候選不在任何開放資料裡 ⇒ **核准了也永遠進不了庫，沒有任何訊號**。
+四個小時後做 C-6 下一步、查 `benefit_id` 才發現：九筆全是 NULL。
+
+⚠️ 根因（我的）：拿「待審 0 筆」當終點。那只證明**審完了**，不證明**進庫了**
+（同 AGENTS.md §1：驗終點，不驗過程）。網站讀的是 `benefits WHERE is_active`，
+不是 change_log。
+
+✅ 修法：
+- `scripts/import_approved_candidates.py`：核准的候選 → benefits（欄位逐筆寫死，同 import_gap_items 的理由），
+  寫入後回填 `change_log.benefit_id`，並斷言「核准但未入庫」剩 0。新增 id 866–874。
+- `welfare_change_review.py` 的提示改成分來源 A／B 各給指令。
+- `verify_approved_candidates_landed.py`（每日回歸）：直接查 DB，核准但 `benefit_id` 指不到 benefits 就紅；
+  內建 negative control（交易內植入後 rollback）。雙向測過：真實 9/9 綠／把 275 改 NULL 變紅／還原變綠。
+- 寫入前備份：`~/.hermes/cache/welfare_backup_before_c6b_import_20261019.sql`
+
+⚠️ 金額有兩筆是推算不是原文：270 臺中孕婦乘車 `≤10,000`（40 趟×250 點）、
+273 新竹縣證照津貼 `≤6,000/年`（3,000×2 次）—— 已寫在 `amount_note` 註明「推算」。
