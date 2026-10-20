@@ -21,6 +21,7 @@ const answers = reactive<QuestionnaireAnswers>({
   housingStatus: '' as QuestionnaireAnswers['housingStatus'],
   selfAnnualIncome: 0,
   selfAssets: 0,
+  registeredLowIncome: 'unknown',
   employmentStatus: '' as QuestionnaireAnswers['employmentStatus'],
   workCounty: undefined,
   selfDisabilityCard: false,
@@ -516,6 +517,18 @@ const noneStudentAndChild = computed({
         <span>{{ member.relationship }}年收入</span>
         <input v-model.number="member.annualIncome" type="number" min="0" />
       </div>
+
+      <h3>第 9a 題：目前是否已列冊低收入戶或中低收入戶？</h3>
+      <p class="hint">
+        很多補助要求「已列冊」。上面填的收入只能推算你<strong>可不可以去申請列冊</strong>，
+        不代表已經是低收／中低收 —— 所以有列冊請直接選。
+      </p>
+      <fieldset class="radio-col">
+        <label><input v-model="answers.registeredLowIncome" type="radio" value="low_income" /> 已列冊低收入戶</label>
+        <label><input v-model="answers.registeredLowIncome" type="radio" value="mid_low_income" /> 已列冊中低收入戶</label>
+        <label><input v-model="answers.registeredLowIncome" type="radio" value="none" /> 都不是</label>
+        <label><input v-model="answers.registeredLowIncome" type="radio" value="unknown" /> 不清楚</label>
+      </fieldset>
     </section>
 
     <section v-if="currentStep === 'employment'" class="step">

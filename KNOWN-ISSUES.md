@@ -1325,6 +1325,14 @@ C-6 C 第二輪（花蓮／嘉義縣／臺東／澎湖，改用 curl 讀縣府�
   · ⚠️ 植入時差點誤判：我第一次用 `familySpecialCircumstances` 送身障證明，兩個人結果一模一樣 —— 正確欄位是 `selfDisabilityCard`。**對照組長一樣＝輸入沒送進去，不是引擎壞**
 - 備份：`~/.hermes/cache/welfare_w020/benefits_before_w020b_20261020.dump`
 
+**問卷第 9a 題「是否已列冊」（2026-10-20 13:58，Lonck 選 A）**
+- 🔴 Lonck 的判準：「**用推算的只能證明他今年的收入明年可以去申請**」—— 推算 ≠ 已是低收／中低收
+- 規格：有答已列冊 ⇒ 以答案為準（推算超標也算，因為推算用的是去年所得）；答「都不是／不清楚」⇒ 推算符合也**最高 possible**，「還缺」寫「須為列冊低收入戶（你目前未列冊；依收入推算可向區公所申請列冊，核定後才能申請本項）」
+- 例外 `incomeEstimateSufficient`（只 4 筆，各附原文依據，`mark_income_estimate_sufficient.py`）：6／8 低收認定本身、173 中低收入老人津貼（依收入審查）、853 國保所得未達一定標準 —— 推算符合可 confirmed
+- ⚠️ 舊測試「推算是低收 ⇒ confirmed」就是這個 bug 的規格，已改寫；測試 68 → 74；植入「推算＝符合」2 紅、植入「不看列冊答案」1 紅；還原綠；backend tsc／frontend vue-tsc＋build 皆過
+- 端對端（高雄）：70 歲收入 0、**沒答列冊** → 瓦斯補助 51、健保補助 222 從 confirmed 降為 possible；**同一人答已列冊低收** → 回到 confirmed；30 歲上班族不變；舊版 payload（不帶新欄位）照常回應
+- 備份：`benefits_before_registered_20261020.dump`
+
 **B 第 2 批：高雄市 29 筆（2026-10-20 13:35 完成）**
 - 29 頁全部用 curl＋瀏覽器 UA 讀到正文（885、895 原網址是 JS 轉址，讀轉址後的頁）；`scripts/w020_conditions/batch02_高雄市.py`
 - 編法：問卷問得到的編成條件；🔴 **「符合其一」的 OR 條件一律放 `uncheckedConditions`**（引擎只有 AND，硬編會把該看到的人刷掉，例如 882 老人修繕「低收／中低收／領中低老人津貼／領身障生活補助」四選一）

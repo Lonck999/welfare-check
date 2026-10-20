@@ -93,6 +93,11 @@ function validateAnswers(body: unknown): QuestionnaireAnswers {
     housingStatus: b.housingStatus as QuestionnaireAnswers['housingStatus'],
     selfAnnualIncome: typeof b.selfAnnualIncome === 'number' ? b.selfAnnualIncome : 0,
     selfAssets: typeof b.selfAssets === 'number' ? b.selfAssets : 0,
+    registeredLowIncome: (['low_income', 'mid_low_income', 'none', 'unknown'] as const).includes(
+      b.registeredLowIncome as never,
+    )
+      ? (b.registeredLowIncome as QuestionnaireAnswers['registeredLowIncome'])
+      : 'unknown',
     employmentStatus: b.employmentStatus as QuestionnaireAnswers['employmentStatus'],
     workCounty: b.workCounty === '' ? undefined : (b.workCounty as string | undefined),
     selfDisabilityCard: Boolean(b.selfDisabilityCard),

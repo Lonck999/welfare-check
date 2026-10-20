@@ -27,6 +27,8 @@ PERSONAS = {
                           housingStatus='rent', familySpecialCircumstances=['single_parent_custody'],
                           householdMembers=[dict(relationship='子女', birthDate='2021-03-01',
                                                  registeredCounty=county, sameHukou=True)]),
+    '⑥70歲同②但已列冊低收': base(birthDate='1956-01-01', selfAnnualIncome=0, selfAssets=0, employmentStatus='retired',
+                       housingStatus='rent', registeredLowIncome='low_income'),
     '⑤臺南人(縣市對照)': base(county='臺南市', birthDate='1956-01-01', selfAnnualIncome=0, selfAssets=0,
                           selfDisabilityCard=True, housingStatus='rent'),
 }

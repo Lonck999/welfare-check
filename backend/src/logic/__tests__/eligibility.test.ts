@@ -47,10 +47,45 @@ describe('evaluateEligibility', () => {
     expect(evaluateEligibility(conditions, applicant).verdict).toBe('not_eligible')
   })
 
-  it('所得門檻：中低收入戶條件下，低收入戶身分也算符合', () => {
+  // 🔴 2026-10-20 改規格（Lonck：「用推算的只能證明他今年的收入明年可以去申請」）：
+  //    舊測試「推算是低收 ⇒ confirmed」就是 bug 本身 —— 推算只代表可以去申請列冊。
+  it('所得門檻：中低收入戶條件下，已列冊低收入戶也算符合', () => {
     const conditions: EligibilityConditions = { incomeThreshold: 'mid_low_income' }
-    const applicant: ApplicantProfile = { incomeThresholdResult: 'low_income' }
+    const applicant: ApplicantProfile = { incomeThresholdResult: 'low_income', registeredLowIncome: 'low_income' }
     expect(evaluateEligibility(conditions, applicant).verdict).toBe('confirmed')
+  })
+
+  it('所得門檻：只有推算（沒答已列冊）⇒ 最高 possible，且說明要先列冊', () => {
+    const conditions: EligibilityConditions = { incomeThreshold: 'mid_low_income' }
+    const r = evaluateEligibility(conditions, { incomeThresholdResult: 'low_income', registeredLowIncome: 'unknown' })
+    expect(r.verdict).toBe('possible')
+    expect(r.missingConditions.join()).toContain('列冊')
+  })
+
+  it('所得門檻：答「都不是」但推算符合 ⇒ possible，提示可去申請列冊', () => {
+    const r = evaluateEligibility({ incomeThreshold: 'low_income' }, { incomeThresholdResult: 'low_income', registeredLowIncome: 'none' })
+    expect(r.verdict).toBe('possible')
+    expect(r.missingConditions.join()).toContain('未列冊')
+  })
+
+  it('所得門檻：答「都不是」且推算也不符 ⇒ not_eligible', () => {
+    const r = evaluateEligibility({ incomeThreshold: 'mid_low_income' }, { incomeThresholdResult: 'above_threshold', registeredLowIncome: 'none' })
+    expect(r.verdict).toBe('not_eligible')
+  })
+
+  it('所得門檻：已列冊以答案為準 —— 推算超標也 confirmed（推算用的是去年所得）', () => {
+    const r = evaluateEligibility({ incomeThreshold: 'mid_low_income' }, { incomeThresholdResult: 'above_threshold', registeredLowIncome: 'mid_low_income' })
+    expect(r.verdict).toBe('confirmed')
+  })
+
+  it('所得門檻：已列冊中低收 不符合「限低收入戶」', () => {
+    const r = evaluateEligibility({ incomeThreshold: 'low_income' }, { incomeThresholdResult: 'low_income', registeredLowIncome: 'mid_low_income' })
+    expect(r.verdict).toBe('not_eligible')
+  })
+
+  it('認定類（incomeEstimateSufficient）：推算符合就 confirmed —— 申請列冊本身不需要已列冊', () => {
+    const r = evaluateEligibility({ incomeThreshold: 'mid_low_income', incomeEstimateSufficient: true }, { incomeThresholdResult: 'mid_low_income', registeredLowIncome: 'none' })
+    expect(r.verdict).toBe('confirmed')
   })
 
   it('所得門檻：超過門檻者一律不符合', () => {

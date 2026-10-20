@@ -72,6 +72,7 @@ export interface QuestionnaireAnswers {
   housingStatus: 'own' | 'rent' | 'borrow' | 'other'
   selfAnnualIncome: number
   selfAssets: number
+  registeredLowIncome: 'low_income' | 'mid_low_income' | 'none' | 'unknown'
   employmentStatus: EmploymentStatus
   workCounty?: string
   selfDisabilityCard: boolean

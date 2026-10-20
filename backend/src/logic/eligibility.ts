@@ -19,6 +19,12 @@ export interface EligibilityConditions {
   ageMax?: number
   /** 'low_income' 只允許低收入戶；'mid_low_income' 允許低收入戶或中低收入戶 */
   incomeThreshold?: 'low_income' | 'mid_low_income'
+  /**
+   * 這筆本身就是「申請列冊」（低收／中低收認定）⇒ 用收入推算就夠，不需要已經列冊。
+   * 🔴 只有認定類可以設。其他項目一律要「已列冊」才可能 confirmed（2026-10-20 Lonck：
+   *    「用推算的只能證明他今年的收入明年可以去申請」）。
+   */
+  incomeEstimateSufficient?: boolean
   maxPerCapitaAssets?: number
   /** 符合其中之一即可 */
   requiredIdentities?: string[]
@@ -79,11 +85,18 @@ export interface ApplicantProfile {
    */
   answeredFlags?: string[]
   /**
+   * 問卷第 9a 題：目前是否已列冊（2026-10-20 Lonck 定 A）。有答以答為準；
+   * 'unknown'／未設 ⇒ 只能用收入推算，而推算只代表「可以去申請列冊」，不代表已是低收／中低收。
+   */
+  registeredLowIncome?: RegisteredLowIncome
+  /**
    * 家庭成員名單已作答、且非同戶家人裡沒有未滿 18 歲者 ⇒ hasChildUnder 為 undefined 代表「沒有小孩」，
    * requiresChildUnder ⇒ failed（不是 missing_data）。未設＝不知道。
    */
   householdAnswered?: boolean
 }
+
+export type RegisteredLowIncome = 'low_income' | 'mid_low_income' | 'none' | 'unknown'
 
 export type EligibilityVerdict = 'confirmed' | 'possible' | 'not_eligible'
 
@@ -120,12 +133,27 @@ function checkIncomeThreshold(
   applicant: ApplicantProfile,
 ): ConditionCheck {
   if (!conditions.incomeThreshold) return 'satisfied'
-  if (!applicant.incomeThresholdResult) return 'missing_data'
-  if (applicant.incomeThresholdResult === 'above_threshold') return 'failed'
-  if (conditions.incomeThreshold === 'low_income' && applicant.incomeThresholdResult !== 'low_income') {
-    return 'failed'
+  const reg = applicant.registeredLowIncome
+  // ① 有答「已列冊」⇒ 以答案為準（不看推算）
+  if (reg === 'low_income') return 'satisfied'
+  if (reg === 'mid_low_income') return conditions.incomeThreshold === 'mid_low_income' ? 'satisfied' : 'failed'
+  // ② 沒列冊／不清楚 ⇒ 只剩推算
+  const est = applicant.incomeThresholdResult
+  if (!est) return 'missing_data'
+  const estMeets = est !== 'above_threshold' && !(conditions.incomeThreshold === 'low_income' && est !== 'low_income')
+  if (!estMeets) return 'failed'
+  // 推算符合：認定類（申請列冊本身）算數；其他項目推算只代表「可以去申請列冊」⇒ 最高 possible
+  return conditions.incomeEstimateSufficient ? 'satisfied' : 'missing_data'
+}
+
+/** 所得門檻缺資料時，告訴使用者到底缺什麼（取代泛稱「所得門檻」） */
+function incomeMissingLabel(conditions: EligibilityConditions, applicant: ApplicantProfile): string {
+  const kind = conditions.incomeThreshold === 'low_income' ? '低收入戶' : '低收入戶或中低收入戶'
+  if (!applicant.incomeThresholdResult) return `須為列冊${kind}`
+  if (applicant.registeredLowIncome === 'none') {
+    return `須為列冊${kind}（你目前未列冊；依填寫的收入推算可向區公所申請列冊，核定後才能申請本項）`
   }
-  return 'satisfied'
+  return `須為列冊${kind}（依填寫的收入推算可能符合，請確認是否已列冊）`
 }
 
 function checkPerCapitaAssets(
@@ -229,7 +257,7 @@ const CHECKS: Array<{
 ]
 
 /** 不算「資格條件」的鍵：地區只是篩選範圍、referenceData 不參與比對、_ 開頭是註記 */
-const NON_SUBSTANTIVE_KEYS = new Set(['counties', 'referenceData', 'openToAll', 'ageMinByIdentity'])
+const NON_SUBSTANTIVE_KEYS = new Set(['counties', 'referenceData', 'openToAll', 'ageMinByIdentity', 'incomeEstimateSufficient'])
 export const UNSORTED_CONDITIONS_LABEL = '資格條件尚未整理（請見官方頁）'
 
 /**
@@ -254,7 +282,9 @@ export function evaluateEligibility(
   for (const { label, check } of CHECKS) {
     const result = check(conditions, applicant)
     if (result === 'failed') failedConditions.push(label)
-    if (result === 'missing_data') missingConditions.push(label)
+    if (result === 'missing_data') {
+      missingConditions.push(label === '所得門檻' ? incomeMissingLabel(conditions, applicant) : label)
+    }
   }
   missingConditions.push(...missingRequiredFlagLabels(conditions, applicant))
   if (hasUnsortedConditions(conditions)) missingConditions.push(UNSORTED_CONDITIONS_LABEL)

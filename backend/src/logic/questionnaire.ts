@@ -76,6 +76,8 @@ export interface QuestionnaireAnswers {
   // Q8/Q9（本人）
   selfAnnualIncome: number
   selfAssets: number
+  // Q9a：目前是否已列冊（2026-10-20 加）。未作答的舊 API 呼叫一律當 'unknown'
+  registeredLowIncome?: 'low_income' | 'mid_low_income' | 'none' | 'unknown'
   // Q10
   employmentStatus: EmploymentStatus
   // Q10a
@@ -257,6 +259,7 @@ export function buildApplicantProfile(
     flags: deriveFlags(answers),
     // 🔴 2026-10-20 Lonck 定 A：問卷有明問的，沒勾＝沒有
     answeredFlags: ANSWERED_FLAGS,
+    registeredLowIncome: answers.registeredLowIncome ?? 'unknown',
     // 非同戶家人裡有未滿 18 歲的（例如不同戶籍的子女）⇒ 不能說「沒有小孩」，保留 missing
     householdAnswered: !answers.nonCohabitingFamily.some((m) => ageOf(m.birthDate, asOf) < 18),
   }
