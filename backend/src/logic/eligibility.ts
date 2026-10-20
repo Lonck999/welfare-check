@@ -38,6 +38,17 @@ export interface EligibilityConditions {
    */
   openToAll?: boolean
   /**
+   * 特定身分的年齡下限另計（W-020 補條件時加）：例如老人福利「65 歲以上，原住民 55 歲以上」
+   * ⇒ { ageMin: 65, ageMinByIdentity: { 原住民: 55 } }。申請人有該身分時取較低者。
+   */
+  ageMinByIdentity?: Record<string, number>
+  /**
+   * 官方原文寫了、但問卷問不到的條件（設籍滿 N 年、個人所得未達 X、醫療自付達 Y…）。
+   * 🔴 每一條都會原文照列進 missingConditions ⇒ 這筆最高只能是 possible，不可能 confirmed。
+   *    寫在這裡＝「我們知道有這條、但無法替使用者判斷」，不是「沒有這條」。
+   */
+  uncheckedConditions?: string[]
+  /**
    * 縣市層級的門檻參考數值（目前只有「低收入戶/中低收入戶認定」這類本身就是門檻定義的項目會填）。
    * evaluateEligibility() 不會讀取這裡的數字做比對——實際比對邏輯是用 calculations.ts 的
    * evaluateIncomeThreshold(perCapitaMonthlyIncome, minLivingExpense) 在收集完使用者資料後另外計算。
@@ -74,10 +85,20 @@ export interface EligibilityResult {
 
 type ConditionCheck = 'satisfied' | 'failed' | 'missing_data'
 
+/** 申請人適用的年齡下限：有 ageMinByIdentity 對應身分時取較低者 */
+export function effectiveAgeMin(conditions: EligibilityConditions, applicant: ApplicantProfile): number | undefined {
+  let min = conditions.ageMin
+  for (const [identity, age] of Object.entries(conditions.ageMinByIdentity ?? {})) {
+    if ((applicant.identities ?? []).includes(identity)) min = min === undefined ? age : Math.min(min, age)
+  }
+  return min
+}
+
 function checkAgeRange(conditions: EligibilityConditions, applicant: ApplicantProfile): ConditionCheck {
   if (conditions.ageMin === undefined && conditions.ageMax === undefined) return 'satisfied'
   if (applicant.age === undefined) return 'missing_data'
-  if (conditions.ageMin !== undefined && applicant.age < conditions.ageMin) return 'failed'
+  const ageMin = effectiveAgeMin(conditions, applicant)
+  if (ageMin !== undefined && applicant.age < ageMin) return 'failed'
   if (conditions.ageMax !== undefined && applicant.age > conditions.ageMax) return 'failed'
   return 'satisfied'
 }
@@ -185,7 +206,7 @@ const CHECKS: Array<{
 ]
 
 /** 不算「資格條件」的鍵：地區只是篩選範圍、referenceData 不參與比對、_ 開頭是註記 */
-const NON_SUBSTANTIVE_KEYS = new Set(['counties', 'referenceData', 'openToAll'])
+const NON_SUBSTANTIVE_KEYS = new Set(['counties', 'referenceData', 'openToAll', 'ageMinByIdentity'])
 export const UNSORTED_CONDITIONS_LABEL = '資格條件尚未整理（請見官方頁）'
 
 /**
@@ -214,6 +235,7 @@ export function evaluateEligibility(
   }
   missingConditions.push(...missingRequiredFlagLabels(conditions, applicant))
   if (hasUnsortedConditions(conditions)) missingConditions.push(UNSORTED_CONDITIONS_LABEL)
+  for (const u of conditions.uncheckedConditions ?? []) missingConditions.push(u)
 
   if (failedConditions.length > 0) {
     return { verdict: 'not_eligible', missingConditions: [], failedConditions }

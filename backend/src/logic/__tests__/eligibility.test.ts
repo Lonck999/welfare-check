@@ -93,6 +93,33 @@ describe('evaluateEligibility', () => {
     expect(result.verdict).toBe('confirmed')
   })
 
+  it('ageMinByIdentity：60 歲原住民符合「65 歲以上（原住民 55）」', () => {
+    const c: EligibilityConditions = { counties: ['新竹市'], ageMin: 65, ageMinByIdentity: { 原住民: 55 } }
+    expect(evaluateEligibility(c, { age: 60, county: '新竹市', identities: ['原住民'] }).verdict).toBe('confirmed')
+  })
+
+  it('ageMinByIdentity：60 歲非原住民 → not_eligible（不可因為有特例就全面放寬）', () => {
+    const c: EligibilityConditions = { counties: ['新竹市'], ageMin: 65, ageMinByIdentity: { 原住民: 55 } }
+    expect(evaluateEligibility(c, { age: 60, county: '新竹市', identities: [] }).verdict).toBe('not_eligible')
+  })
+
+  it('uncheckedConditions：其他條件全符合也只能 possible，且原文照列', () => {
+    const c: EligibilityConditions = { counties: ['新竹市'], ageMin: 65, uncheckedConditions: ['連續設籍本市滿 10 年'] }
+    const r = evaluateEligibility(c, { age: 70, county: '新竹市' })
+    expect(r.verdict).toBe('possible')
+    expect(r.missingConditions).toEqual(['連續設籍本市滿 10 年'])
+  })
+
+  it('uncheckedConditions：年齡不符仍是 not_eligible（❌ 優先）', () => {
+    const c: EligibilityConditions = { counties: ['新竹市'], ageMin: 65, uncheckedConditions: ['連續設籍本市滿 10 年'] }
+    expect(evaluateEligibility(c, { age: 30, county: '新竹市' }).verdict).toBe('not_eligible')
+  })
+
+  it('只有 ageMinByIdentity 沒有 ageMin → 仍算條件未整理', () => {
+    const c: EligibilityConditions = { counties: ['新竹市'], ageMinByIdentity: { 原住民: 55 } }
+    expect(evaluateEligibility(c, { age: 70, county: '新竹市' }).missingConditions).toContain(UNSORTED_CONDITIONS_LABEL)
+  })
+
   it('有實質條件且都符合 → 照舊 confirmed，不會被誤標成未整理', () => {
     const result = evaluateEligibility({ counties: ['新竹市'], ageMin: 65 }, { age: 70, county: '新竹市' })
     expect(result.verdict).toBe('confirmed')
