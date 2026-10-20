@@ -202,7 +202,9 @@ async function evaluateAllBenefits(
     .where(
       and(
         eq(benefits.isActive, true),
-        or(isNull(benefits.county), eq(benefits.county, county), eq(benefits.county, workCounty ?? '')),
+        // 🔴 W-023（2026-10-20）：全國制度有兩種存法 —— county IS NULL 與 county='全國'（9/25 補建、10/20 匯入都用後者）。
+        //    原本只撈 NULL ⇒ 24 筆「全國」對任何縣市都看不到，且不報錯（引擎的 counties ['全國'] 判斷根本沒機會跑）。
+        or(isNull(benefits.county), eq(benefits.county, '全國'), eq(benefits.county, county), eq(benefits.county, workCounty ?? '')),
       ),
     )
 
