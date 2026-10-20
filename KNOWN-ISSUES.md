@@ -1277,7 +1277,7 @@ C-6 C 第二輪（花蓮／嘉義縣／臺東／澎湖，改用 curl 讀縣府�
 
 | 項目 | 內容 |
 |---|---|
-| 狀態 | ⬜ 未修（先記錄；問卷討論中發現，與問卷要不要改直接相關） |
+| 狀態 | 🟡 **A 止血完成（2026-10-20）**：引擎改判 `possible`＋「資格條件尚未整理（請見官方頁）」；⬜ **B 逐筆補條件未做** |
 | 範圍 | `benefits where is_active` 832 筆中 **219 筆** `eligibility_conditions` 只有 `counties`（＋`_note`） |
 | 來源 | 匯入程式寫死只填 `counties`＋`_note`：`import_approved_candidates.py`（C-6 新增 109 筆）、`import_directory_items.py`、`import_central_opendata.py` |
 
@@ -1299,4 +1299,18 @@ C-6 C 第二輪（花蓮／嘉義縣／臺東／澎湖，改用 curl 讀縣府�
 ① 219 筆逐筆從原文把條件編進 JSONB（能編的就編；編不了的至少降成 `possible`）
 ② 引擎：條件只有 `counties` 的項目 → 一律 `possible`＋「資格請見官方頁」，不可 `confirmed`
 ③ 匯入程式不准再寫出「只有 counties」的列（verify 擋下）
+
+**A 止血（2026-10-20，Lonck 選 C＝先 A 後 B）**：
+- `eligibility.ts`：`hasUnsortedConditions()` —— 除了 `counties`／`referenceData`／`_` 開頭以外**沒有任何條件鍵**、且沒標 `openToAll` ⇒ 塞進 `missingConditions`。
+  縣市不符仍是 `not_eligible`（❌ 優先）。
+- 新欄位 **`openToAll: true`**：🔴 **只有逐筆讀過官方原文、確認真的人人可申請才可設**（例如 TPASS）。
+- ⚠️ 舊測試「沒有任何條件限制 → 一定 confirmed」**就是這個 bug 的規格**，已改寫成新語意。
+- 三向：55/55 綠 → 拿掉那一行 **3 紅** → 還原 55/55；`tsc` 0。
+- 端對端（起後端打 `/api/check`，新竹市）：30 歲上班族 confirmed **33 → 14**；
+  新竹市 11 筆未整理項目 **confirmed 0、possible 11**，卡片顯示「還缺：資格條件尚未整理（請見官方頁）」。
+- 🔴 **實際受影響是 241 筆，不是上面寫的 219**：219 是「只有 counties」；
+  另有 **7 筆全國項目條件是 `null`/`{}`**（TPASS、法律扶助、節能家電…）與 **15 筆「低收入戶／中低收入戶認定」只有 `referenceData`**，以前也都對所有人 confirmed。
+
+**B（逐筆補條件）待做**：241 筆依縣市分批，從 `source_url` 原文把條件編進 JSONB；
+真的人人可申請的標 `openToAll`；編完的那筆自動脫離 possible。
 

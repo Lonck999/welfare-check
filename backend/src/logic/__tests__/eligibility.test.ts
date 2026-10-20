@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { evaluateEligibility, type ApplicantProfile, type EligibilityConditions } from '../eligibility.js'
+import { evaluateEligibility, UNSORTED_CONDITIONS_LABEL, type ApplicantProfile, type EligibilityConditions } from '../eligibility.js'
 
 describe('evaluateEligibility', () => {
   it('✅ 所有條件都滿足 → confirmed', () => {
@@ -66,8 +66,35 @@ describe('evaluateEligibility', () => {
     expect(result.verdict).toBe('not_eligible')
   })
 
-  it('沒有任何條件限制 → 一定 confirmed（例如人人可申請的優惠）', () => {
+  it('W-020：條件全空 → possible（條件尚未整理，不是人人可申請）', () => {
     const result = evaluateEligibility({}, {})
+    expect(result.verdict).toBe('possible')
+    expect(result.missingConditions).toContain(UNSORTED_CONDITIONS_LABEL)
+  })
+
+  it('W-020：只有縣市、居住縣市相符 → possible，不可 confirmed', () => {
+    const result = evaluateEligibility({ counties: ['新竹市'] }, { age: 30, county: '新竹市' })
+    expect(result.verdict).toBe('possible')
+    expect(result.missingConditions).toEqual([UNSORTED_CONDITIONS_LABEL])
+  })
+
+  it('W-020：只有縣市、縣市不符 → 仍是 not_eligible（❌ 優先於 ⚠️）', () => {
+    const result = evaluateEligibility({ counties: ['新竹市'] }, { age: 30, county: '臺南市' })
+    expect(result.verdict).toBe('not_eligible')
+  })
+
+  it('W-020：_note 與 referenceData 不算條件', () => {
+    const c = { counties: ['新竹市'], _note: '資格條件見官方頁', referenceData: { minLivingExpense: 1 } } as EligibilityConditions
+    expect(evaluateEligibility(c, { county: '新竹市' }).verdict).toBe('possible')
+  })
+
+  it('openToAll：逐筆確認過人人可申請 → confirmed', () => {
+    const result = evaluateEligibility({ counties: ['新竹市'], openToAll: true }, { county: '新竹市' })
+    expect(result.verdict).toBe('confirmed')
+  })
+
+  it('有實質條件且都符合 → 照舊 confirmed，不會被誤標成未整理', () => {
+    const result = evaluateEligibility({ counties: ['新竹市'], ageMin: 65 }, { age: 70, county: '新竹市' })
     expect(result.verdict).toBe('confirmed')
   })
 

@@ -32,6 +32,12 @@ export interface EligibilityConditions {
   /** 其他布林旗標式條件，例如 'pregnant'、'disability_card'、'time_sensitive_deadline_confirmed' */
   requiredFlags?: string[]
   /**
+   * 明確標記「真的人人可申請」（逐筆從官方原文確認過才可設）。
+   * 🔴 沒設這個、又沒有任何實質條件的項目 → 一律 possible（W-020）：
+   *    那代表「條件還沒整理」，不是「沒有條件」。
+   */
+  openToAll?: boolean
+  /**
    * 縣市層級的門檻參考數值（目前只有「低收入戶/中低收入戶認定」這類本身就是門檻定義的項目會填）。
    * evaluateEligibility() 不會讀取這裡的數字做比對——實際比對邏輯是用 calculations.ts 的
    * evaluateIncomeThreshold(perCapitaMonthlyIncome, minLivingExpense) 在收集完使用者資料後另外計算。
@@ -178,6 +184,21 @@ const CHECKS: Array<{
   { label: '需自有住宅', check: checkOwnedHome },
 ]
 
+/** 不算「資格條件」的鍵：地區只是篩選範圍、referenceData 不參與比對、_ 開頭是註記 */
+const NON_SUBSTANTIVE_KEYS = new Set(['counties', 'referenceData', 'openToAll'])
+export const UNSORTED_CONDITIONS_LABEL = '資格條件尚未整理（請見官方頁）'
+
+/**
+ * W-020：條件只有 counties（或全空）且沒標 openToAll ⇒ 條件尚未整理。
+ * 以前這種項目沒有任何條件可以不符 ⇒ 對任何人都判 confirmed（30 歲上班族會看到「65 歲以上健保補助」）。
+ */
+export function hasUnsortedConditions(conditions: EligibilityConditions): boolean {
+  if (conditions.openToAll === true) return false
+  return !Object.keys(conditions).some(
+    (k) => !k.startsWith('_') && !NON_SUBSTANTIVE_KEYS.has(k),
+  )
+}
+
 /** 依 SKILL.md 第四步的三級邏輯評估單一福利項目 */
 export function evaluateEligibility(
   conditions: EligibilityConditions,
@@ -192,6 +213,7 @@ export function evaluateEligibility(
     if (result === 'missing_data') missingConditions.push(label)
   }
   missingConditions.push(...missingRequiredFlagLabels(conditions, applicant))
+  if (hasUnsortedConditions(conditions)) missingConditions.push(UNSORTED_CONDITIONS_LABEL)
 
   if (failedConditions.length > 0) {
     return { verdict: 'not_eligible', missingConditions: [], failedConditions }
