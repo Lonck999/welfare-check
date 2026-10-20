@@ -73,6 +73,8 @@ export interface QuestionnaireAnswers {
   selfAnnualIncome: number
   selfAssets: number
   registeredLowIncome: 'low_income' | 'mid_low_income' | 'none' | 'unknown'
+  /** 第 2a 題：在現居縣市設籍幾個月（未答＝undefined，不可預設 0 —— 0 會被當成「剛遷入」） */
+  residencyMonths?: number
   employmentStatus: EmploymentStatus
   workCounty?: string
   selfDisabilityCard: boolean

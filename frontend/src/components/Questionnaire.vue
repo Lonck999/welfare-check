@@ -22,6 +22,7 @@ const answers = reactive<QuestionnaireAnswers>({
   selfAnnualIncome: 0,
   selfAssets: 0,
   registeredLowIncome: 'unknown',
+  residencyMonths: undefined,
   employmentStatus: '' as QuestionnaireAnswers['employmentStatus'],
   workCounty: undefined,
   selfDisabilityCard: false,
@@ -111,8 +112,14 @@ function validateCurrentStep(): boolean {
 }
 
 /** 使用者可能點了「+ 新增」卻沒填完就直接下一步，送出前濾掉這些空白列，避免後端因缺必填欄位而擋掉整份問卷 */
+// 第 2a 題：年＋月兩格，兩格都空才算「未答」
+const residencyYears = ref<number | ''>('')
+const residencyExtraMonths = ref<number | ''>('')
+
 function buildSubmission(): QuestionnaireAnswers {
   const cloned = JSON.parse(JSON.stringify(answers)) as QuestionnaireAnswers
+  const y = residencyYears.value, m = residencyExtraMonths.value
+  cloned.residencyMonths = y === '' && m === '' ? undefined : (Number(y) || 0) * 12 + (Number(m) || 0)
   cloned.householdMembers = cloned.householdMembers.filter((m) => m.relationship && m.birthDate)
   cloned.nonCohabitingFamily = cloned.nonCohabitingFamily.filter((m) => m.relationship && m.birthDate && m.county)
   return cloned
@@ -342,6 +349,13 @@ const noneStudentAndChild = computed({
         <span>鄉鎮市區（選填）</span>
         <input v-model="answers.district" type="text" placeholder="例：板橋區" />
       </label>
+
+      <h3>第 2a 題：在這個縣市設籍多久了？（選填）</h3>
+      <p class="hint">不少補助要求「設籍滿 6 個月／1 年／3 年」。不確定可以先跳過，結果會列出需要設籍幾年。</p>
+      <div class="field inline">
+        <label><input v-model.number="residencyYears" type="number" min="0" max="120" placeholder="0" /> 年</label>
+        <label><input v-model.number="residencyExtraMonths" type="number" min="0" max="11" placeholder="0" /> 個月</label>
+      </div>
     </section>
 
     <section v-if="currentStep === 'gender'" class="step">

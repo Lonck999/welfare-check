@@ -225,3 +225,26 @@ describe('問卷明確作答過的條件 → 可以判不符合', () => {
     expect(evaluateEligibility(c, {}).verdict).toBe('possible')
   })
 })
+
+// 2026-10-20 Lonck 定 A：問卷第 2a 題設籍年限
+describe('設籍年限 minResidencyMonths', () => {
+  const c: EligibilityConditions = { counties: ['新北市'], ageMin: 65, minResidencyMonths: 12 }
+  it('設籍滿 12 個月 → confirmed', () => {
+    expect(evaluateEligibility(c, { county: '新北市', age: 70, residencyMonths: 12 }).verdict).toBe('confirmed')
+  })
+  it('設籍 11 個月 → not_eligible', () => {
+    expect(evaluateEligibility(c, { county: '新北市', age: 70, residencyMonths: 11 }).verdict).toBe('not_eligible')
+  })
+  it('沒回答 → possible，還缺寫出幾年', () => {
+    const r = evaluateEligibility(c, { county: '新北市', age: 70 })
+    expect(r.verdict).toBe('possible')
+    expect(r.missingConditions.join()).toContain('設籍滿 1 年')
+  })
+  it('只靠工作縣市對上（戶籍在別縣市）→ not_eligible', () => {
+    expect(evaluateEligibility(c, { county: '臺北市', workCounty: '新北市', age: 70, residencyMonths: 240 }).verdict).toBe('not_eligible')
+  })
+  it('只有設籍年限、沒有其他條件 → 仍算條件未整理（不可 confirmed）', () => {
+    const r = evaluateEligibility({ counties: ['新北市'], minResidencyMonths: 12 }, { county: '新北市', residencyMonths: 24 })
+    expect(r.verdict).toBe('possible')
+  })
+})

@@ -25,6 +25,12 @@ export interface EligibilityConditions {
    *    「用推算的只能證明他今年的收入明年可以去申請」）。
    */
   incomeEstimateSufficient?: boolean
+  /**
+   * 申請人須在該縣市設籍滿 N 個月（問卷第 2a 題，2026-10-20 Lonck 定 A）。
+   * 🔴 只編「申請人本人」的設籍年限。原文是「父或母一方」「或勞務提供地在本市」「某固定日期前設籍」
+   *    這種 OR／固定日期的，不編（編了會把該看到的人刷掉）。
+   */
+  minResidencyMonths?: number
   maxPerCapitaAssets?: number
   /** 符合其中之一即可 */
   requiredIdentities?: string[]
@@ -89,6 +95,8 @@ export interface ApplicantProfile {
    * 'unknown'／未設 ⇒ 只能用收入推算，而推算只代表「可以去申請列冊」，不代表已是低收／中低收。
    */
   registeredLowIncome?: RegisteredLowIncome
+  /** 問卷第 2a 題：在現居縣市（county）設籍幾個月。未答＝undefined */
+  residencyMonths?: number
   /**
    * 家庭成員名單已作答、且非同戶家人裡沒有未滿 18 歲者 ⇒ hasChildUnder 為 undefined 代表「沒有小孩」，
    * requiresChildUnder ⇒ failed（不是 missing_data）。未設＝不知道。
@@ -144,6 +152,18 @@ function checkIncomeThreshold(
   if (!estMeets) return 'failed'
   // 推算符合：認定類（申請列冊本身）算數；其他項目推算只代表「可以去申請列冊」⇒ 最高 possible
   return conditions.incomeEstimateSufficient ? 'satisfied' : 'missing_data'
+}
+
+function checkResidency(conditions: EligibilityConditions, applicant: ApplicantProfile): ConditionCheck {
+  if (conditions.minResidencyMonths === undefined) return 'satisfied'
+  // 設籍要求是對「該縣市」的戶籍：只靠工作縣市對上的人，在該縣市設籍是 0 個月
+  if (applicant.county && conditions.counties && !conditions.counties.includes(applicant.county)) return 'failed'
+  if (applicant.residencyMonths === undefined) return 'missing_data'
+  return applicant.residencyMonths >= conditions.minResidencyMonths ? 'satisfied' : 'failed'
+}
+
+function residencyLabel(months: number): string {
+  return months % 12 === 0 ? `設籍滿 ${months / 12} 年` : `設籍滿 ${months} 個月`
 }
 
 /** 所得門檻缺資料時，告訴使用者到底缺什麼（取代泛稱「所得門檻」） */
@@ -254,10 +274,13 @@ const CHECKS: Array<{
   { label: '無自有住宅', check: checkNoOwnedHome },
   { label: '需自有住宅', check: checkOwnedHome },
   { label: '身心障礙證明', check: checkAnsweredFlags },
+  { label: '設籍年限', check: checkResidency },
 ]
 
 /** 不算「資格條件」的鍵：地區只是篩選範圍、referenceData 不參與比對、_ 開頭是註記 */
-const NON_SUBSTANTIVE_KEYS = new Set(['counties', 'referenceData', 'openToAll', 'ageMinByIdentity', 'incomeEstimateSufficient'])
+const NON_SUBSTANTIVE_KEYS = new Set(['counties', 'referenceData', 'openToAll', 'ageMinByIdentity', 'incomeEstimateSufficient',
+  // 設籍年限只是眾多條件之一：只有它的項目仍算「條件未整理」，不可因此變成 confirmed
+  'minResidencyMonths'])
 export const UNSORTED_CONDITIONS_LABEL = '資格條件尚未整理（請見官方頁）'
 
 /**
@@ -283,7 +306,13 @@ export function evaluateEligibility(
     const result = check(conditions, applicant)
     if (result === 'failed') failedConditions.push(label)
     if (result === 'missing_data') {
-      missingConditions.push(label === '所得門檻' ? incomeMissingLabel(conditions, applicant) : label)
+      missingConditions.push(
+        label === '所得門檻'
+          ? incomeMissingLabel(conditions, applicant)
+          : label === '設籍年限'
+            ? `${residencyLabel(conditions.minResidencyMonths!)}（請回答設籍年限）`
+            : label,
+      )
     }
   }
   missingConditions.push(...missingRequiredFlagLabels(conditions, applicant))

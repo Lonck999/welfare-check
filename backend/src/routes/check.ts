@@ -98,6 +98,10 @@ function validateAnswers(body: unknown): QuestionnaireAnswers {
     )
       ? (b.registeredLowIncome as QuestionnaireAnswers['registeredLowIncome'])
       : 'unknown',
+    residencyMonths:
+      typeof b.residencyMonths === 'number' && Number.isFinite(b.residencyMonths) && b.residencyMonths >= 0
+        ? Math.floor(b.residencyMonths)
+        : undefined,
     employmentStatus: b.employmentStatus as QuestionnaireAnswers['employmentStatus'],
     workCounty: b.workCounty === '' ? undefined : (b.workCounty as string | undefined),
     selfDisabilityCard: Boolean(b.selfDisabilityCard),
