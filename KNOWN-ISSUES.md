@@ -1325,6 +1325,21 @@ C-6 C 第二輪（花蓮／嘉義縣／臺東／澎湖，改用 curl 讀縣府�
   · ⚠️ 植入時差點誤判：我第一次用 `familySpecialCircumstances` 送身障證明，兩個人結果一模一樣 —— 正確欄位是 `selfDisabilityCard`。**對照組長一樣＝輸入沒送進去，不是引擎壞**
 - 備份：`~/.hermes/cache/welfare_w020/benefits_before_w020b_20261020.dump`
 
-**B（逐筆補條件）其餘待做**：241 筆依縣市分批，從 `source_url` 原文把條件編進 JSONB；
+**B 第 2 批：高雄市 29 筆（2026-10-20 13:35 完成）**
+- 29 頁全部用 curl＋瀏覽器 UA 讀到正文（885、895 原網址是 JS 轉址，讀轉址後的頁）；`scripts/w020_conditions/batch02_高雄市.py`
+- 編法：問卷問得到的編成條件；🔴 **「符合其一」的 OR 條件一律放 `uncheckedConditions`**（引擎只有 AND，硬編會把該看到的人刷掉，例如 882 老人修繕「低收／中低收／領中低老人津貼／領身障生活補助」四選一）
+- `incomeThreshold` 只用在原文就是「列冊低收／中低收」或「人均未達最低生活費 1.5 倍」的項目（與 `evaluateIncomeThreshold` 同一把尺）；2.5 倍、4 倍、6 倍的放 unchecked
+- 端對端（新寫 `scripts/w020_conditions/e2e_personas.py`，五人對照，寫入前後各跑一次）：
+  · ① 30 歲上班族（年收 90 萬、自有房）：29 筆中 **11 筆不再出現**（低收認定、老人 3 筆、低收學生 3 筆、單親 2 筆、身障租金、營養補助）；possible 70 → 59
+  · ② 70 歲低收：882/883/884 老人福利仍出現（possible，列出缺失能評估等）；6 低收認定 → confirmed
+  · 889 購屋貸款（需自有房）：租屋的 ②③④ 不出現、自有房的 ① 出現
+  · ⑤ 臺南人：29 筆**全部不出現**，前後計數完全相同（c37/p40）
+- 備份：`~/.hermes/cache/welfare_w020/benefits_before_w020b02_20261020.dump`
+- ⚠️ **發現（未改，需決定）**：
+  · **身障類 10 筆對 30 歲上班族仍是 possible**：`requiredFlags` 設計上**永不 failed**（`missingRequiredFlagLabels` 註解：怕使用者沒想到要勾）。但身障證明問卷**有明確問**（`selfDisabilityCard`／成員 `disabilityCard`），沒勾＝沒有，不是「不確定」 ⇒ 是否讓少數「問卷有明問」的旗標可以 failed
+  · `requiresChildUnder` 對「家裡沒有小孩」的人回 `missing_data`（`hasChildUnder` undefined）而不是 failed ⇒ 879 療育、967 育兒租金對 30 歲單身仍是 possible。問卷第 5/6 題有列家庭成員，沒有子女是答案不是缺資料
+  · **354 電動機車補助官方頁寫「2026/8/11 補助金額已用罄」** —— 用罄≠停辦（年度預算），目前保留並在「還缺」照列這句
+
+**B（逐筆補條件）其餘待做**：**200 筆**（10-20 13:36 SQL 實查，241 − 新竹 11 − 高雄 29 − 856 停用 1）依縣市分批，從 `source_url` 原文把條件編進 JSONB；
 真的人人可申請的標 `openToAll`；編完的那筆自動脫離 possible。
 
