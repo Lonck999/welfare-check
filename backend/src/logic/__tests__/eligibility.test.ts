@@ -159,3 +159,34 @@ describe('evaluateEligibility', () => {
     expect(evaluateEligibility(conditions, applicant).verdict).toBe('confirmed')
   })
 })
+
+// 🔴 2026-10-20 Lonck 定 A：問卷有明問的「身障證明」「家裡有沒有小孩」，沒有＝不符合（不是可能符合）
+describe('問卷明確作答過的條件 → 可以判不符合', () => {
+  it('requiredFlags 身障證明：問卷答過且沒有 → not_eligible', () => {
+    const c: EligibilityConditions = { requiredFlags: ['disability_certificate'] }
+    const a: ApplicantProfile = { flags: ['general_public'], answeredFlags: ['disability_certificate'] }
+    expect(evaluateEligibility(c, a).verdict).toBe('not_eligible')
+  })
+  it('requiredFlags 身障證明：問卷答過且有 → confirmed', () => {
+    const c: EligibilityConditions = { requiredFlags: ['disability_certificate'] }
+    const a: ApplicantProfile = { flags: ['disability_certificate'], answeredFlags: ['disability_certificate'] }
+    expect(evaluateEligibility(c, a).verdict).toBe('confirmed')
+  })
+  it('沒問過（非同戶家人 profile 不帶 answeredFlags）→ 仍是 possible', () => {
+    const c: EligibilityConditions = { requiredFlags: ['disability_certificate'] }
+    expect(evaluateEligibility(c, { flags: [] }).verdict).toBe('possible')
+  })
+  it('其他旗標（戒菸意願）沒勾 → 仍是 possible，不受影響', () => {
+    const c: EligibilityConditions = { requiredFlags: ['wants_to_quit_smoking'] }
+    const a: ApplicantProfile = { flags: [], answeredFlags: ['disability_certificate'] }
+    expect(evaluateEligibility(c, a).verdict).toBe('possible')
+  })
+  it('requiresChildUnder：家庭名單已作答且沒有小孩 → not_eligible', () => {
+    const c: EligibilityConditions = { requiresChildUnder: 18 }
+    expect(evaluateEligibility(c, { householdAnswered: true }).verdict).toBe('not_eligible')
+  })
+  it('requiresChildUnder：不知道家庭狀況 → possible', () => {
+    const c: EligibilityConditions = { requiresChildUnder: 18 }
+    expect(evaluateEligibility(c, {}).verdict).toBe('possible')
+  })
+})

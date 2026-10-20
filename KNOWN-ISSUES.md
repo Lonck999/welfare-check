@@ -1335,7 +1335,11 @@ C-6 C 第二輪（花蓮／嘉義縣／臺東／澎湖，改用 curl 讀縣府�
   · 889 購屋貸款（需自有房）：租屋的 ②③④ 不出現、自有房的 ① 出現
   · ⑤ 臺南人：29 筆**全部不出現**，前後計數完全相同（c37/p40）
 - 備份：`~/.hermes/cache/welfare_w020/benefits_before_w020b02_20261020.dump`
-- ⚠️ **發現（未改，需決定）**：
+- ✅ **下面兩個發現 10-20 13:45 Lonck 選 A 已修**：`ApplicantProfile.answeredFlags`（只有 `disability_certificate`）＋`householdAnswered`（非同戶家人有未滿 18 歲則 false）。本人 profile 才帶，非同戶家人 profile 不帶（沒問過他們）。
+  · 測試 60 → 68；拿掉兩個判斷 **2 紅**、還原 68 綠；`tsc` 0
+  · 端對端：30 歲上班族高雄 possible **59 → 40**，消失 19 筆逐筆查過全是身障或要小孩的項目、**0 筆新增**；臺南對照組（有身障）40 → 37，只少 3 筆育兒類；身障者 ③ 的身障項目全部還在
+  · 查過：沒有生育／孕產類項目用 `requiresChildUnder` ⇒ 懷孕未生的人不會被誤刷
+- ⚠️ **發現（原文，已修見上）**：
   · **身障類 10 筆對 30 歲上班族仍是 possible**：`requiredFlags` 設計上**永不 failed**（`missingRequiredFlagLabels` 註解：怕使用者沒想到要勾）。但身障證明問卷**有明確問**（`selfDisabilityCard`／成員 `disabilityCard`），沒勾＝沒有，不是「不確定」 ⇒ 是否讓少數「問卷有明問」的旗標可以 failed
   · `requiresChildUnder` 對「家裡沒有小孩」的人回 `missing_data`（`hasChildUnder` undefined）而不是 failed ⇒ 879 療育、967 育兒租金對 30 歲單身仍是 possible。問卷第 5/6 題有列家庭成員，沒有子女是答案不是缺資料
   · **354 電動機車補助官方頁寫「2026/8/11 補助金額已用罄」** —— 用罄≠停辦（年度預算），目前保留並在「還缺」照列這句

@@ -71,6 +71,18 @@ export interface ApplicantProfile {
   hasElderOver?: number // 家中最年長成員的年齡
   ownsHome?: boolean
   flags?: string[]
+  /**
+   * 問卷「有明確問過」的旗標（2026-10-20 Lonck 定 A）。
+   * 這些旗標沒出現在 flags ＝ 使用者答了「沒有」，requiredFlags 要它 ⇒ failed（不是 missing）。
+   * 🔴 只放問卷有直接題目的（身障證明）。其他旗標仍維持「沒勾＝不確定」，
+   *    理由見 missingRequiredFlagLabels 的註解。非同戶家人的 profile 不設（沒問過他們）。
+   */
+  answeredFlags?: string[]
+  /**
+   * 家庭成員名單已作答、且非同戶家人裡沒有未滿 18 歲者 ⇒ hasChildUnder 為 undefined 代表「沒有小孩」，
+   * requiresChildUnder ⇒ failed（不是 missing_data）。未設＝不知道。
+   */
+  householdAnswered?: boolean
 }
 
 export type EligibilityVerdict = 'confirmed' | 'possible' | 'not_eligible'
@@ -134,7 +146,7 @@ function checkIdentities(conditions: EligibilityConditions, applicant: Applicant
 
 function checkChildUnder(conditions: EligibilityConditions, applicant: ApplicantProfile): ConditionCheck {
   if (conditions.requiresChildUnder === undefined) return 'satisfied'
-  if (applicant.hasChildUnder === undefined) return 'missing_data'
+  if (applicant.hasChildUnder === undefined) return applicant.householdAnswered ? 'failed' : 'missing_data'
   return applicant.hasChildUnder < conditions.requiresChildUnder ? 'satisfied' : 'failed'
 }
 
@@ -185,9 +197,19 @@ function checkOwnedHome(conditions: EligibilityConditions, applicant: ApplicantP
 function missingRequiredFlagLabels(conditions: EligibilityConditions, applicant: ApplicantProfile): string[] {
   if (!conditions.requiredFlags || conditions.requiredFlags.length === 0) return []
   const presentFlags = applicant.flags ?? []
+  const answered = applicant.answeredFlags ?? []
   return conditions.requiredFlags
-    .filter((flag) => !presentFlags.includes(flag))
+    .filter((flag) => !presentFlags.includes(flag) && !answered.includes(flag))
     .map((flag) => FLAG_LABELS.get(flag) ?? flag)
+}
+
+/** 問卷明確問過、答案是「沒有」的必要旗標 ⇒ 不符合（W-020 第 2 批後 Lonck 定 A） */
+function checkAnsweredFlags(conditions: EligibilityConditions, applicant: ApplicantProfile): ConditionCheck {
+  if (!conditions.requiredFlags || conditions.requiredFlags.length === 0) return 'satisfied'
+  const presentFlags = applicant.flags ?? []
+  const answered = applicant.answeredFlags ?? []
+  const deniedExplicitly = conditions.requiredFlags.some((f) => answered.includes(f) && !presentFlags.includes(f))
+  return deniedExplicitly ? 'failed' : 'satisfied'
 }
 
 const CHECKS: Array<{
@@ -203,6 +225,7 @@ const CHECKS: Array<{
   { label: '居住/工作縣市', check: checkCounties },
   { label: '無自有住宅', check: checkNoOwnedHome },
   { label: '需自有住宅', check: checkOwnedHome },
+  { label: '身心障礙證明', check: checkAnsweredFlags },
 ]
 
 /** 不算「資格條件」的鍵：地區只是篩選範圍、referenceData 不參與比對、_ 開頭是註記 */

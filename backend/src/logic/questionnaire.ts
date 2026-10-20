@@ -229,6 +229,12 @@ export function deriveFlags(answers: QuestionnaireAnswers): string[] {
   return [...flags]
 }
 
+/**
+ * 問卷有直接題目的旗標：本人 selfDisabilityCard ＋ 每位同戶成員 disabilityCard／chronicDisability。
+ * ⚠️ 只列這一個 —— 其他旗標（戒菸意願、不孕症…）使用者可能沒想到要勾，維持「沒勾＝不確定」。
+ */
+export const ANSWERED_FLAGS = ['disability_certificate']
+
 /** 把逐題答案組成主要申請人（本人）的 ApplicantProfile，交給 evaluateEligibility 使用 */
 export function buildApplicantProfile(
   answers: QuestionnaireAnswers,
@@ -249,5 +255,9 @@ export function buildApplicantProfile(
     hasElderOver,
     ownsHome: answers.housingStatus === 'own',
     flags: deriveFlags(answers),
+    // 🔴 2026-10-20 Lonck 定 A：問卷有明問的，沒勾＝沒有
+    answeredFlags: ANSWERED_FLAGS,
+    // 非同戶家人裡有未滿 18 歲的（例如不同戶籍的子女）⇒ 不能說「沒有小孩」，保留 missing
+    householdAnswered: !answers.nonCohabitingFamily.some((m) => ageOf(m.birthDate, asOf) < 18),
   }
 }

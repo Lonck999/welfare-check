@@ -146,6 +146,22 @@ describe('buildApplicantProfile', () => {
     expect(profile.hasElderOver).toBeUndefined()
   })
 
+  it('本人 profile 標記身障證明為已作答；家庭名單已作答 ⇒ householdAnswered', () => {
+    const profile = buildApplicantProfile(baseAnswers(), 'above_threshold', asOf)
+    expect(profile.answeredFlags).toContain('disability_certificate')
+    expect(profile.householdAnswered).toBe(true)
+  })
+
+  it('非同戶家人有未滿 18 歲的 ⇒ 不可說「沒有小孩」，householdAnswered 為 false', () => {
+    const profile = buildApplicantProfile(
+      baseAnswers({ nonCohabitingFamily: [
+        { relationship: '子女', birthDate: '2015-01-01', county: '臺北市', annualIncome: 0, assets: 0, isSinglePersonHousehold: false },
+      ] }),
+      'above_threshold', asOf,
+    )
+    expect(profile.householdAnswered).toBe(false)
+  })
+
   it('住宅狀況為 own 時 ownsHome 為 true，其餘皆為 false', () => {
     expect(buildApplicantProfile(baseAnswers({ housingStatus: 'own' }), 'above_threshold', asOf).ownsHome).toBe(true)
     expect(buildApplicantProfile(baseAnswers({ housingStatus: 'rent' }), 'above_threshold', asOf).ownsHome).toBe(false)
