@@ -10,7 +10,17 @@
  */
 
 import type { IncomeThresholdResult } from './calculations.js'
-import { FLAG_OPTIONS } from './profile-mapping.js'
+import { FLAG_OPTIONS, IDENTITY_OPTIONS } from './profile-mapping.js'
+
+/** 問卷第 14 題能選的身分；requiredIdentities 裡不在這份清單的值 ＝ 問卷問不到 */
+const QUESTIONNAIRE_IDENTITIES = new Set(IDENTITY_OPTIONS.map((o) => o.value))
+/** requiredIdentities 裡寫成「身分」、其實是列冊別的值（2026-10-20 實查 DB） */
+const LOW_INCOME_IDENTITIES = new Set(['低收入戶', '列冊低收入戶'])
+const MID_LOW_INCOME_IDENTITIES = new Set([
+  '中低收入戶', '列冊中低收入戶', '低收入戶、中低收入戶', '低收入戶或中低收入戶', '低(中低)收入戶',
+])
+/** 匯入時填的「沒有限制」佔位值 —— 不是身分 */
+const NO_RESTRICTION_IDENTITIES = new Set(['無', '沒有規範'])
 
 const FLAG_LABELS = new Map(FLAG_OPTIONS.map((f) => [f.value, f.label]))
 
@@ -199,11 +209,38 @@ function checkPerCapitaAssets(
   return applicant.perCapitaAssets <= conditions.maxPerCapitaAssets ? 'satisfied' : 'failed'
 }
 
+/**
+ * 符合其一即可。🔴 2026-10-20 修：以前只認問卷第 14 題的 9 種身分，
+ * DB 裡 56 筆寫的是「低收入戶」「中低收入戶」或一整段原文 ⇒ 永遠 failed、對任何人都看不到
+ * （已列冊低收的臺南長者，臺南 10 筆低收入戶福利一筆都看不到）。
+ * 現在：問卷身分照舊比對；列冊別改看第 9a 題；問卷問不到的原文 ⇒ missing（列給使用者看），不 failed。
+ */
 function checkIdentities(conditions: EligibilityConditions, applicant: ApplicantProfile): ConditionCheck {
-  if (!conditions.requiredIdentities || conditions.requiredIdentities.length === 0) return 'satisfied'
-  if (!applicant.identities) return 'missing_data'
-  const matched = conditions.requiredIdentities.some((id) => applicant.identities!.includes(id))
-  return matched ? 'satisfied' : 'failed'
+  const required = (conditions.requiredIdentities ?? []).filter((id) => !NO_RESTRICTION_IDENTITIES.has(id))
+  if (required.length === 0) return 'satisfied'
+  const reg = applicant.registeredLowIncome
+  let unknown = false
+  for (const id of required) {
+    if (QUESTIONNAIRE_IDENTITIES.has(id)) {
+      if (!applicant.identities) unknown = true
+      else if (applicant.identities.includes(id)) return 'satisfied'
+    } else if (LOW_INCOME_IDENTITIES.has(id)) {
+      if (reg === 'low_income') return 'satisfied'
+      if (reg !== 'mid_low_income' && reg !== 'none') unknown = true
+    } else if (MID_LOW_INCOME_IDENTITIES.has(id)) {
+      if (reg === 'low_income' || reg === 'mid_low_income') return 'satisfied'
+      if (reg !== 'none') unknown = true
+    } else {
+      unknown = true // 問卷問不到的原文
+    }
+  }
+  return unknown ? 'missing_data' : 'failed'
+}
+
+/** requiredIdentities 缺資料時列出原文，而不是泛稱「身分別」 */
+function identityMissingLabel(conditions: EligibilityConditions): string {
+  const ids = (conditions.requiredIdentities ?? []).filter((id) => !NO_RESTRICTION_IDENTITIES.has(id))
+  return `須符合其一：${ids.join('／')}`
 }
 
 function checkChildUnder(conditions: EligibilityConditions, applicant: ApplicantProfile): ConditionCheck {
@@ -292,10 +329,6 @@ const CHECKS: Array<{
   { label: '性別', check: checkGender },
 ]
 
-/** 不算「資格條件」的鍵：地區只是篩選範圍、referenceData 不參與比對、_ 開頭是註記 */
-const NON_SUBSTANTIVE_KEYS = new Set(['counties', 'referenceData', 'openToAll', 'ageMinByIdentity', 'incomeEstimateSufficient',
-  // 設籍年限只是眾多條件之一：只有它的項目仍算「條件未整理」，不可因此變成 confirmed
-  'minResidencyMonths'])
 export const UNSORTED_CONDITIONS_LABEL = '資格條件尚未整理（請見官方頁）'
 
 /**
@@ -304,9 +337,31 @@ export const UNSORTED_CONDITIONS_LABEL = '資格條件尚未整理（請見官�
  */
 export function hasUnsortedConditions(conditions: EligibilityConditions): boolean {
   if (conditions.openToAll === true) return false
-  return !Object.keys(conditions).some(
-    (k) => !k.startsWith('_') && !NON_SUBSTANTIVE_KEYS.has(k),
-  )
+  // 🔴 2026-10-20 修：以前「有任何鍵」就算整理過 —— 但 otherConditions／incomeMonthlyMax 等
+  //    引擎根本不檢查（206 筆），等於沒條件卻判 confirmed（臺南年收 150 萬的人「低收入戶」confirmed）。
+  //    只認引擎真的會檢查的鍵。
+  return !Object.keys(conditions).some((k) => ENGINE_CHECKED_KEYS.has(k))
+}
+
+/** 引擎真的會拿來判斷的鍵（新增 check 時要同步加進來，否則那個條件的項目會被當成未整理 → 最高 possible） */
+const ENGINE_CHECKED_KEYS = new Set([
+  'ageMin', 'ageMax', 'incomeThreshold', 'maxPerCapitaAssets', 'requiredIdentities', 'requiresChildUnder',
+  'requiresElderOver', 'requiresNoOwnedHome', 'requiresOwnedHome', 'requiredFlags', 'uncheckedConditions',
+  // 🔴 刻意不含 minResidencyMonths／requiredGender：只有設籍或性別的項目仍是「條件未整理」
+  //    （例：只寫「設籍滿 1 年」不代表人人可領，那是其他條件還沒編）
+])
+
+/**
+ * DB 裡有、但引擎沒有比對邏輯的條件（匯入時從開放資料帶進來的）。
+ * 不能裝作沒看到 —— 原文列進「還缺」，這筆最高 possible。
+ */
+function unenforcedConditionLabels(c: Record<string, unknown>): string[] {
+  const out: string[] = []
+  if (typeof c.otherConditions === 'string' && c.otherConditions.trim()) out.push(c.otherConditions.trim())
+  if (typeof c.incomeMonthlyMax === 'number') out.push(`家庭人均月收入不超過 ${c.incomeMonthlyMax.toLocaleString()} 元`)
+  if (typeof c.movableAssetsMax === 'number') out.push(`動產不超過 ${c.movableAssetsMax.toLocaleString()} 元`)
+  if (typeof c.realEstateMax === 'number') out.push(`不動產不超過 ${c.realEstateMax.toLocaleString()} 元`)
+  return out
 }
 
 /** 依 SKILL.md 第四步的三級邏輯評估單一福利項目 */
@@ -326,13 +381,16 @@ export function evaluateEligibility(
           ? incomeMissingLabel(conditions, applicant)
           : label === '設籍年限'
             ? `${residencyLabel(conditions.minResidencyMonths!)}（請回答設籍年限）`
-            : label,
+            : label === '身分別'
+              ? identityMissingLabel(conditions)
+              : label,
       )
     }
   }
   missingConditions.push(...missingRequiredFlagLabels(conditions, applicant))
   if (hasUnsortedConditions(conditions)) missingConditions.push(UNSORTED_CONDITIONS_LABEL)
   for (const u of conditions.uncheckedConditions ?? []) missingConditions.push(u)
+  missingConditions.push(...unenforcedConditionLabels(conditions as unknown as Record<string, unknown>))
 
   if (failedConditions.length > 0) {
     return { verdict: 'not_eligible', missingConditions: [], failedConditions }

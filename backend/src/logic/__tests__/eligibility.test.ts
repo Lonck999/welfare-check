@@ -262,3 +262,42 @@ describe('requiredGender（2026-10-20 Lonck 定 A）', () => {
     expect(evaluateEligibility(c, { flags: ['unemployed'] }).verdict).toBe('possible')
   })
 })
+
+// 🔴 2026-10-20 兩個靜默 bug（問性別那題時實測發現）
+describe('引擎不認得的條件不可讓項目變成 confirmed', () => {
+  it('只有 otherConditions → possible，且原文列進還缺', () => {
+    const c = { counties: ['臺南市'], otherConditions: '經濟狀況不佳致生活陷於困境者' } as unknown as EligibilityConditions
+    const r = evaluateEligibility(c, { county: '臺南市' })
+    expect(r.verdict).toBe('possible')
+    expect(r.missingConditions).toContain('經濟狀況不佳致生活陷於困境者')
+  })
+  it('incomeMonthlyMax 等金額門檻 → possible 並寫出金額', () => {
+    const c = { counties: ['臺南市'], incomeMonthlyMax: 12389 } as unknown as EligibilityConditions
+    const r = evaluateEligibility(c, { county: '臺南市' })
+    expect(r.verdict).toBe('possible')
+    expect(r.missingConditions.join()).toContain('12,389')
+  })
+})
+
+describe('requiredIdentities 裡的列冊別與原文', () => {
+  it('「低收入戶」＋已列冊低收 → 符合', () => {
+    expect(evaluateEligibility({ requiredIdentities: ['低收入戶'] }, { identities: [], registeredLowIncome: 'low_income' }).verdict).toBe('confirmed')
+  })
+  it('「低收入戶」＋答都不是 → not_eligible', () => {
+    expect(evaluateEligibility({ requiredIdentities: ['低收入戶'] }, { identities: [], registeredLowIncome: 'none' }).verdict).toBe('not_eligible')
+  })
+  it('「中低收入戶」＋已列冊低收 → 也符合', () => {
+    expect(evaluateEligibility({ requiredIdentities: ['中低收入戶'] }, { identities: [], registeredLowIncome: 'low_income' }).verdict).toBe('confirmed')
+  })
+  it('問卷問不到的原文 → possible（不可 failed，否則永遠看不到）', () => {
+    const r = evaluateEligibility({ requiredIdentities: ['於本市遭受水災淹水之住戶'] }, { identities: [] })
+    expect(r.verdict).toBe('possible')
+    expect(r.missingConditions.join()).toContain('水災')
+  })
+  it('佔位值「無」不算身分限制', () => {
+    expect(evaluateEligibility({ ageMin: 100, requiredIdentities: ['無', '無'] }, { age: 100, identities: [] }).verdict).toBe('confirmed')
+  })
+  it('問卷身分照舊：沒選原住民 → not_eligible', () => {
+    expect(evaluateEligibility({ requiredIdentities: ['原住民'] }, { identities: ['客家人'] }).verdict).toBe('not_eligible')
+  })
+})
