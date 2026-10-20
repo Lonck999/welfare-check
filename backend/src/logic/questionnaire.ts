@@ -263,6 +263,7 @@ export function buildApplicantProfile(
     answeredFlags: ANSWERED_FLAGS,
     registeredLowIncome: answers.registeredLowIncome ?? 'unknown',
     residencyMonths: answers.residencyMonths,
+    gender: answers.gender,
     // 非同戶家人裡有未滿 18 歲的（例如不同戶籍的子女）⇒ 不能說「沒有小孩」，保留 missing
     householdAnswered: !answers.nonCohabitingFamily.some((m) => ageOf(m.birthDate, asOf) < 18),
   }

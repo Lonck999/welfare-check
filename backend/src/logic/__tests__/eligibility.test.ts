@@ -248,3 +248,17 @@ describe('設籍年限 minResidencyMonths', () => {
     expect(r.verdict).toBe('possible')
   })
 })
+
+describe('requiredGender（2026-10-20 Lonck 定 A）', () => {
+  const c: EligibilityConditions = { requiredGender: 'female', requiredFlags: ['unemployed'] }
+  it('女性 → 不因性別被擋', () => {
+    expect(evaluateEligibility(c, { gender: 'female', flags: ['unemployed'] }).verdict).toBe('confirmed')
+  })
+  it('男性 → not_eligible', () => {
+    expect(evaluateEligibility(c, { gender: 'male', flags: ['unemployed'] }).verdict).toBe('not_eligible')
+  })
+  it('其他／未答 → possible（不替使用者判）', () => {
+    expect(evaluateEligibility(c, { gender: 'other', flags: ['unemployed'] }).verdict).toBe('possible')
+    expect(evaluateEligibility(c, { flags: ['unemployed'] }).verdict).toBe('possible')
+  })
+})

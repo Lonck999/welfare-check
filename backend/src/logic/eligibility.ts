@@ -31,6 +31,11 @@ export interface EligibilityConditions {
    *    這種 OR／固定日期的，不編（編了會把該看到的人刷掉）。
    */
   minResidencyMonths?: number
+  /**
+   * 原文明寫限某性別（2026-10-20 Lonck 定 A；目前只有「婦女」限定的 2 筆）。
+   * 🔴 名稱有「婦女」不等於限女性（特殊境遇婦女／家庭扶助、生產補助都不是）—— 逐筆讀原文才可設。
+   */
+  requiredGender?: 'female' | 'male'
   maxPerCapitaAssets?: number
   /** 符合其中之一即可 */
   requiredIdentities?: string[]
@@ -97,6 +102,8 @@ export interface ApplicantProfile {
   registeredLowIncome?: RegisteredLowIncome
   /** 問卷第 2a 題：在現居縣市（county）設籍幾個月。未答＝undefined */
   residencyMonths?: number
+  /** 問卷第 3 題。'other'／未答 ⇒ 不判不符，列為可能符合 */
+  gender?: 'male' | 'female' | 'other'
   /**
    * 家庭成員名單已作答、且非同戶家人裡沒有未滿 18 歲者 ⇒ hasChildUnder 為 undefined 代表「沒有小孩」，
    * requiresChildUnder ⇒ failed（不是 missing_data）。未設＝不知道。
@@ -160,6 +167,13 @@ function checkResidency(conditions: EligibilityConditions, applicant: ApplicantP
   if (applicant.county && conditions.counties && !conditions.counties.includes(applicant.county)) return 'failed'
   if (applicant.residencyMonths === undefined) return 'missing_data'
   return applicant.residencyMonths >= conditions.minResidencyMonths ? 'satisfied' : 'failed'
+}
+
+function checkGender(conditions: EligibilityConditions, applicant: ApplicantProfile): ConditionCheck {
+  if (!conditions.requiredGender) return 'satisfied'
+  if (applicant.gender === conditions.requiredGender) return 'satisfied'
+  if (applicant.gender === 'male' || applicant.gender === 'female') return 'failed'
+  return 'missing_data'
 }
 
 function residencyLabel(months: number): string {
@@ -275,6 +289,7 @@ const CHECKS: Array<{
   { label: '需自有住宅', check: checkOwnedHome },
   { label: '身心障礙證明', check: checkAnsweredFlags },
   { label: '設籍年限', check: checkResidency },
+  { label: '性別', check: checkGender },
 ]
 
 /** 不算「資格條件」的鍵：地區只是篩選範圍、referenceData 不參與比對、_ 開頭是註記 */
