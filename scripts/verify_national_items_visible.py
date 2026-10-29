@@ -16,7 +16,14 @@ import json, os, subprocess, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-MIN_SEEN_RATIO = 0.5
+MIN_SEEN = 1
+# 🔴 2026-10-29 改判準：原本是「至少看到一半（MIN_SEEN_RATIO 0.5）」—— 那個比例是 10-20 量出來的 14/24，
+#    當時大部分全國項目沒有條件（W-020）⇒ 一律 possible ⇒ 誰都看得到。
+#    10-29 W-020 B 依原文補了條件（遺屬年金只能為家人申請、老年年金要 65 歲…）⇒ 30 歲上班族合理地只剩 8/24，
+#    比例判準就紅了，**而程式完全沒壞**（寫死的結論活得比它的證據久，AGENTS §5.5）。
+#    W-023 的 bug 長相是「全國項目一筆都看不到」⇒ 改成兩條跟資料條件無關的斷言：
+#    ① 每個縣市至少看到 1 筆全國項目 ② 同一個人換縣市，看到的全國項目必須完全相同（全國項目不該隨縣市變）。
+#    雙向驗過：拿掉 check.ts 撈資料的 eq(county,'全國') ⇒ ① 紅；還原 ⇒ 綠。
 
 env = dict(os.environ)
 envf = ROOT / 'backend' / '.env'
@@ -36,13 +43,17 @@ fails = []
 n = len(d['national'])
 if n < 20:
     fails.append(f"資料庫 county='全國' 只有 {n} 筆（10-20 時 24 筆）—— 分母變了，先查是不是被改掉")
+seen_sets = {}
 for county, v in d['out'].items():
     seen = len(v['seen'])
+    seen_sets[county] = set(v['seen'])
     print(f"{county}：全國項目看到 {seen}/{n}；臺南專屬混入 {len(v['foreign'])}")
-    if seen < n * MIN_SEEN_RATIO:
-        fails.append(f"{county} 只看到 {seen}/{n} 筆全國項目 —— 撈資料的縣市篩選又漏了 '全國'")
+    if seen < MIN_SEEN:
+        fails.append(f"{county} 一筆全國項目都看不到（0/{n}）—— 撈資料的縣市篩選又漏了 '全國'")
     if v['foreign']:
         fails.append(f"{county} 看到臺南市專屬項目 {v['foreign'][:5]} —— 縣市篩選被拿掉了")
+if len({frozenset(s) for s in seen_sets.values()}) > 1:
+    fails.append(f"同一個人換縣市，看到的全國項目不同：{ {c: sorted(s) for c, s in seen_sets.items()} }")
 if fails:
     print('🔴 FAIL'); [print('  ', f) for f in fails]; sys.exit(1)
 print('✅ PASS'); sys.exit(0)
