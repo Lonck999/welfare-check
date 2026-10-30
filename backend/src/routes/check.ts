@@ -69,6 +69,10 @@ function validateAnswers(body: unknown): QuestionnaireAnswers {
   }
 
   return {
+    // 🔴 W-024（2026-10-30）：這行原本漏了 —— 上面驗了 applyForRoles 卻沒放進回傳物件，
+    //    前端送什麼都變成 undefined → []，65 筆「只能為家人申請」的福利從 9/25 起對任何人都看不到（不報錯）。
+    //    回歸：scripts/verify_apply_for_roles_e2e.py（端對端，勾與不勾必須不同）
+    applyForRoles: Array.isArray(b.applyForRoles) ? (b.applyForRoles as QuestionnaireAnswers['applyForRoles']) : [],
     birthDate: b.birthDate as string,
     county: b.county as string,
     district: typeof b.district === 'string' ? b.district : undefined,
