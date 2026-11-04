@@ -57,10 +57,25 @@ def main() -> int:
         #    而下一步就是去重抓一次（判準見 `active_scope.py`）。
         have = {re.sub(r"\s+", "", n) for (n,) in cur.fetchall()}
         missing = names - have
+        # 🔴 2026-11-04：已進「新福利候選」待審／已駁回的不算靜默漏掉 ——
+        #    這支要抓的是「匯入失敗而沒人知道」（9/25 rollback 那種），
+        #    而候選佇列裡的那幾筆是**已知、等人工決定**。
+        #    不分開的話：每次月更寫入候選，這支就紅到有人核准為止（10-21 起天天紅），
+        #    真正的靜默漏掉會混在裡面看不出來。
+        #    ⚠️ 只有「名字在 benefit_change_log new_candidate 裡」才放行，不是放寬判準。
+        cur.execute("""SELECT new_value, approved_at IS NOT NULL, rejected_at IS NOT NULL
+                       FROM benefit_change_log
+                       WHERE change_type = 'new_candidate' AND new_value LIKE %s""",
+                    (f"{county}｜%",))
+        queued = {re.sub(r"\s+", "", v.split("｜", 1)[1]): ("核准未入庫" if a else "已駁回" if rj else "待審")
+                  for v, a, rj in cur.fetchall() if "｜" in v}
+        known = {m: queued[m] for m in missing if m in queued and queued[m] != "核准未入庫"}
+        missing = missing - set(known)
 
         mark = "✅" if not missing else "🔴"
         print(f"  {mark} {key:<18} 來源 {len(names):>3}　"
-              f"已入庫 {len(names) - len(missing):>3}　缺 {len(missing)}")
+              f"已入庫 {len(names) - len(missing) - len(known):>3}　缺 {len(missing)}"
+              + (f"　⏳ 候選 {len(known)}" if known else ""))
         if missing:
             fails.append(f"{key} 缺 {len(missing)} 筆")
             for m in list(missing)[:4]:
