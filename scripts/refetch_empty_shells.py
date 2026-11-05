@@ -51,9 +51,10 @@ EMPTY_MARK = re.compile(r"未查得|查無|待補|尚未")
 #       ⇒ 白等 75 分鐘，而且結果一定是「找不到」
 #    🔴 標註成「工具限制」而不是「官方沒有」—— 兩者完全不同，
 #       日後換抽取後端就能補，不可記成「這個縣市沒補助」
-UNREACHABLE_COUNTY = {
-    "屏東縣": "pthg.gov.tw 整站 Firecrawl 抓不到（proxy 問題，非官方無資料）",
-}
+# 🔴 2026-11-05 移除屏東縣：W-025 實測 7 筆 pthg.gov.tw 頁面 web_extract（exa）
+#    讀到 1,102–1,969 字、curl 讀到 2,957–35,552 字。當初是 Firecrawl 的 proxy 問題，
+#    換後端後早就讀得到，但這個寫死的結論讓月更**每個月都跳過屏東**（AGENTS.md §5.5）。
+UNREACHABLE_COUNTY: dict = {}
 
 
 def own_domain(url: str, county: str) -> bool:
