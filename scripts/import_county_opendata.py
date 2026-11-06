@@ -378,6 +378,15 @@ def main() -> int:
              json.dumps(elig, ensure_ascii=False), link, excerpt))
         bid = cur.fetchone()[0]
         ins += 1
+        # 🔴 2026-11-06：核准過的候選要回填 change_log.benefit_id ——
+        #    不回填的話 `verify_approved_candidates_landed.py` 會把「已進庫」
+        #    報成「核准了卻沒進庫」（11-06 新北 5 筆實例：1000–1004 在庫、回歸紅）。
+        #    import_approved_candidates.py（來源 B）早就有回填，這條路（來源 A）漏了。
+        cur.execute("""UPDATE benefit_change_log SET benefit_id = %s
+                        WHERE change_type = 'new_candidate' AND benefit_id IS NULL
+                          AND approved_at IS NOT NULL AND rejected_at IS NULL
+                          AND regexp_replace(new_value, '\\s+', '', 'g') = %s""",
+                    (bid, re.sub(r"\s+", "", f"{county}｜{nm}")))
         if docs := pick(r, "docs"):
             for d in re.split(r"\n|\d+\.\s*|、", docs):
                 d = d.strip()
