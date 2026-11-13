@@ -20,6 +20,8 @@ const PERSONAS: Record<string, Record<string, unknown>> = {
     householdMembers: [{ relationship: '配偶', birthDate: '1980-01-01', sameHukou: true, annualIncome: 800_000 }] },
   '22男租屋失業': { ...base, birthDate: '2004-02-01', housingStatus: 'rent', employmentStatus: 'unemployed_seeking',
     selfAnnualIncome: 300_000, selfAssets: 100_000 },
+  // 2026-11-13 C-6b 加：前三位都 <55 歲，17 筆假牙「ageMin 55 沒編其他條件」對 60 歲普通人 confirmed 一個多月都沒被抓到
+  '60男有房退休': { ...base, birthDate: '1966-01-01', employmentStatus: 'retired' },
 }
 
 const app = Fastify({ logger: false })

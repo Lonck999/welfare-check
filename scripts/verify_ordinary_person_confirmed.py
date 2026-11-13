@@ -24,7 +24,7 @@ ALLOWED = {
     374: '離島居民航空票價補貼（金門）：辦法第 3 條唯一條件＝設籍離島，counties 已限金門（2026-10-29 讀原文放行）',
     375: '離島居民航空票價補貼（連江）：同上，counties 已限連江（2026-10-29 讀原文放行）',
 }
-EXPECTED_CALLS = 66
+EXPECTED_CALLS = 88  # 22 縣市 × 4 人（11-13 加 60 歲）
 
 env = dict(os.environ)
 envf = ROOT / 'backend' / '.env'
