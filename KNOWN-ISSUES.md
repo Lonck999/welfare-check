@@ -1637,6 +1637,7 @@ C-6 C 第二輪（花蓮／嘉義縣／臺東／澎湖，改用 curl 讀縣府�
 - 發現經過：查 Vite 安全公告 GHSA-p4f5-76q4-ffq7 時想對正式站打探測，才看到整站不在
 - 本機沒有 `railway` CLI（`which railway` 查無），所以查不到是服務被刪、額度用完還是網域換了 —— **要 Lonck 登入 Railway 後台看**
 - vault 與本 repo 全文搜「Application not found」零命中 ⇒ 之前沒記錄過
+- **2026-11-19 Lonck 定：先不查、先下線沒關係**（資料還沒整理好）。重啟條件：要重新對外前再登入 Railway 查。資料庫在 Neon（`網站化規劃.md` 第 152 行），不受影響。⚠️ 若後台顯示服務已被刪，重建要補回 staging 綁 `dev`、`VITE_API_BASE_URL`、`SENTRY_DSN`（設定都記在 `網站化規劃.md`）
 
 ### 同時記：Vite GHSA-p4f5-76q4-ffq7（critical，2026-11-10 公告）
 - `frontend` 裝的是 vite **8.1.5**，落在受影響範圍 8.0.0～8.1.6（修補版 8.1.7）
