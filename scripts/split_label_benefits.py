@@ -34,6 +34,7 @@ import time
 import psycopg2
 
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+from eligibility_guard import assert_substantive  # noqa: E402
 from refetch_empty_shells import best_page  # noqa: E402
 from split_subsidy_items import latest_only, split_items  # noqa: E402
 
@@ -100,6 +101,11 @@ def main() -> int:
                     f"資格與應備文件請以官方頁為準。"
                     f"（來源：{url}）")
             print(f"         + {new_name}　{rng} {u}")
+            # 🔴 C-6b ③：這支雖然不叫 import_*，寫出來的 eligibility_conditions
+            #    跟當年匯入程式一樣只有 counties + _note ⇒ 引擎判「資格條件尚未整理」。
+            #    拆出來的新列至少要繼承母筆的條件，或用 uncheckedConditions 列原文。
+            elig = {"counties": [county], "_note": "資格條件待從官方頁面補齊"}
+            assert_substantive(elig, label=f"{county}｜{new_name}")
             made += 1
             new_n += 1
             if not args.apply:
@@ -114,9 +120,7 @@ def main() -> int:
                 VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb,%s,%s,
                         CURRENT_DATE,true,%s,%s,%s,%s,'unknown')""",
                 (new_name, agency, county, desc, sgroup, "",
-                 json.dumps({"counties": [county],
-                             "_note": "資格條件待從官方頁面補齊"},
-                            ensure_ascii=False),
+                 json.dumps(elig, ensure_ascii=False),
                  url, SP.sub(" ", it.raw)[:900],
                  it.amount_min, it.amount_max, it.amount_unit,
                  "官方頁面實抓：" + "；".join(it.evidence[:3])))

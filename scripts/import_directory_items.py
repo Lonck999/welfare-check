@@ -8,7 +8,12 @@
 
    ⇒ 寫入時：
      · description 誠實標「本筆為官方項目索引」
-     · eligibility_conditions 只填 counties + _note
+     · ~~eligibility_conditions 只填 counties + _note~~
+       🔴 **2026-11-19 作廢（C-6b ③）**：那樣寫出來的列在引擎裡是
+       「資格條件尚未整理」⇒ 對任何人都 possible、誰都篩不掉
+       （這支正是 241 筆那種列的來源之一）。現在 `eligibility_guard`
+       會在寫入前擋下 ⇒ **這支要能跑，必須先補出引擎認得的條件**
+       （ageMin／requiredIdentities／…，或 uncheckedConditions 列原文）。
      · 🔴 **絕不猜金額或年齡** —— 昨天試抓已證明「就近取金額」
        會抓到別的補助的數字（宜蘭 100 元工本費、彰化 220 萬貸款）
 
@@ -25,6 +30,9 @@ import sys
 from pathlib import Path
 
 import psycopg2
+
+sys.path.insert(0, str(Path(__file__).parent))
+from eligibility_guard import assert_substantive  # noqa: E402
 
 VALID_COUNTIES = {
     "臺北市", "新北市", "桃園市", "臺中市", "臺南市", "高雄市",
@@ -96,6 +104,11 @@ def main() -> int:
                 "counties": [county],
                 "_note": "金額與資格條件待從官方頁面補齊（本筆來源為目錄頁）",
             }
+            # 🔴 C-6b ③：守門 —— 這支檔頭註解當年寫的「eligibility_conditions
+            #    只填 counties + _note」就是 241 筆「資格條件尚未整理」的來源。
+            #    目錄頁沒有條件可抽 ⇒ **不該靠這支直接建檔**，
+            #    要先逐筆進官方頁把條件抓出來（或至少 uncheckedConditions 列原文）。
+            assert_substantive(elig, label=f"{county}｜{name}")
             new += 1
             if args.apply:
                 cur.execute("""

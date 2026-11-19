@@ -25,6 +25,9 @@ import sys
 
 import psycopg2
 
+sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+from eligibility_guard import assert_substantive  # noqa: E402
+
 # change_log id → (agency, search_group, amin, amax, unit, amount_note, deadline_type, deadline_date)
 ITEMS = {
     267: ("桃園市政府婦幼發展局", "醫療與健康類", None, 6000, "monthly",
@@ -227,6 +230,14 @@ def main() -> int:
             ag, grp, amin, amax, unit, note, dt, dd = item
             ex = excerpt.split("　【判讀】")[0]
             desc = f"{name}。{note}。詳見官方頁面。"
+            # 🔴 C-6b ③：寫入前守門 —— 只有 counties 的條件引擎判不掉任何人
+            #    （possible ＋「資格條件尚未整理」，對 30 歲上班族也照樣顯示）。
+            #    ⚠️ 下面這份是**當年的寫法**，守門會直接擋下：新增一筆之前要把
+            #    該筆的條件編進 ITEMS（ageMin／requiredIdentities／requiredFlags…），
+            #    真的抓不到就用 uncheckedConditions=["官方頁原文…"] 誠實列出。
+            elig = {"counties": [county],
+                    "_note": "資格條件見官方頁（C-6 來源 B 新增）"}
+            assert_substantive(elig, label=f"{county}｜{name}（change_log {cid}）")
             cur.execute("""
                 INSERT INTO benefits
                   (name, agency, county, description, search_group, eligibility_conditions,
@@ -238,8 +249,7 @@ def main() -> int:
                         %s,%s,%s,%s,%s,%s,'official','valid_current',now(),%s)
                 RETURNING id""",
                 (name, ag, county, desc, grp,
-                 json.dumps({"counties": [county], "_note": "資格條件見官方頁（C-6 來源 B 新增）"},
-                            ensure_ascii=False),
+                 json.dumps(elig, ensure_ascii=False),
                  url, ex[:900], amin, amax, unit, note, dt, dd,
                  f"C-6 人工判讀＋{approved[cid]} Lonck 核准（change_log {cid}）；頁面原文：{ex[:300]}"))
             bid = cur.fetchone()[0]

@@ -24,6 +24,9 @@ import sys
 
 import psycopg2
 
+sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+from eligibility_guard import assert_substantive  # noqa: E402
+
 # 🔴 每筆的 amount_* 都必須有 source_url 佐證，抓不到就留 None
 NATIONAL = [
     {
@@ -146,6 +149,9 @@ def main() -> int:
         print(f"  + {b['name']}")
         print(f"      金額 {b['amount_min']}~{b['amount_max']} "
               f"{b['amount_unit']}　{b['url'][:56]}")
+        # 🔴 C-6b ③：守門 —— 刻意放在 dry-run 也會跑到的位置，
+        #    NATIONAL 是手寫常數表，新增一筆忘了編條件要在 dry-run 當場現形。
+        assert_substantive(b["elig"], label=f"全國｜{b['name']}")
         new += 1
         if not args.apply:
             continue

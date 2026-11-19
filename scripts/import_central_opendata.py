@@ -35,6 +35,7 @@ from pathlib import Path
 import psycopg2
 
 sys.path.insert(0, str(Path(__file__).parent))
+from eligibility_guard import assert_substantive  # noqa: E402
 from import_county_opendata import fetch  # noqa: E402
 
 # 保險別 → 主管機關
@@ -127,6 +128,12 @@ def import_mol_pension(cur, apply: bool, refresh: bool = False) -> tuple[int, in
             "counties": ["全國"],
             "_note": "資格條件待從官方頁面補齊（本筆來源僅提供頁面索引）",
         }
+        # 🔴 C-6b ③：守門 —— 只有 counties 的條件 = 引擎的「資格條件尚未整理」，
+        #    對任何人都判 possible 並顯示。刻意放在 dry-run 也會跑到的位置：
+        #    一筆永遠不該寫進去的資料，預覽它沒有意義。
+        #    ⚠️ 要讓這支能跑，得先把條件從官方頁補進來（或至少
+        #    uncheckedConditions=["請領資格見勞保局官方頁…"]），不是放寬守門。
+        assert_substantive(elig, label=f"全國｜{name}（{ins}{kind}）")
 
         print(f"    · {name}（{len(items)} 篇說明）")
         if apply and refresh and re.sub(r"\s+", "", name) in existing:

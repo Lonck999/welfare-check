@@ -21,6 +21,9 @@ import sys
 
 import psycopg2
 
+sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+from eligibility_guard import assert_substantive  # noqa: E402
+
 # (縣市, 正式名稱, 官方頁, 金額min, 金額max, 單位, 金額備註, 對照表項目)
 GAP_ITEMS = [
     ("新竹市", "身心障礙者租賃房屋租金及購屋貸款利息補助",
@@ -108,6 +111,9 @@ def main() -> int:
             "counties": [county],
             "_note": "資格條件待從官方頁面補齊（本筆來源為法規/公告頁）",
         }
+        # 🔴 C-6b ③：守門。來源是法規／公告頁，條件其實抓得到（不像目錄頁），
+        #    ⇒ 補 GAP_ITEMS 時要連條件一起編，不可留 counties + _note。
+        assert_substantive(elig, label=f"{county}｜{name}")
         cur.execute("""
             INSERT INTO benefits
               (name, agency, county, description, search_group,

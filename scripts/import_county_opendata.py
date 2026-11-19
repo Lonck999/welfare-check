@@ -30,6 +30,9 @@ from typing import Any
 
 import psycopg2
 
+sys.path.insert(0, str(Path(__file__).parent))
+from eligibility_guard import assert_substantive  # noqa: E402
+
 # 🔴 來源清單：每個縣市的「社會福利/救助項目」開放資料下載網址。
 #    ⚠️ 必須是**資料下載網址**，不是 data.gov.tw 的頁面網址
 #    （那頁是 JS 渲染的，urllib 抓不到連結）。
@@ -341,6 +344,26 @@ def main() -> int:
         print(f"      洽辦 {pick(r, 'office')[:28]}　"
               f"文件 {'有' if pick(r, 'docs') else '🔴 無'}")
 
+    # 🔴 C-6b ③：資格條件守門，dry-run 也要跑 ——
+    #    只在 --apply 的寫入迴圈裡擋的話，dry-run 全綠而 --apply 跑到一半才炸，
+    #    前面幾筆已經寫進去了（這支是逐筆 INSERT 最後才 commit，但訊息會指錯方向）。
+    #    ⚠️ build_eligibility 產出的 incomeMonthlyMax／movableAssetsMax／
+    #    realEstateMax／otherConditions **引擎都不檢查**（W-021：206 筆靠這些鍵
+    #    假裝有條件而對任何人都 confirmed），所以它們不算實質條件。
+    blocked = []
+    for r in new:
+        try:
+            assert_substantive(build_eligibility(r, county),
+                               label=f"{county}｜{pick(r, 'name')}")
+        except ValueError as e:
+            blocked.append((pick(r, "name"), str(e)))
+    if blocked:
+        print(f"\n  🛑 {len(blocked)} 筆沒有引擎認得的條件鍵，整批不寫（先把條件編好再跑）：")
+        for nm, _ in blocked[:5]:
+            print(f"    · {nm[:34]}")
+        print(f"\n{blocked[0][1]}")
+        return 1
+
     if not args.apply:
         print("\n（dry-run，未寫入。加 --apply 才會真的寫）")
         return 0
@@ -349,6 +372,7 @@ def main() -> int:
     for r in new:
         nm = pick(r, "name")
         elig = build_eligibility(r, county)
+        assert_substantive(elig, label=f"{county}｜{nm}")   # 🔴 寫入前再擋一次
         link = pick(r, "link") or src["dataset"]
         phone = pick(r, "phone")
         if ext := pick(r, "ext"):
