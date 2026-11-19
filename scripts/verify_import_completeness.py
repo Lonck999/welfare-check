@@ -51,7 +51,11 @@ def main() -> int:
 
         names = {re.sub(r"\s+", "", pick(r, "name"))
                  for r in rows if pick(r, "name")}
-        cur.execute("SELECT name FROM benefits WHERE county = %s", (county,))
+        # 🔴 2026-11-20：縣市辦的福利也可能改成「全國都查得到」（1001 新北環保葬：原文「申請人及亡者不限新北市民」，
+        #    Lonck 選全國可見 ⇒ county 改「全國」，因為 /api/check 依 county 撈）。它仍是這個縣市來源匯入的那一筆，
+        #    所以 county='全國' 但機關是本縣市的（agency 以縣市名開頭）也算已入庫 —— 只放寬「在哪個 county 欄」，不放寬名稱比對。
+        cur.execute("SELECT name FROM benefits WHERE county = %s OR (county = '全國' AND agency LIKE %s)",
+                    (county, county + '%'))
         # 🔴 **刻意不濾 `is_active`** —— 這支比「來源有的 vs 庫裡有的」。
         #    停用但保留的筆仍代表「已匯入過」；濾掉會報成 missing，
         #    而下一步就是去重抓一次（判準見 `active_scope.py`）。
