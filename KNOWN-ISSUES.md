@@ -1630,3 +1630,16 @@ C-6 C 第二輪（花蓮／嘉義縣／臺東／澎湖，改用 curl 讀縣府�
 - 🔸 359 新竹縣電動機車：來源是 `hcepb-rmei.easylife.net.tw`（委外），但縣環保局官網 hcepb.gov.tw 直接連過去、頁面就是 115 年度辦法 ⇒ 保留，記為「官方委外子站」例外。
 - ⚠️ 自己踩到：審核工具只接受 `amount_min/max`，我送了一列 `amount_unit` ⇒ 會讓整批 apply 被擋 → 已刪該列；單位改在核准時一併寫。
 - 備份 `benefits_before_c6close_20261106`、`benefits_before_kinmen_20261106`。
+
+## 🔴 W-026　Railway 四個網址全部回「Application not found」（2026-11-19 15:03 發現，未查原因）
+
+- 實測（curl）：`welfare-check-frontend-production`／`welfare-check-production`／`welfare-check-frontend-staging`／`welfare-check-staging` 四個 `*.up.railway.app`，`/` 全部回 HTTP 404 `{"status":"error","code":404,"message":"Application not found"}` —— 那是 Railway 平台層的回應，不是我們程式的 404
+- 發現經過：查 Vite 安全公告 GHSA-p4f5-76q4-ffq7 時想對正式站打探測，才看到整站不在
+- 本機沒有 `railway` CLI（`which railway` 查無），所以查不到是服務被刪、額度用完還是網域換了 —— **要 Lonck 登入 Railway 後台看**
+- vault 與本 repo 全文搜「Application not found」零命中 ⇒ 之前沒記錄過
+
+### 同時記：Vite GHSA-p4f5-76q4-ffq7（critical，2026-11-10 公告）
+- `frontend` 裝的是 vite **8.1.5**，落在受影響範圍 8.0.0～8.1.6（修補版 8.1.7）
+- 只有**開發伺服器**對外開放（`--host` 或 `server.host`）才中。`frontend/vite.config.ts` 只設了 `preview.host: '0.0.0.0'`，`dev` 沒加 `--host` ⇒ 本機開發不中
+- 正式站跑的是 `vite preview`：讀 `node_modules/vite/dist/node/chunks/node.js` 的 preview 實作，只掛靜態檔（dist）＋ html fallback，**沒有** dev server 的模組轉換中介層（`/@id/…` 就是走那條）⇒ 依原始碼判斷不受影響；正式站目前不在線，沒辦法實打驗證
+- 建議仍升到 ≥ 8.1.7（`npm i -D vite@^8.1.7`），成本低
