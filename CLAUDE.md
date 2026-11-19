@@ -220,6 +220,12 @@ W-010 補 100 筆網址時攔下 4 筆，其中 **id 739 的網址頁面講的�
 ⚠️ 拿 500 筆配對時命中數碰巧一樣 ⇒ **無法證明沒漏**。
 🔴 腳本要加封頂偵測（筆數 ≤ 已知上限就整批不處理，不是印個警告）。
 
+### 🔴 量「沒有資格條件」一律用 `scripts/eligibility_guard.is_substantive()`（2026-11-19）
+
+- 它跟 `eligibility.ts` 的 `ENGINE_CHECKED_KEYS` 是同一份白名單（`test_eligibility_guard.py` 會比對兩邊）。
+- 🔴 不要自己寫 SQL「除了 counties 以外有沒有鍵」—— 那把尺量出 1 筆，引擎的尺是 218 筆（W-028）。
+- 🔴 `backend/.env` 現在連 **localhost**；Neon 是 9 月的舊正式庫，沒收到之後的資料修正（W-026）。講「資料庫在哪」先讀 `.env`，不要讀規劃文件。
+
 ## 核心檔案
 
 - `skills/welfare-check/SKILL.md`：本體，問卷題目（第一步）＋搜索清單（第三步）都在這裡
